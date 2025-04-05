@@ -1,4 +1,4 @@
-package com.skillshare.model;
+package com.paf.knowledgenest.model;
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;
