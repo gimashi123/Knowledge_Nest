@@ -63,4 +63,13 @@ public class ChallengeService {
             challengeRepository.save(challenge);
         });
     }
+
+    // disable the challenge
+    public Challenge toggleChallengeStatus(String id) {
+        Challenge challenge = challengeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Challenge not found"));
+        challenge.setActive(!challenge.isActive());
+        return challengeRepository.save(challenge);
+    }
+
 }

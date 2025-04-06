@@ -69,4 +69,11 @@ public class ChallengeController {
         challengeService.blockChallenge(id);
         return ResponseEntity.ok().build();
     }
+
+    // used to disable the challenge
+    @PatchMapping("/{id}/toggle")
+    public Challenge toggleChallenge(@PathVariable String id) {
+        return challengeService.toggleChallengeStatus(id);
+    }
+
 }
