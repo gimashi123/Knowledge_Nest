@@ -4,10 +4,13 @@ import com.paf.knowledgenest.model.ChallengeAttempt;
 import com.paf.knowledgenest.service.ChallengeAttemptService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/challenge-attempts")
@@ -52,5 +55,13 @@ public class ChallengeAttemptController {
     public ChallengeAttempt getUserChallengeResult(@RequestParam String userId, @RequestParam String challengeId) {
         return attemptService.getUserChallengeResult(userId, challengeId);
     }
+
+    // used for report generation remove if this begins to throw errors
+    @GetMapping("/report/{challengeId}")
+    public ResponseEntity<HashMap<Object, Object>> getChallengeReport(@PathVariable String challengeId) {
+        HashMap<Object, Object> stats = attemptService.getChallengeStats(challengeId);
+        return ResponseEntity.ok(stats);
+    }
+
 
 }

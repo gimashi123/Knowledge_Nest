@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -75,5 +76,23 @@ public class ChallengeAttemptService {
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Result not found"));
     }
+
+    // used for report generation remove if this begins to throw errors
+    public HashMap<Object, Object> getChallengeStats(String challengeId) {
+        List<ChallengeAttempt> attempts = attemptRepository.findByChallengeId(challengeId);
+
+        int totalAttempts = attempts.size();
+        double averageScore = attempts.stream().mapToInt(ChallengeAttempt::getScore).average().orElse(0.0);
+        int maxScore = attempts.stream().mapToInt(ChallengeAttempt::getScore).max().orElse(0);
+
+        HashMap<Object, Object> stats = new HashMap<>();
+        stats.put("challengeId", challengeId);
+        stats.put("totalAttempts", totalAttempts);
+        stats.put("averageScore", averageScore);
+        stats.put("maxScore", maxScore);
+
+        return stats;
+    }
+
 
 }
