@@ -1,6 +1,6 @@
-package com.paf.knowledgenest.controller;
+package com.paf.knowledgenest.controller.challenges;
 
-import com.paf.knowledgenest.model.ChallengeAttempt;
+import com.paf.knowledgenest.model.challenges.ChallengeAttempt;
 import com.paf.knowledgenest.service.ChallengeAttemptService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/challenge-attempts")

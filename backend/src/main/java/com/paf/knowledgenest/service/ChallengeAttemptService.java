@@ -1,9 +1,9 @@
 package com.paf.knowledgenest.service;
 
-import com.paf.knowledgenest.model.Challenge;
-import com.paf.knowledgenest.model.ChallengeAttempt;
-import com.paf.knowledgenest.repository.ChallengeAttemptRepository;
-import com.paf.knowledgenest.repository.ChallengeRepository;
+import com.paf.knowledgenest.model.challenges.Challenge;
+import com.paf.knowledgenest.model.challenges.ChallengeAttempt;
+import com.paf.knowledgenest.repository.challenges.ChallengeAttemptRepository;
+import com.paf.knowledgenest.repository.challenges.ChallengeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

@@ -1,4 +1,4 @@
-package com.paf.knowledgenest.model;
+package com.paf.knowledgenest.model.challenges;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;

@@ -1,7 +1,6 @@
-package com.paf.knowledgenest.controller;
+package com.paf.knowledgenest.controller.user;
 
 import com.paf.knowledgenest.service.AuthService;
-import com.paf.knowledgenest.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

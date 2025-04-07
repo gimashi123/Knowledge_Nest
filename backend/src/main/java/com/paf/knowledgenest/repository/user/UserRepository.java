@@ -1,6 +1,6 @@
-package com.paf.knowledgenest.repository;
+package com.paf.knowledgenest.repository.user;
 
-import com.paf.knowledgenest.model.User;
+import com.paf.knowledgenest.model.user.User;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.Optional;
 

@@ -1,4 +1,4 @@
-package com.paf.knowledgenest.model;
+package com.paf.knowledgenest.model.user;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;

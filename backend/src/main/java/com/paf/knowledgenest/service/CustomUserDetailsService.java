@@ -1,7 +1,7 @@
 package com.paf.knowledgenest.service;
 
-import com.paf.knowledgenest.model.User;
-import com.paf.knowledgenest.repository.UserRepository;
+import com.paf.knowledgenest.model.user.User;
+import com.paf.knowledgenest.repository.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;

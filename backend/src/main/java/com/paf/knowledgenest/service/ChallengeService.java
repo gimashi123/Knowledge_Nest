@@ -1,7 +1,7 @@
 package com.paf.knowledgenest.service;
 
-import com.paf.knowledgenest.model.Challenge;
-import com.paf.knowledgenest.repository.ChallengeRepository;
+import com.paf.knowledgenest.model.challenges.Challenge;
+import com.paf.knowledgenest.repository.challenges.ChallengeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

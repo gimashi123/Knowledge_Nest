@@ -1,6 +1,6 @@
-package com.paf.knowledgenest.repository;
+package com.paf.knowledgenest.repository.challenges;
 
-import com.paf.knowledgenest.model.Challenge;
+import com.paf.knowledgenest.model.challenges.Challenge;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 import java.util.List;

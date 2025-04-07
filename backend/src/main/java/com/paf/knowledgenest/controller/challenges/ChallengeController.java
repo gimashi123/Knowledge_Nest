@@ -1,6 +1,6 @@
-package com.paf.knowledgenest.controller;
+package com.paf.knowledgenest.controller.challenges;
 
-import com.paf.knowledgenest.model.Challenge;
+import com.paf.knowledgenest.model.challenges.Challenge;
 import com.paf.knowledgenest.service.ChallengeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
