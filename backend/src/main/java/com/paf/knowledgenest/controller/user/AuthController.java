@@ -1,35 +1,58 @@
 package com.paf.knowledgenest.controller.user;
 
-import com.paf.knowledgenest.service.AuthService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import com.paf.knowledgenest.dto.RegisterRequest;
+import com.paf.knowledgenest.dto.LoginRequest;
+import com.paf.knowledgenest.dto.JwtAuthenticationResponse;
+import com.paf.knowledgenest.model.user.User;
+import com.paf.knowledgenest.model.user.Role;
+import com.paf.knowledgenest.repository.user.UserRepository;
+import com.paf.knowledgenest.security.JwtUtils;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.*;
+import org.springframework.security.authentication.*;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
-
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
-    @Autowired
-    private AuthService authService;
+    private final AuthenticationManager authenticationManager;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtUtils jwtUtils;
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody Map<String, String> request) {
-        String username = request.get("username");
-        String email = request.get("email");
-        String password = request.get("password");
+    public ResponseEntity<String> register(@Valid @RequestBody RegisterRequest request) {
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email already registered.");
+        }
 
-        String token = authService.registerUser(username, email, password);
-        return ResponseEntity.ok(Map.of("token", token));
+        User newUser = new User();
+        newUser.setName(request.getName());
+        newUser.setEmail(request.getEmail());
+        newUser.setPassword(passwordEncoder.encode(request.getPassword()));
+        newUser.setRole(String.valueOf(Role.USER)); // default role
+
+        userRepository.save(newUser);
+        return ResponseEntity.ok("User registered successfully.");
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> request) {
-        String email = request.get("email");
-        String password = request.get("password");
+    public ResponseEntity<JwtAuthenticationResponse> login(@Valid @RequestBody LoginRequest request) {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+        );
 
-        String token = authService.loginUser(email, password);
-        return ResponseEntity.ok(Map.of("token", token));
+        UserDetails userDetails = (UserDetails) userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        String token = jwtUtils.generateToken((com.paf.knowledgenest.model.user.User) userDetails);
+
+        return ResponseEntity.ok(new JwtAuthenticationResponse(token));
     }
 }
