@@ -6,13 +6,17 @@ const instance = axios.create({
 
 instance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers["Authorization"] = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
+      const token = localStorage.getItem("token");
+
+      // Only attach token for secure routes (not /auth)
+      if (token && !config.url?.includes("/auth/register") && !config.url?.includes("/auth/login")) {
+        config.headers["Authorization"] = `Bearer ${token}`;
+      }
+
+      return config;
+    },
+    (error) => Promise.reject(error)
+
 );
 
 export default instance;

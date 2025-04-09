@@ -18,3 +18,12 @@ export const register = async (name: string, email: string, password: string) =>
   });
   return response.data;
 };
+
+export const getCurrentUser = async () => {
+  const response = await axios.get(`${API}/me`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+  return response.data;
+};

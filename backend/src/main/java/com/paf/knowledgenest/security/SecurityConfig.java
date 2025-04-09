@@ -43,7 +43,9 @@ public class SecurityConfig {
         JwtAuthFilter jwtAuthFilter = new JwtAuthFilter(jwtUtils, customUserDetailsService);
 
         return http
-//                .securityMatcher("/**")
+
+                .csrf(AbstractHttpConfigurer::disable)
+                .securityMatcher("/**")
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .anyRequest().authenticated()
@@ -52,7 +54,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .csrf(AbstractHttpConfigurer::disable)
+
                 .build();
     }
 
