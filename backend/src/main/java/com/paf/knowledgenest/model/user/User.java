@@ -14,7 +14,7 @@ public class User {
     private String id;
 
     @Setter
-    private String name;     // ✅ Add this field
+    private String name;     // Add this field
     @Setter
     private String username;
     @Setter
