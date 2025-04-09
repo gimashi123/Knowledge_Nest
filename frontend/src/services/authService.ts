@@ -18,5 +18,3 @@ export const register = async (name: string, email: string, password: string) =>
   });
   return response.data;
 };
-
-// handle login and register requests
