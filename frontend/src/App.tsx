@@ -4,7 +4,7 @@ import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
 import Dashboard from "@/pages/DashboardPage";
 
-function App() {
+export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
@@ -20,3 +20,4 @@ function App() {
     </Routes>
   );
 }
+
