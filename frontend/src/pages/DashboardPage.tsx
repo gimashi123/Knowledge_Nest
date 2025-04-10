@@ -34,7 +34,22 @@ export default function DashboardPage() {
           <p><strong>Role:</strong> {user.role}</p>
         </div>
       )}
-      <Button onClick={handleLogout}>Logout</Button>
+
+      {user?.role === "ADMIN" && (
+        <div className="mt-6 p-4 border border-blue-500 rounded-xl bg-blue-50">
+          <h2 className="text-lg font-semibold text-blue-700">Admin Panel</h2>
+          <p className="text-sm text-gray-600">You have access to manage users and content.</p>
+        </div>
+      )}
+
+      {user?.role === "USER" && (
+        <div className="mt-6 p-4 border border-green-500 rounded-xl bg-green-50">
+          <h2 className="text-lg font-semibold text-green-700">Welcome User</h2>
+          <p className="text-sm text-gray-600">Feel free to browse and take on challenges!</p>
+        </div>
+      )}
+
+      <Button onClick={handleLogout} className="mt-6">Logout</Button>
     </div>
   );
 }
