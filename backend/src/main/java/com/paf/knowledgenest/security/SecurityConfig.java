@@ -45,7 +45,7 @@ public class SecurityConfig {
         return http
 
                 .csrf(AbstractHttpConfigurer::disable)
-                .securityMatcher("/**")
+//                .securityMatcher("/**") removed this for a test
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .anyRequest().authenticated()

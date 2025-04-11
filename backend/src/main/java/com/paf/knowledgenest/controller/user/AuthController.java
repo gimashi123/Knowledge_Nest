@@ -18,7 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth") // made a change here (/api)
 @RequiredArgsConstructor
 public class AuthController {
 
@@ -45,14 +45,16 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<JwtAuthenticationResponse> login(@Valid @RequestBody LoginRequest request) {
-        authenticationManager.authenticate(
+        //  Authenticate credentials (Spring Security will call CustomUserDetailsService)
+        Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
 
-        UserDetails userDetails = (UserDetails) userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        // Get the principal (this will be your CustomUserDetails implementation)
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
-        String token = jwtUtils.generateToken((com.paf.knowledgenest.model.user.User) userDetails);
+        //  Generate JWT using email (username)
+        String token = jwtUtils.generateToken(userDetails.getUsername());
 
         return ResponseEntity.ok(new JwtAuthenticationResponse(token));
     }

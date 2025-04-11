@@ -30,7 +30,7 @@ public class AuthService {
         User user = new User(username, email, hashedPassword, "USER");
 
         userRepository.save(user);
-        return jwtUtils.generateToken(user); // Auto-login after registration
+        return jwtUtils.generateToken(user.getEmail()); // Auto-login after registration
     }
 
     public String loginUser(String email, String password) {
@@ -42,7 +42,7 @@ public class AuthService {
             throw new RuntimeException("Invalid credentials");
         }
 
-        return jwtUtils.generateToken(user);
+        return jwtUtils.generateToken(user.getEmail());
     }
 
     public Optional<User> getUserByEmail(String email) {
