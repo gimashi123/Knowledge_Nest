@@ -1,6 +1,6 @@
 package com.paf.knowledgenest.security;
 
-import com.paf.knowledgenest.service.CustomUserDetailsService;
+import com.paf.knowledgenest.service.user.CustomUserDetailsService;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

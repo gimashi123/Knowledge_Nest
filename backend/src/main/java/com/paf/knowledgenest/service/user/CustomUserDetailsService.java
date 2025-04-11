@@ -1,4 +1,4 @@
-package com.paf.knowledgenest.service;
+package com.paf.knowledgenest.service.user;
 
 import com.paf.knowledgenest.model.user.User;
 import com.paf.knowledgenest.repository.user.UserRepository;

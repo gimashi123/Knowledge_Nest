@@ -1,4 +1,4 @@
-package com.paf.knowledgenest.service;
+package com.paf.knowledgenest.service.challenges;
 
 import com.paf.knowledgenest.model.challenges.Challenge;
 import com.paf.knowledgenest.model.challenges.ChallengeAttempt;

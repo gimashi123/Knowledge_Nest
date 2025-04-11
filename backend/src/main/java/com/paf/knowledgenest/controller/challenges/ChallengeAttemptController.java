@@ -1,7 +1,7 @@
 package com.paf.knowledgenest.controller.challenges;
 
 import com.paf.knowledgenest.model.challenges.ChallengeAttempt;
-import com.paf.knowledgenest.service.ChallengeAttemptService;
+import com.paf.knowledgenest.service.challenges.ChallengeAttemptService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
