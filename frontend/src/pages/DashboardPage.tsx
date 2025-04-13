@@ -35,6 +35,8 @@ export default function DashboardPage() {
         </div>
       )}
 
+      <Button onClick={() => navigate("/profile")} className="mt-2 mr-2">View Profile</Button>
+
       {user?.role === "ADMIN" && (
         <div className="mt-6 p-4 border border-blue-500 rounded-xl bg-blue-50">
           <h2 className="text-lg font-semibold text-blue-700">Admin Panel</h2>
@@ -50,11 +52,6 @@ export default function DashboardPage() {
       )}
 
       <Button onClick={handleLogout} className="mt-6">Logout</Button>
-
-      <Button onClick={() => navigate("/profile")} className="mt-4">
-        View Profile
-      </Button>
-
     </div>
   );
 }
