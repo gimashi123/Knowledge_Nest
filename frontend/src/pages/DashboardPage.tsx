@@ -50,6 +50,11 @@ export default function DashboardPage() {
       )}
 
       <Button onClick={handleLogout} className="mt-6">Logout</Button>
+
+      <Button onClick={() => navigate("/profile")} className="mt-4">
+        View Profile
+      </Button>
+
     </div>
   );
 }

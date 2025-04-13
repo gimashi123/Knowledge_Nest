@@ -11,9 +11,11 @@ export default function App() {
       <Route path="/register" element={<RegisterPage />} />
       <Route
         path="/dashboard"
+        path="/profile"
         element={
           <ProtectedRoute>
             <Dashboard />
+            <ProfilePage />
           </ProtectedRoute>
         }
       />
