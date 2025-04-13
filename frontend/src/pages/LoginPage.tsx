@@ -41,6 +41,17 @@ export default function LoginPage() {
         <Button type="submit" className="w-full">
           Login
         </Button>
+
+        <div className="text-center">
+          <a
+            href="http://localhost:8081/oauth2/authorization/google"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded border border-black-2 bg-white hover:bg-gray-100 text-black text-sm font-medium transition"
+          >
+            <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5" />
+            Continue with Google
+          </a>
+        </div>
+
         <p className="text-sm text-center pt-2">
           Don't have an account? <Link to="/register" className="text-blue-600">Register</Link>
         </p>
