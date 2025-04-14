@@ -23,6 +23,8 @@ public class User {
     private String password; // Hashed password
     @Setter
     private String role;     // "USER" or "ADMIN"
+    @Setter
+    private String profilePic;
 
     // Constructors
     public User() {}
