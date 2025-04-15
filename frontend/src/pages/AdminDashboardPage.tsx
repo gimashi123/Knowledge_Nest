@@ -7,16 +7,21 @@ export default function AdminDashboardPage() {
   const [admin, setAdmin] = useState<{ name: string; email: string; role: string } | null>(null);
   const navigate = useNavigate();
 
+  // In AdminDashboardPage.tsx, update the useEffect:
   useEffect(() => {
     const fetchAdmin = async () => {
       try {
-        const adminData = await getCurrentUser();
-        setAdmin(adminData);
+        const userData = await getCurrentUser();
+        // Redirect non-admins to regular dashboard
+        if (userData.role !== "ADMIN") {
+          navigate("/dashboard");
+          return;
+        }
+        setAdmin(userData);
       } catch (error) {
         navigate("/login");
       }
     };
-
     fetchAdmin();
   }, [navigate]);
 

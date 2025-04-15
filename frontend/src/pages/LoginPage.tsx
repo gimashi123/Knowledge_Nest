@@ -10,12 +10,19 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  // In LoginPage.tsx, update the handleSubmit function:
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const res = await login(email, password);
       localStorage.setItem("token", res.token);
-      navigate("/admin-dashboard"); // changed the path will see now
+
+      // Redirect based on user role (case-sensitive check)
+      if (res.user?.role === "ADMIN") {
+        navigate("/admin-dashboard");
+      } else {
+        navigate("/dashboard"); // regular user dashboard
+      }
     } catch (err) {
       setError("Invalid credentials. Please try again.");
     }
