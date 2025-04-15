@@ -7,12 +7,10 @@ export default function AdminDashboardPage() {
   const [admin, setAdmin] = useState<{ name: string; email: string; role: string } | null>(null);
   const navigate = useNavigate();
 
-  // In AdminDashboardPage.tsx, update the useEffect:
   useEffect(() => {
     const fetchAdmin = async () => {
       try {
         const userData = await getCurrentUser();
-        // Redirect non-admins to regular dashboard
         if (userData.role !== "ADMIN") {
           navigate("/dashboard");
           return;
@@ -40,6 +38,15 @@ export default function AdminDashboardPage() {
           <p><strong>Role:</strong> {admin.role}</p>
         </div>
       )}
+
+      <div className="flex justify-center gap-4 mb-6">
+        <Button
+          onClick={() => navigate("/admin-profile")}
+          className="bg-blue-600 hover:bg-blue-700 text-white"
+        >
+          Admin Profile
+        </Button>
+      </div>
 
       <div className="mt-6 p-4 border border-red-500 rounded-xl bg-red-50">
         <h2 className="text-lg font-semibold text-red-700">Admin Actions</h2>

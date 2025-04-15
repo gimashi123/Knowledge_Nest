@@ -6,6 +6,7 @@ import Dashboard from "@/pages/DashboardPage";
 import ProfilePage from "@/pages/ProfilePage";
 import OAuthSuccessPage from "@/pages/OAuthSuccessPage";
 import AdminDashboardPage from "@/pages/AdminDashboardPage";
+import AdminProfilePage from "@/pages/AdminProfilePage";
 
 export default function App() {
   return (
@@ -43,6 +44,9 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+
+      <Route path="/admin-profile" element={<ProtectedRoute><AdminProfilePage /></ProtectedRoute>} />
+
     </Routes>
   );
 }
