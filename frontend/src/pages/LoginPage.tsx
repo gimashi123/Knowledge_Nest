@@ -15,7 +15,7 @@ export default function LoginPage() {
     try {
       const res = await login(email, password);
       localStorage.setItem("token", res.token);
-      navigate("/dashboard");
+      navigate("/admin-dashboard"); // changed the path will see now
     } catch (err) {
       setError("Invalid credentials. Please try again.");
     }
