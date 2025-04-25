@@ -235,6 +235,110 @@ This guide provides details on all available APIs in the Knowledge Nest backend 
 - **Path Variables**: `challengeId` (string)
 - **Response**: Statistics data object
 
+### Skill Post APIs
+
+#### 1. Create Skill Post
+- **URL**: `/api/skill-posts`
+- **Method**: POST
+- **Description**: Create a new skill post
+- **Authentication**: JWT token in Authorization header
+- **Request Body**:
+```json
+{
+  "title": "Introduction to Spring Boot",
+  "description": "Learn the basics of Spring Boot framework",
+  "content": "Spring Boot makes it easy to create stand-alone, production-grade Spring based Applications...",
+  "tags": ["Spring", "Java", "Backend"]
+}
+```
+- **Response**: Created skill post object with HTTP status 201
+
+#### 2. Get Skill Post by ID
+- **URL**: `/api/skill-posts/{id}`
+- **Method**: GET
+- **Description**: Get a skill post by its ID
+- **Authentication**: JWT token in Authorization header
+- **Path Variables**: `id` (string)
+- **Response**: Skill post object
+
+#### 3. Get All Skill Posts
+- **URL**: `/api/skill-posts`
+- **Method**: GET
+- **Description**: Get all skill posts
+- **Authentication**: JWT token in Authorization header
+- **Response**: Array of skill post objects
+
+#### 4. Get Skill Posts by User
+- **URL**: `/api/skill-posts/user/{userId}`
+- **Method**: GET
+- **Description**: Get all skill posts created by a specific user
+- **Authentication**: JWT token in Authorization header
+- **Path Variables**: `userId` (string)
+- **Response**: Array of skill post objects
+
+#### 5. Get Skill Posts by Tag
+- **URL**: `/api/skill-posts/tag/{tag}`
+- **Method**: GET
+- **Description**: Get all skill posts containing a specific tag
+- **Authentication**: JWT token in Authorization header
+- **Path Variables**: `tag` (string)
+- **Response**: Array of skill post objects
+
+#### 6. Search Skill Posts
+- **URL**: `/api/skill-posts/search`
+- **Method**: GET
+- **Description**: Search for skill posts by title keyword
+- **Authentication**: JWT token in Authorization header
+- **Query Parameters**: `keyword` (string)
+- **Response**: Array of matching skill post objects
+
+#### 7. Update Skill Post
+- **URL**: `/api/skill-posts/{id}`
+- **Method**: PUT
+- **Description**: Update an existing skill post
+- **Authentication**: JWT token in Authorization header
+- **Path Variables**: `id` (string)
+- **Request Body**:
+```json
+{
+  "title": "Updated: Introduction to Spring Boot",
+  "description": "Updated description about Spring Boot basics",
+  "content": "Updated content about Spring Boot...",
+  "tags": ["Spring", "Java", "Backend", "Web Development"]
+}
+```
+- **Response**: Updated skill post object
+
+#### 8. Delete Skill Post
+- **URL**: `/api/skill-posts/{id}`
+- **Method**: DELETE
+- **Description**: Delete a skill post
+- **Authentication**: JWT token in Authorization header
+- **Path Variables**: `id` (string)
+- **Response**: No content with HTTP status 204
+
+#### 9. Add Comment to Skill Post
+- **URL**: `/api/skill-posts/{postId}/comments`
+- **Method**: POST
+- **Description**: Add a comment to a skill post
+- **Authentication**: JWT token in Authorization header
+- **Path Variables**: `postId` (string)
+- **Request Body**:
+```json
+{
+  "content": "This is a great post, very informative!"
+}
+```
+- **Response**: Updated skill post object with the new comment
+
+#### 10. Like/Unlike Skill Post
+- **URL**: `/api/skill-posts/{postId}/like`
+- **Method**: POST
+- **Description**: Like or unlike a skill post (toggles the like status)
+- **Authentication**: JWT token in Authorization header
+- **Path Variables**: `postId` (string)
+- **Response**: Updated skill post object with updated like count
+
 ## Testing with Postman
 
 ### Setting Up Authentication in Postman
