@@ -1,0 +1,67 @@
+package com.paf.knowledgenest.controller.user;
+
+import com.paf.knowledgenest.dto.RegisterRequest;
+import com.paf.knowledgenest.dto.LoginRequest;
+import com.paf.knowledgenest.dto.JwtAuthenticationResponse;
+import com.paf.knowledgenest.model.user.User;
+
+import com.paf.knowledgenest.repository.user.UserRepository;
+
+import com.paf.knowledgenest.service.user.AuthService;
+import com.paf.knowledgenest.utils.ApiResponse;
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.web.bind.annotation.*;
+
+@Slf4j
+@RestController
+@RequestMapping("/api/auth")
+public class AuthController {
+
+    private final AuthService authService;
+    private final UserRepository userRepository;
+
+    @Autowired
+    public AuthController(AuthService authService, UserRepository userRepository) {
+        this.authService = authService;
+        this.userRepository = userRepository;
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<ApiResponse<String>> register(@Valid @RequestBody RegisterRequest request) {
+        log.info("Registering user: {}", request);
+        ApiResponse<String> response = authService.registerUser(request);
+        if(response.isSuccess()) {
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } else {
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<JwtAuthenticationResponse>> login(@Valid @RequestBody LoginRequest request) {
+
+        log.info("Login request: {}", request);
+        ApiResponse<JwtAuthenticationResponse>  response = authService.loginUser(request);
+        if(response.isSuccess()) {
+            return ResponseEntity.ok().body(response);
+        } else {
+            return ResponseEntity.badRequest().body(response);
+        }
+
+    }
+
+    // added this to fetch user detail into frontend (dashboard)
+    @GetMapping("/me")
+    public ResponseEntity<User> getCurrentUser(Authentication authentication) {
+        String email = authentication.getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        return ResponseEntity.ok(user);
+    }
+
+}
