@@ -1,4 +1,4 @@
-package com.paf.knowledgenest.config.user;
+package com.paf.knowledgenest.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

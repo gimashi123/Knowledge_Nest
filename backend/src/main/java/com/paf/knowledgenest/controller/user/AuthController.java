@@ -4,60 +4,55 @@ import com.paf.knowledgenest.dto.RegisterRequest;
 import com.paf.knowledgenest.dto.LoginRequest;
 import com.paf.knowledgenest.dto.JwtAuthenticationResponse;
 import com.paf.knowledgenest.model.user.User;
-import com.paf.knowledgenest.model.user.Role;
+
 import com.paf.knowledgenest.repository.user.UserRepository;
-import com.paf.knowledgenest.security.JwtUtils;
+
+import com.paf.knowledgenest.service.user.AuthService;
+import com.paf.knowledgenest.utils.ApiResponse;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
-import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
-@RequestMapping("/api/auth") // made a change here (/api)
-@RequiredArgsConstructor
+@RequestMapping("/api/auth")
 public class AuthController {
 
-    private final AuthenticationManager authenticationManager;
+    private final AuthService authService;
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final JwtUtils jwtUtils;
+
+    @Autowired
+    public AuthController(AuthService authService, UserRepository userRepository) {
+        this.authService = authService;
+        this.userRepository = userRepository;
+    }
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@Valid @RequestBody RegisterRequest request) {
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email already registered.");
+    public ResponseEntity<ApiResponse<String>> register(@Valid @RequestBody RegisterRequest request) {
+        log.info("Registering user: {}", request);
+        ApiResponse<String> response = authService.registerUser(request);
+        if(response.isSuccess()) {
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } else {
+            return ResponseEntity.badRequest().body(response);
         }
-
-        User newUser = new User();
-        newUser.setName(request.getName());
-        newUser.setEmail(request.getEmail());
-        newUser.setPassword(passwordEncoder.encode(request.getPassword()));
-//        newUser.setRole(String.valueOf(Role.USER)); // default role
-        newUser.setRole(request.getRole() != null ? request.getRole() : String.valueOf(Role.USER));
-
-        userRepository.save(newUser);
-        return ResponseEntity.ok("User registered successfully.");
     }
 
     @PostMapping("/login")
-    public ResponseEntity<JwtAuthenticationResponse> login(@Valid @RequestBody LoginRequest request) {
-        //  Authenticate credentials (Spring Security will call CustomUserDetailsService)
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
-        );
+    public ResponseEntity<ApiResponse<JwtAuthenticationResponse>> login(@Valid @RequestBody LoginRequest request) {
 
-        // Get the principal (this will be your CustomUserDetails implementation)
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        log.info("Login request: {}", request);
+        ApiResponse<JwtAuthenticationResponse>  response = authService.loginUser(request);
+        if(response.isSuccess()) {
+            return ResponseEntity.ok().body(response);
+        } else {
+            return ResponseEntity.badRequest().body(response);
+        }
 
-        //  Generate JWT using email (username)
-        String token = jwtUtils.generateToken(userDetails.getUsername());
-
-        return ResponseEntity.ok(new JwtAuthenticationResponse(token));
     }
 
     // added this to fetch user detail into frontend (dashboard)

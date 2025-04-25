@@ -11,7 +11,6 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/challenges")
-@CrossOrigin(origins = "*") // For allowing frontend to call API (adjust for security later)
 public class ChallengeController {
 
     @Autowired

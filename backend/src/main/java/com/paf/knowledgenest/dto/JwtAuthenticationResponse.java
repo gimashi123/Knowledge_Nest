@@ -1,10 +1,10 @@
 package com.paf.knowledgenest.dto;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
-@Setter
-@Getter
+@Data
 public class JwtAuthenticationResponse {
     private String token;
 

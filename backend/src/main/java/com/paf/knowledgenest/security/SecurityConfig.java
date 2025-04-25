@@ -46,9 +46,9 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
 
-                .oauth2Login(oauth2 -> oauth2
+             /*   .oauth2Login(oauth2 -> oauth2
                         .successHandler(new OAuth2LoginSuccessHandler(userRepository, jwtUtils))
-                )
+                )*/
 
                 .build();
     }

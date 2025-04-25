@@ -1,12 +1,12 @@
 package com.paf.knowledgenest.dto;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
-@Setter
-@Getter
+@Data
 public class RegisterRequest {
-    // Getters and setters
+
     private String role;
     private String name;
     private String email;

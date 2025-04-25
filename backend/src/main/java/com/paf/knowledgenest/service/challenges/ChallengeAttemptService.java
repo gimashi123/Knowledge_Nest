@@ -5,6 +5,7 @@ import com.paf.knowledgenest.model.challenges.ChallengeAttempt;
 import com.paf.knowledgenest.repository.challenges.ChallengeAttemptRepository;
 import com.paf.knowledgenest.repository.challenges.ChallengeRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -13,11 +14,16 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
 public class ChallengeAttemptService {
 
     private final ChallengeRepository challengeRepository;
     private final ChallengeAttemptRepository attemptRepository;
+
+    @Autowired
+    public ChallengeAttemptService(ChallengeRepository challengeRepository, ChallengeAttemptRepository attemptRepository) {
+        this.challengeRepository = challengeRepository;
+        this.attemptRepository = attemptRepository;
+    }
 
     // Simulate auto-evaluation (you can replace this with smarter logic later)
     private int evaluateAnswers(List<String> correctTasks, List<String> userAnswers) {

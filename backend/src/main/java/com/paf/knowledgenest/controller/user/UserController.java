@@ -4,10 +4,10 @@ import com.paf.knowledgenest.model.user.User;
 import com.paf.knowledgenest.repository.user.UserRepository;
 import io.jsonwebtoken.io.IOException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,8 +18,9 @@ import java.util.Base64;
 @RequiredArgsConstructor
 public class UserController {
 
+    @Autowired
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+
 
     @PutMapping("/update-name")
     public ResponseEntity<?> updateName(@RequestParam String name, Authentication auth) {

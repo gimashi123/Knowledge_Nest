@@ -1,9 +1,10 @@
+/*
 package com.paf.knowledgenest.security;
 
 import com.paf.knowledgenest.model.user.Role;
 import com.paf.knowledgenest.model.user.User;
 import com.paf.knowledgenest.repository.user.UserRepository;
-import jakarta.servlet.ServletException;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +31,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
-                                        Authentication authentication) throws IOException, ServletException {
+                                        Authentication authentication) throws IOException {
 
         DefaultOAuth2User oauthUser = (DefaultOAuth2User) authentication.getPrincipal();
         Map<String, Object> attributes = oauthUser.getAttributes();
@@ -57,3 +58,4 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         response.sendRedirect("http://localhost:5173/oauth-success?token=" + token);
     }
 }
+*/

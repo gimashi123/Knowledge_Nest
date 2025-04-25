@@ -18,7 +18,6 @@ public class ChallengeAttemptController {
 
     private final ChallengeAttemptService attemptService;
 
-    // POST /submit — submit challenge answers
     @PostMapping("/submit")
     public ChallengeAttempt submitChallenge(@RequestBody ChallengeSubmitRequest request) {
         return attemptService.submitChallenge(

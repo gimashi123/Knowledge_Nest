@@ -2,6 +2,8 @@ package com.paf.knowledgenest.security;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -10,8 +12,10 @@ import java.util.Date;
 @Component
 public class JwtUtils {
 
-    private static final String JWT_SECRET = "supersecretkeysupersecretkeysupersecretkey"; // must be 256-bit key (min 32 chars)
-    private static final long JWT_EXPIRATION = 86400000; // 1 day in milliseconds
+   @Value("${jwt.secret}")
+    private String JWT_SECRET; // must be 256-bit key (min 32 chars)
+    @Value("${jwt.expiration}")
+    private long JWT_EXPIRATION; // 1 day in milliseconds
 
     //  Generate JWT using email
     public String generateToken(String email) {
@@ -49,4 +53,4 @@ public class JwtUtils {
     }
 }
 
-// re-created the jwtutils
+

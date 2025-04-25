@@ -1,29 +1,31 @@
 package com.paf.knowledgenest.model.user;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
+@Setter
 @Getter
 @Document(collection = "users")
 public class User {
 
-    // Getters & Setters
     @Id
     private String id;
 
-    @Setter
-    private String name;     // Add this field
-    @Setter
+
+    private String name;
+
     private String username;
-    @Setter
+
     private String email;
-    @Setter
-    private String password; // Hashed password
-    @Setter
-    private String role;     // "USER" or "ADMIN"
-    @Setter
+
+    private String password;
+
+    private String role;
+
     private String profilePic;
 
     // Constructors
