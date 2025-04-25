@@ -52,7 +52,6 @@ export default tseslint.config({
   },
 })
 
-
-Start the editing Yasitha
+Star the editing here
 
 ```
