@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -151,6 +152,115 @@ public class SkillPostServiceImpl implements SkillPostService {
             skillPost.setLikes(skillPost.getLikes() + 1);
         }
         
+        SkillPost updatedPost = skillPostRepository.save(skillPost);
+        return mapToResponseDto(updatedPost);
+    }
+
+    @Override
+    public List<SkillPostDto.Response> getTrendingSkillPosts(int limit) {
+        // Use PageRequest to properly limit results
+        return skillPostRepository.findAll().stream()
+                .sorted((post1, post2) -> {
+                    // Sort by likes count (descending), then by comment count (descending), then by creation date (newest first)
+                    int likesComparison = Integer.compare(post2.getLikes(), post1.getLikes());
+                    if (likesComparison != 0) {
+                        return likesComparison;
+                    }
+                    
+                    int commentsComparison = Integer.compare(
+                            post2.getComments() != null ? post2.getComments().size() : 0, 
+                            post1.getComments() != null ? post1.getComments().size() : 0);
+                    if (commentsComparison != 0) {
+                        return commentsComparison;
+                    }
+                    
+                    return post2.getCreatedAt().compareTo(post1.getCreatedAt());
+                })
+                .limit(limit)
+                .map(this::mapToResponseDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<SkillPostDto.Response> getSkillPostsByMultipleTags(List<String> tags) {
+        return skillPostRepository.findAll().stream()
+                .filter(post -> post.getTags() != null && !Collections.disjoint(post.getTags(), tags))
+                .map(this::mapToResponseDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void batchDeleteSkillPosts(List<String> ids, String userId) {
+        List<SkillPost> postsToDelete = skillPostRepository.findAllById(ids).stream()
+                .filter(post -> post.getUserId().equals(userId))
+                .collect(Collectors.toList());
+        
+        if (postsToDelete.size() != ids.size()) {
+            List<String> notFoundOrUnauthorized = new ArrayList<>(ids);
+            postsToDelete.forEach(post -> notFoundOrUnauthorized.remove(post.getId()));
+            throw new SkillPostException.BatchOperationException(
+                    "Some posts could not be deleted due to not found or unauthorized access: " + notFoundOrUnauthorized);
+        }
+        
+        skillPostRepository.deleteAll(postsToDelete);
+    }
+
+    @Override
+    public SkillPostDto.Response updateComment(String postId, String commentId, SkillPostDto.CommentRequest request, String userId) {
+        SkillPost skillPost = skillPostRepository.findById(postId)
+                .orElseThrow(() -> new SkillPostException.NotFoundException(postId));
+        
+        if (skillPost.getComments() == null || skillPost.getComments().isEmpty()) {
+            throw new SkillPostException.CommentNotFoundException(commentId);
+        }
+        
+        boolean commentUpdated = false;
+        for (SkillPost.Comment comment : skillPost.getComments()) {
+            if (comment.getId().equals(commentId)) {
+                if (!comment.getUserId().equals(userId)) {
+                    throw new SkillPostException.UnauthorizedException();
+                }
+                comment.setContent(request.getContent());
+                commentUpdated = true;
+                break;
+            }
+        }
+        
+        if (!commentUpdated) {
+            throw new SkillPostException.CommentNotFoundException(commentId);
+        }
+        
+        SkillPost updatedPost = skillPostRepository.save(skillPost);
+        return mapToResponseDto(updatedPost);
+    }
+
+    @Override
+    public SkillPostDto.Response deleteComment(String postId, String commentId, String userId) {
+        SkillPost skillPost = skillPostRepository.findById(postId)
+                .orElseThrow(() -> new SkillPostException.NotFoundException(postId));
+        
+        if (skillPost.getComments() == null || skillPost.getComments().isEmpty()) {
+            throw new SkillPostException.CommentNotFoundException(commentId);
+        }
+        
+        boolean isPostOwner = skillPost.getUserId().equals(userId);
+        SkillPost.Comment commentToRemove = null;
+        
+        for (SkillPost.Comment comment : skillPost.getComments()) {
+            if (comment.getId().equals(commentId)) {
+                if (!isPostOwner && !comment.getUserId().equals(userId)) {
+                    throw new SkillPostException.UnauthorizedException();
+                }
+                commentToRemove = comment;
+                break;
+            }
+        }
+        
+        if (commentToRemove == null) {
+            throw new SkillPostException.CommentNotFoundException(commentId);
+        }
+        
+        skillPost.getComments().remove(commentToRemove);
         SkillPost updatedPost = skillPostRepository.save(skillPost);
         return mapToResponseDto(updatedPost);
     }

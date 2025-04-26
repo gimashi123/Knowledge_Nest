@@ -26,4 +26,14 @@ public interface SkillPostService {
     SkillPostDto.Response addComment(String postId, SkillPostDto.CommentRequest request, String userId, String userName);
     
     SkillPostDto.Response likeSkillPost(String postId, String userId);
+    
+    List<SkillPostDto.Response> getTrendingSkillPosts(int limit);
+    
+    List<SkillPostDto.Response> getSkillPostsByMultipleTags(List<String> tags);
+    
+    void batchDeleteSkillPosts(List<String> ids, String userId);
+    
+    SkillPostDto.Response updateComment(String postId, String commentId, SkillPostDto.CommentRequest request, String userId);
+    
+    SkillPostDto.Response deleteComment(String postId, String commentId, String userId);
 } 
