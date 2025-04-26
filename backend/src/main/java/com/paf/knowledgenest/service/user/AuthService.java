@@ -3,6 +3,7 @@ package com.paf.knowledgenest.service.user;
 import com.paf.knowledgenest.dto.JwtAuthenticationResponse;
 import com.paf.knowledgenest.dto.LoginRequest;
 import com.paf.knowledgenest.dto.RegisterRequest;
+import com.paf.knowledgenest.dto.request.FollowerRequestDTO;
 import com.paf.knowledgenest.model.user.User;
 import com.paf.knowledgenest.repository.user.UserRepository;
 import com.paf.knowledgenest.security.JwtUtils;
@@ -16,6 +17,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 @Service
@@ -73,6 +75,8 @@ public class AuthService {
             return ApiResponse.errorResponse("Unexpected Error Occurred while attempting to login");
         }
     }
+
+
 
     public Optional<User> getUserByEmail(String email) {
         return userRepository.findByEmail(email);

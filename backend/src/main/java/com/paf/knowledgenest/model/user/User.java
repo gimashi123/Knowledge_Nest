@@ -1,11 +1,11 @@
 package com.paf.knowledgenest.model.user;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
+
+import java.util.List;
 
 @Setter
 @Getter
@@ -14,7 +14,6 @@ public class User {
 
     @Id
     private String id;
-
 
     private String name;
 
@@ -27,6 +26,11 @@ public class User {
     private String role;
 
     private String profilePic;
+
+    private List<String> followers;
+
+    private List<String> following;
+
 
     // Constructors
     public User() {}
