@@ -251,51 +251,337 @@ This guide provides details on all available APIs in the Knowledge Nest backend 
   "tags": ["Spring", "Java", "Backend"]
 }
 ```
-- **Response**: Created skill post object with HTTP status 201
+- **Response**:
+```json
+{
+  "success": true,
+  "message": "Skill post created successfully",
+  "data": {
+    "id": "680c11b25609893d37e6eded",
+    "title": "Introduction to Spring Boot",
+    "description": "Learn the basics of Spring Boot framework",
+    "content": "Spring Boot makes it easy to create stand-alone, production-grade Spring based Applications...",
+    "userId": "your.email@example.com",
+    "userName": "your.email@example.com",
+    "tags": ["Spring", "Java", "Backend"],
+    "createdAt": "2025-04-26T04:20:26.3281458",
+    "updatedAt": "2025-04-26T04:20:26.3281458",
+    "likes": 0,
+    "comments": []
+  },
+  "timestamp": "2025-04-26T04:20:26.3281458"
+}
+```
 
 #### 2. Get Skill Post by ID
 - **URL**: `/api/skill-posts/{id}`
 - **Method**: GET
 - **Description**: Get a skill post by its ID
-- **Authentication**: JWT token in Authorization header
+- **Authentication**: JWT token in Authorization header (optional)
 - **Path Variables**: `id` (string)
-- **Response**: Skill post object
+- **Response**:
+```json
+{
+  "success": true,
+  "message": "Skill post retrieved successfully",
+  "data": {
+    "id": "680c11b25609893d37e6eded",
+    "title": "Introduction to Spring Boot",
+    "description": "Learn the basics of Spring Boot framework",
+    "content": "Spring Boot makes it easy to create stand-alone, production-grade Spring based Applications...",
+    "userId": "your.email@example.com",
+    "userName": "your.email@example.com",
+    "tags": ["Spring", "Java", "Backend"],
+    "createdAt": "2025-04-26T04:20:26.3281458",
+    "updatedAt": "2025-04-26T04:20:26.3281458",
+    "likes": 0,
+    "comments": []
+  },
+  "timestamp": "2025-04-26T04:20:26.3281458"
+}
+```
 
 #### 3. Get All Skill Posts
 - **URL**: `/api/skill-posts`
 - **Method**: GET
 - **Description**: Get all skill posts
-- **Authentication**: JWT token in Authorization header
-- **Response**: Array of skill post objects
+- **Authentication**: JWT token in Authorization header (optional)
+- **Response**:
+```json
+{
+  "success": true,
+  "message": "All skill posts retrieved successfully",
+  "data": [
+    {
+      "id": "680c11b25609893d37e6eded",
+      "title": "Introduction to Spring Boot",
+      "description": "Learn the basics of Spring Boot framework",
+      "content": "Spring Boot makes it easy to create stand-alone, production-grade Spring based Applications...",
+      "userId": "your.email@example.com",
+      "userName": "your.email@example.com",
+      "tags": ["Spring", "Java", "Backend"],
+      "createdAt": "2025-04-26T04:20:26.3281458",
+      "updatedAt": "2025-04-26T04:20:26.3281458",
+      "likes": 0,
+      "comments": []
+    }
+    // Additional posts...
+  ],
+  "timestamp": "2025-04-26T04:20:26.3281458"
+}
+```
 
-#### 4. Get Skill Posts by User
+#### 4. Advanced View with Filters, Sorting, and Pagination
+- **URL**: `/api/skill-posts/view`
+- **Method**: GET
+- **Description**: Get posts with advanced filtering, sorting, and pagination options
+- **Authentication**: JWT token in Authorization header (optional)
+- **Query Parameters**:
+  - `page` (default 0): Page number
+  - `size` (default 10): Items per page
+  - `sortBy` (default "createdAt"): Field to sort by (title, likes, createdAt, updatedAt)
+  - `sortDir` (default "desc"): Sort direction (asc, desc)
+  - `keyword` (optional): Search term in title, description, or content
+  - `tags` (optional): Filter by tags (can provide multiple)
+  - `userId` (optional): Filter by creator
+- **Response**:
+```json
+{
+  "success": true,
+  "message": "Skill posts retrieved successfully",
+  "data": {
+    "posts": [
+      {
+        "id": "680c11b25609893d37e6eded",
+        "title": "Introduction to Spring Boot",
+        "description": "Learn the basics of Spring Boot framework",
+        "content": "Spring Boot makes it easy to create stand-alone, production-grade Spring based Applications...",
+        "userId": "your.email@example.com",
+        "userName": "your.email@example.com",
+        "tags": ["Spring", "Java", "Backend"],
+        "createdAt": "2025-04-26T04:20:26.3281458",
+        "updatedAt": "2025-04-26T04:20:26.3281458",
+        "likes": 0,
+        "comments": []
+      }
+      // Additional posts...
+    ],
+    "currentPage": 0,
+    "totalItems": 25,
+    "totalPages": 3,
+    "pageSize": 10,
+    "sortBy": "createdAt",
+    "sortDirection": "desc"
+  },
+  "timestamp": "2025-04-26T04:20:26.3281458"
+}
+```
+
+#### 5. Get Posts by User
 - **URL**: `/api/skill-posts/user/{userId}`
 - **Method**: GET
-- **Description**: Get all skill posts created by a specific user
-- **Authentication**: JWT token in Authorization header
+- **Description**: Get all posts by a specific user
+- **Authentication**: JWT token in Authorization header (optional)
 - **Path Variables**: `userId` (string)
-- **Response**: Array of skill post objects
+- **Response**:
+```json
+{
+  "success": true,
+  "message": "User skill posts retrieved successfully",
+  "data": [
+    {
+      "id": "680c11b25609893d37e6eded",
+      "title": "Introduction to Spring Boot",
+      "description": "Learn the basics of Spring Boot framework",
+      "content": "Spring Boot makes it easy to create stand-alone, production-grade Spring based Applications...",
+      "userId": "your.email@example.com",
+      "userName": "your.email@example.com",
+      "tags": ["Spring", "Java", "Backend"],
+      "createdAt": "2025-04-26T04:20:26.3281458",
+      "updatedAt": "2025-04-26T04:20:26.3281458",
+      "likes": 0,
+      "comments": []
+    }
+    // Additional posts by the user...
+  ],
+  "timestamp": "2025-04-26T04:20:26.3281458"
+}
+```
 
-#### 5. Get Skill Posts by Tag
+#### 6. Get Posts by Tag
 - **URL**: `/api/skill-posts/tag/{tag}`
 - **Method**: GET
-- **Description**: Get all skill posts containing a specific tag
-- **Authentication**: JWT token in Authorization header
+- **Description**: Get all posts with a specific tag
+- **Authentication**: JWT token in Authorization header (optional)
 - **Path Variables**: `tag` (string)
-- **Response**: Array of skill post objects
+- **Response**:
+```json
+{
+  "success": true,
+  "message": "Tagged skill posts retrieved successfully",
+  "data": [
+    {
+      "id": "680c11b25609893d37e6eded",
+      "title": "Introduction to Spring Boot",
+      "description": "Learn the basics of Spring Boot framework",
+      "content": "Spring Boot makes it easy to create stand-alone, production-grade Spring based Applications...",
+      "userId": "your.email@example.com",
+      "userName": "your.email@example.com",
+      "tags": ["Spring", "Java", "Backend"],
+      "createdAt": "2025-04-26T04:20:26.3281458",
+      "updatedAt": "2025-04-26T04:20:26.3281458",
+      "likes": 0,
+      "comments": []
+    }
+    // Additional posts with the tag...
+  ],
+  "timestamp": "2025-04-26T04:20:26.3281458"
+}
+```
 
-#### 6. Search Skill Posts
+#### 7. Get Posts by Multiple Tags
+- **URL**: `/api/skill-posts/by-tags`
+- **Method**: GET
+- **Description**: Get posts that contain any of the specified tags
+- **Authentication**: JWT token in Authorization header (optional)
+- **Query Parameters**: `tags` (multiple allowed, e.g., tags=Spring&tags=Java)
+- **Response**:
+```json
+{
+  "success": true,
+  "message": "Tagged skill posts retrieved successfully",
+  "data": [
+    {
+      "id": "680c11b25609893d37e6eded",
+      "title": "Introduction to Spring Boot",
+      "description": "Learn the basics of Spring Boot framework",
+      "content": "Spring Boot makes it easy to create stand-alone, production-grade Spring based Applications...",
+      "userId": "your.email@example.com",
+      "userName": "your.email@example.com",
+      "tags": ["Spring", "Java", "Backend"],
+      "createdAt": "2025-04-26T04:20:26.3281458",
+      "updatedAt": "2025-04-26T04:20:26.3281458",
+      "likes": 0,
+      "comments": []
+    }
+    // Additional posts with any of the tags...
+  ],
+  "timestamp": "2025-04-26T04:20:26.3281458"
+}
+```
+
+#### 8. Search Skill Posts
 - **URL**: `/api/skill-posts/search`
 - **Method**: GET
-- **Description**: Search for skill posts by title keyword
-- **Authentication**: JWT token in Authorization header
+- **Description**: Search posts by keyword in title, description, and content
+- **Authentication**: JWT token in Authorization header (optional)
 - **Query Parameters**: `keyword` (string)
-- **Response**: Array of matching skill post objects
+- **Response**:
+```json
+{
+  "success": true,
+  "message": "Search results retrieved successfully",
+  "data": [
+    {
+      "id": "680c11b25609893d37e6eded",
+      "title": "Introduction to Spring Boot",
+      "description": "Learn the basics of Spring Boot framework",
+      "content": "Spring Boot makes it easy to create stand-alone, production-grade Spring based Applications...",
+      "userId": "your.email@example.com",
+      "userName": "your.email@example.com",
+      "tags": ["Spring", "Java", "Backend"],
+      "createdAt": "2025-04-26T04:20:26.3281458",
+      "updatedAt": "2025-04-26T04:20:26.3281458",
+      "likes": 0,
+      "comments": []
+    }
+    // Additional matching posts...
+  ],
+  "timestamp": "2025-04-26T04:20:26.3281458"
+}
+```
 
-#### 7. Update Skill Post
+#### 9. Get Trending Skill Posts
+- **URL**: `/api/skill-posts/trending`
+- **Method**: GET
+- **Description**: Get trending posts sorted by popularity (likes, comments, recency)
+- **Authentication**: JWT token in Authorization header (optional)
+- **Query Parameters**: `limit` (default 10): Maximum number of posts to return
+- **Response**:
+```json
+{
+  "success": true,
+  "message": "Trending skill posts retrieved successfully",
+  "data": [
+    {
+      "id": "680c11b25609893d37e6eded",
+      "title": "Introduction to Spring Boot",
+      "description": "Learn the basics of Spring Boot framework",
+      "content": "Spring Boot makes it easy to create stand-alone, production-grade Spring based Applications...",
+      "userId": "your.email@example.com",
+      "userName": "your.email@example.com",
+      "tags": ["Spring", "Java", "Backend"],
+      "createdAt": "2025-04-26T04:20:26.3281458",
+      "updatedAt": "2025-04-26T04:20:26.3281458",
+      "likes": 10,
+      "comments": []
+    }
+    // Additional trending posts...
+  ],
+  "timestamp": "2025-04-26T04:20:26.3281458"
+}
+```
+
+#### 10. Dashboard Summary
+- **URL**: `/api/skill-posts/dashboard-summary`
+- **Method**: GET
+- **Description**: Get an aggregated summary of posts for dashboard display
+- **Authentication**: JWT token in Authorization header (optional)
+- **Response**:
+```json
+{
+  "success": true,
+  "message": "Dashboard summary retrieved successfully",
+  "data": {
+    "totalPosts": 25,
+    "totalLikes": 150,
+    "totalComments": 87,
+    "totalTags": 15,
+    "trendingPosts": [
+      {
+        "id": "680c11b25609893d37e6eded",
+        "title": "Introduction to Spring Boot",
+        "description": "Learn the basics of Spring Boot framework",
+        "content": "Spring Boot makes it easy to create stand-alone...",
+        "userId": "your.email@example.com",
+        "userName": "your.email@example.com",
+        "tags": ["Spring", "Java", "Backend"],
+        "createdAt": "2025-04-26T04:20:26.3281458",
+        "updatedAt": "2025-04-26T04:20:26.3281458",
+        "likes": 10,
+        "comments": []
+      }
+      // Additional trending posts...
+    ],
+    "recentPosts": [
+      // Most recent posts...
+    ],
+    "topTags": [
+      {"Spring": 12},
+      {"Java": 10},
+      {"Backend": 8},
+      {"JavaScript": 7},
+      {"React": 6}
+    ]
+  },
+  "timestamp": "2025-04-26T04:20:26.3281458"
+}
+```
+
+#### 11. Update Skill Post
 - **URL**: `/api/skill-posts/{id}`
 - **Method**: PUT
-- **Description**: Update an existing skill post
+- **Description**: Update an existing skill post (only by creator)
 - **Authentication**: JWT token in Authorization header
 - **Path Variables**: `id` (string)
 - **Request Body**:
@@ -307,17 +593,62 @@ This guide provides details on all available APIs in the Knowledge Nest backend 
   "tags": ["Spring", "Java", "Backend", "Web Development"]
 }
 ```
-- **Response**: Updated skill post object
+- **Response**:
+```json
+{
+  "success": true,
+  "message": "Skill post updated successfully",
+  "data": {
+    "id": "680c11b25609893d37e6eded",
+    "title": "Updated: Introduction to Spring Boot",
+    "description": "Updated description about Spring Boot basics",
+    "content": "Updated content about Spring Boot...",
+    "userId": "your.email@example.com",
+    "userName": "your.email@example.com",
+    "tags": ["Spring", "Java", "Backend", "Web Development"],
+    "createdAt": "2025-04-26T04:20:26.3281458",
+    "updatedAt": "2025-04-26T04:21:35.9753124",
+    "likes": 0,
+    "comments": []
+  },
+  "timestamp": "2025-04-26T04:21:35.9753124"
+}
+```
 
-#### 8. Delete Skill Post
+#### 12. Delete Skill Post
 - **URL**: `/api/skill-posts/{id}`
 - **Method**: DELETE
-- **Description**: Delete a skill post
+- **Description**: Delete a skill post (only by creator)
 - **Authentication**: JWT token in Authorization header
 - **Path Variables**: `id` (string)
+- **Response**:
+```json
+{
+  "success": true,
+  "message": "Skill post deleted successfully",
+  "data": {
+    "postId": "680c11b25609893d37e6eded",
+    "title": "Updated: Introduction to Spring Boot",
+    "deletedAt": "2025-04-26T04:22:15.7493421",
+    "deletedBy": "your.email@example.com",
+    "createdAt": "2025-04-26T04:20:26.3281458"
+  },
+  "timestamp": "2025-04-26T04:22:15.7493421"
+}
+```
+
+#### 13. Batch Delete Skill Posts
+- **URL**: `/api/skill-posts/batch`
+- **Method**: DELETE
+- **Description**: Delete multiple skill posts (only by creator)
+- **Authentication**: JWT token in Authorization header
+- **Request Body**:
+```json
+["680c11b25609893d37e6eded", "680c11b25609893d37e6edee", "680c11b25609893d37e6edef"]
+```
 - **Response**: No content with HTTP status 204
 
-#### 9. Add Comment to Skill Post
+#### 14. Add Comment to Skill Post
 - **URL**: `/api/skill-posts/{postId}/comments`
 - **Method**: POST
 - **Description**: Add a comment to a skill post
@@ -329,15 +660,79 @@ This guide provides details on all available APIs in the Knowledge Nest backend 
   "content": "This is a great post, very informative!"
 }
 ```
-- **Response**: Updated skill post object with the new comment
+- **Response**:
+```json
+{
+  "id": "680c11b25609893d37e6eded",
+  "title": "Introduction to Spring Boot",
+  "description": "Learn the basics of Spring Boot framework",
+  "content": "Spring Boot makes it easy to create stand-alone, production-grade Spring based Applications...",
+  "userId": "your.email@example.com",
+  "userName": "your.email@example.com",
+  "tags": ["Spring", "Java", "Backend"],
+  "createdAt": "2025-04-26T04:20:26.3281458",
+  "updatedAt": "2025-04-26T04:23:45.1287654",
+  "likes": 0,
+  "comments": [
+    {
+      "id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+      "userId": "commenter.email@example.com",
+      "userName": "commenter.email@example.com",
+      "content": "This is a great post, very informative!",
+      "createdAt": "2025-04-26T04:23:45.1287654"
+    }
+  ]
+}
+```
 
-#### 10. Like/Unlike Skill Post
+#### 15. Update Comment
+- **URL**: `/api/skill-posts/{postId}/comments/{commentId}`
+- **Method**: PUT
+- **Description**: Update a comment (only by comment creator)
+- **Authentication**: JWT token in Authorization header
+- **Path Variables**: 
+  - `postId` (string): ID of the post
+  - `commentId` (string): ID of the comment to update
+- **Request Body**:
+```json
+{
+  "content": "Updated comment content"
+}
+```
+- **Response**: Returns the updated post with the edited comment
+
+#### 16. Delete Comment
+- **URL**: `/api/skill-posts/{postId}/comments/{commentId}`
+- **Method**: DELETE
+- **Description**: Delete a comment (by comment creator or post owner)
+- **Authentication**: JWT token in Authorization header
+- **Path Variables**: 
+  - `postId` (string): ID of the post
+  - `commentId` (string): ID of the comment to delete
+- **Response**: Returns the updated post without the deleted comment
+
+#### 17. Like/Unlike Skill Post
 - **URL**: `/api/skill-posts/{postId}/like`
 - **Method**: POST
 - **Description**: Like or unlike a skill post (toggles the like status)
 - **Authentication**: JWT token in Authorization header
 - **Path Variables**: `postId` (string)
-- **Response**: Updated skill post object with updated like count
+- **Response**:
+```json
+{
+  "id": "680c11b25609893d37e6eded",
+  "title": "Introduction to Spring Boot",
+  "description": "Learn the basics of Spring Boot framework",
+  "content": "Spring Boot makes it easy to create stand-alone, production-grade Spring based Applications...",
+  "userId": "your.email@example.com",
+  "userName": "your.email@example.com",
+  "tags": ["Spring", "Java", "Backend"],
+  "createdAt": "2025-04-26T04:20:26.3281458",
+  "updatedAt": "2025-04-26T04:25:12.9876543",
+  "likes": 1,
+  "comments": []
+}
+```
 
 ## Testing with Postman
 
