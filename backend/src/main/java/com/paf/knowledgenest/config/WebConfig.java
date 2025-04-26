@@ -13,21 +13,13 @@ public class WebConfig {
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
-        
-        // Allow all origins for development (you can restrict this in production)
-        config.addAllowedOrigin("*");
-        
-        // Allow common HTTP methods
-        config.addAllowedMethod("GET");
-        config.addAllowedMethod("POST");
-        config.addAllowedMethod("PUT");
-        config.addAllowedMethod("DELETE");
-        config.addAllowedMethod("OPTIONS");
-        
-        // Allow all headers
+
+        config.setAllowCredentials(false); // or true + specific origin
+        config.addAllowedOrigin("*");      // use specific origin if credentials are true
         config.addAllowedHeader("*");
-        
+        config.addAllowedMethod("*");      // instead of listing methods one by one
+
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
     }
-} 
+}
