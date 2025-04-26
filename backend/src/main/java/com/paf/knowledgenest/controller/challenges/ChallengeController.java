@@ -52,16 +52,20 @@ public class ChallengeController {
 
     // Update challenge
     @PutMapping("/{id}")
-    public ResponseEntity<Challenge> updateChallenge(@PathVariable String id, @RequestBody Challenge updatedChallenge) {
-        Optional<Challenge> updated = challengeService.updateChallenge(id, updatedChallenge);
-        return updated.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<ApiResponse<Challenge>> updateChallenge(
+            @PathVariable String id,
+            @RequestBody Challenge updatedChallenge) {
+        ApiResponse<Challenge> response = challengeService.updateChallenge(id, updatedChallenge);
+        return ResponseEntity.status(response.isSuccess() ? HttpStatus.OK : HttpStatus.BAD_REQUEST)
+                .body(response);
     }
 
     // Delete challenge
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteChallenge(@PathVariable String id) {
-        challengeService.deleteChallenge(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<ApiResponse<Void>> deleteChallenge(@PathVariable String id) {
+        ApiResponse<Void> response = challengeService.deleteChallenge(id);
+        HttpStatus status = response.isSuccess() ? HttpStatus.OK : HttpStatus.NOT_FOUND;
+        return ResponseEntity.status(status).body(response);
     }
 
     // Block a challenge manually (can also trigger from timeout logic later)
