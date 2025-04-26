@@ -8,6 +8,11 @@ import OAuthSuccessPage from "@/pages/OAuthSuccessPage";
 import AdminDashboardPage from "@/pages/AdminDashboardPage";
 import AdminProfilePage from "@/pages/AdminProfilePage";
 
+// Skill Posts Pages
+import SkillPostsPage from "@/pages/skills/SkillPostsPage";
+import SkillPostFormPage from "@/pages/skills/SkillPostFormPage";
+import SkillPostDetailPage from "@/pages/skills/SkillPostDetailPage";
+
 export default function App() {
   return (
     <Routes>
@@ -47,6 +52,42 @@ export default function App() {
 
       <Route path="/admin-profile" element={<ProtectedRoute><AdminProfilePage /></ProtectedRoute>} />
 
+      {/* Skill Posts Routes */}
+      <Route
+        path="/skills"
+        element={
+          <ProtectedRoute>
+            <SkillPostsPage />
+          </ProtectedRoute>
+        }
+      />
+      
+      <Route
+        path="/skills/create"
+        element={
+          <ProtectedRoute>
+            <SkillPostFormPage />
+          </ProtectedRoute>
+        }
+      />
+      
+      <Route
+        path="/skills/edit/:id"
+        element={
+          <ProtectedRoute>
+            <SkillPostFormPage />
+          </ProtectedRoute>
+        }
+      />
+      
+      <Route
+        path="/skills/:id"
+        element={
+          <ProtectedRoute>
+            <SkillPostDetailPage />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 }
