@@ -10,6 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 @Data
 public class ProgressResponseDTO {
+    private String progressId;
     private String title;
     private List<String> topics;
     private Integer progress;
