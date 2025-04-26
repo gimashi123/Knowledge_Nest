@@ -74,7 +74,7 @@ public class SkillPostServiceImpl implements SkillPostService {
 
     @Override
     public List<SkillPostDto.Response> searchSkillPosts(String keyword) {
-        return skillPostRepository.findByTitleContainingIgnoreCase(keyword).stream()
+        return skillPostRepository.findByKeywordInTitleDescriptionOrContent(keyword).stream()
                 .map(this::mapToResponseDto)
                 .collect(Collectors.toList());
     }
@@ -99,15 +99,23 @@ public class SkillPostServiceImpl implements SkillPostService {
     }
 
     @Override
-    public void deleteSkillPost(String id, String userId) {
+    public SkillPost deleteSkillPost(String id, String userId) {
+        // First check if the post exists
         SkillPost skillPost = skillPostRepository.findById(id)
                 .orElseThrow(() -> new SkillPostException.NotFoundException(id));
         
+        // Then check if the current user is the owner of the post
         if (!skillPost.getUserId().equals(userId)) {
             throw new SkillPostException.UnauthorizedException();
         }
         
-        skillPostRepository.delete(skillPost);
+        // If all checks pass, delete the post
+        try {
+            skillPostRepository.delete(skillPost);
+            return skillPost; // Return the deleted post
+        } catch (Exception e) {
+            throw new SkillPostException.DeleteOperationException("Failed to delete skill post with id: " + id);
+        }
     }
 
     @Override

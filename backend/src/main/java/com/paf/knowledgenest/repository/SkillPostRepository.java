@@ -15,4 +15,7 @@ public interface SkillPostRepository extends MongoRepository<SkillPost, String> 
     List<SkillPost> findByTagsContaining(String tag);
     
     List<SkillPost> findByTitleContainingIgnoreCase(String keyword);
+    
+    @Query("{ $or: [ { 'title': { $regex: ?0, $options: 'i' } }, { 'description': { $regex: ?0, $options: 'i' } }, { 'content': { $regex: ?0, $options: 'i' } } ] }")
+    List<SkillPost> findByKeywordInTitleDescriptionOrContent(String keyword);
 } 

@@ -32,4 +32,11 @@ public class SkillPostException {
             super(message);
         }
     }
+    
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public static class DeleteOperationException extends RuntimeException {
+        public DeleteOperationException(String message) {
+            super(message);
+        }
+    }
 } 

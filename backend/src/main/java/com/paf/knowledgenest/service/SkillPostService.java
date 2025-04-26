@@ -21,7 +21,7 @@ public interface SkillPostService {
     
     SkillPostDto.Response updateSkillPost(String id, SkillPostDto.Request request, String userId);
     
-    void deleteSkillPost(String id, String userId);
+    SkillPost deleteSkillPost(String id, String userId);
     
     SkillPostDto.Response addComment(String postId, SkillPostDto.CommentRequest request, String userId, String userName);
     
