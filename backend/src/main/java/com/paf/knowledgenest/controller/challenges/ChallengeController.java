@@ -2,7 +2,9 @@ package com.paf.knowledgenest.controller.challenges;
 
 import com.paf.knowledgenest.model.challenges.Challenge;
 import com.paf.knowledgenest.service.challenges.ChallengeService;
+import com.paf.knowledgenest.utils.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,9 +20,9 @@ public class ChallengeController {
 
     // Create challenge
     @PostMapping
-    public ResponseEntity<Challenge> createChallenge(@RequestBody Challenge challenge) {
-        Challenge saved = challengeService.createChallenge(challenge);
-        return ResponseEntity.ok(saved);
+    public ResponseEntity<ApiResponse<Challenge>> createChallenge(@RequestBody Challenge challenge) {
+        ApiResponse<Challenge> saved = challengeService.createChallenge(challenge);
+        return ResponseEntity.status(saved.isSuccess() ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST).body(saved);
     }
 
     // Get all challenges

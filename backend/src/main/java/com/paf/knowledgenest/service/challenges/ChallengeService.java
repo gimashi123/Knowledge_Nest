@@ -2,6 +2,7 @@ package com.paf.knowledgenest.service.challenges;
 
 import com.paf.knowledgenest.model.challenges.Challenge;
 import com.paf.knowledgenest.repository.challenges.ChallengeRepository;
+import com.paf.knowledgenest.utils.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,9 +15,15 @@ public class ChallengeService {
     @Autowired
     private ChallengeRepository challengeRepository;
 
-    // Create new challenge
-    public Challenge createChallenge(Challenge challenge) {
-        return challengeRepository.save(challenge);
+    // Create a new challenge
+    public ApiResponse<Challenge> createChallenge(Challenge challenge) {
+        try{
+            Challenge savedChallenge =  challengeRepository.save(challenge);
+
+            return ApiResponse.successResponse("Challenge Saved Successfully", savedChallenge);
+        } catch (Exception e) {
+            return ApiResponse.errorResponse("Unexpected Error Occurred while attempting to save challenge");
+        }
     }
 
     // Get all challenges (admin or user view)
