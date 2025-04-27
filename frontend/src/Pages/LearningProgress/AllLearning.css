@@ -1,0 +1,345 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap");
+
+/* Container Styles */
+
+.con1 {
+ background: linear-gradient(180deg, #1a2a6c, #0f6fb2);
+}
+
+.continer {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f8fafc;
+  width: 85%;
+}
+
+.continSection {
+  flex: 1;
+  padding: 2rem;
+  margin-left: 50px;
+  background-color: #e0e0e0;
+}
+
+.actionButton_add {
+    margin-top: 25px;
+  }
+
+.action_btn_my {
+    margin-top: 25px;
+  }
+
+.Auth_subheading {
+  font-size: 2.25rem;
+  font-weight: 600;
+  color: #000000;
+  margin-bottom: 2rem;
+  margin-left: 20px;
+  position: relative;
+  display: inline-block;
+  letter-spacing: 0.5px;
+  margin-left: 300px;
+}
+
+.Auth_subheading1 {
+  font-size: 1rem;
+  color: #000000;
+  font-weight: 500;
+  margin-top: -15px;
+}
+
+.Auth_subheading::after {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  width: 300px;
+  height: 4px;
+  background: linear-gradient(to right, #4f46e5, #8b5cf6);
+  border-radius: 2px;
+}
+
+/* Action Buttons */
+.actionButton_add,
+.action_btn_my {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-right: 1rem;
+  margin-bottom: 1.5rem;
+  letter-spacing: 0.5px;
+}
+
+.actionButton_add {
+  background-color: #4f46e5;
+  color: white;
+  box-shadow: 0 2px 5px rgba(79, 70, 229, 0.3);
+}
+
+.actionButton_add:hover {
+  background-color: #4338ca;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(67, 56, 202, 0.4);
+}
+
+.action_btn_my {
+  background-color: white;
+  color: #4f46e5;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.action_btn_my:hover {
+  background-color: #f1f5f9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Post Card Container */
+.post_card_continer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 95%;
+  margin-left: 30px;
+}
+
+/* Enhanced Post Card Styles */
+.post_card {
+  background-color: white;
+  border-radius: 16px;
+  padding: 1.8rem;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  border: none;
+  width: 70%;
+  margin-left: 50px;
+  position: relative;
+  overflow: hidden;
+}
+
+.post_card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(to bottom, #4f46e5, #8b5cf6);
+}
+
+.post_card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* User Details Section */
+.user_details_card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.2rem;
+}
+
+.name_section_post_owner_name {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.name_section_post_owner_name svg {
+  color: #4f46e5;
+  font-size: 1.4rem;
+}
+
+/* Action Icons */
+.action_btn_icon_post {
+  display: flex;
+  gap: 1.2rem;
+}
+
+.action_btn_icon {
+  font-size: 28px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #94a3b8;
+  background: #f1f5f9;
+  padding: 0.4rem;
+  border-radius: 50%;
+}
+
+.action_btn_icon:hover {
+  transform: scale(1.1);
+}
+
+.action_btn_icon:first-child:hover {
+  color: white;
+  background-color: #3b82f6;
+}
+
+.action_btn_icon:last-child:hover {
+  color: white;
+  background-color: #ef4444;
+}
+
+/* Topic Styles */
+.topic_cont {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 1.2rem;
+  line-height: 1.4;
+}
+
+.topic_cont_b {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(to right, #4f46e5, #7c3aed);
+  padding: 0.35rem 1rem;
+  border-radius: 20px;
+  margin-left: 0.75rem;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Description Section */
+.dis_con {
+  margin-bottom: 1.8rem;
+}
+
+.dis_con_topic {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #4f46e5;
+  margin-bottom: 0.75rem;
+  letter-spacing: 0.3px;
+}
+
+.dis_con_pera {
+  font-size: 1.05rem;
+  color: #475569;
+  line-height: 1.7;
+  margin: 0;
+  padding-left: 0.5rem;
+  border-left: 3px solid #e2e8f0;
+}
+
+/* Date Section */
+.date_card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #64748b;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.date_card svg {
+  font-size: 1.1rem;
+  color: #4f46e5;
+}
+
+/* Progress Indicator */
+.progress-container {
+  margin-top: 1.5rem;
+}
+
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.progress-bar {
+  height: 8px;
+  background-color: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(to right, #4f46e5, #8b5cf6);
+  border-radius: 4px;
+  transition: width 0.6s ease;
+}
+
+/* Not Found Styles */
+.not_found_box {
+  text-align: center;
+  padding: 3rem;
+  width: 100%;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  margin-top: 2rem;
+}
+
+.not_found_img {
+  width: 180px;
+  height: 180px;
+  margin: 0 auto 1.5rem;
+  background-color: #f1f5f9;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4f46e5;
+  font-size: 3rem;
+}
+
+.not_found_msg {
+  font-size: 1.2rem;
+  color: #64748b;
+  margin-bottom: 1.8rem;
+  line-height: 1.6;
+}
+
+.not_found_btn {
+  padding: 0.85rem 2rem;
+  background: linear-gradient(to right, #4f46e5, #7c3aed);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+}
+
+.not_found_btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(79, 70, 229, 0.4);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .continSection {
+    margin-left: 0;
+    padding: 1.5rem;
+  }
+
+  .post_card {
+    width: 90%;
+    margin-left: 0;
+    padding: 1.5rem;
+  }
+
+  .actionButton_add,
+  .action_btn_my {
+    width: 100%;
+    margin-bottom: 1rem;
+    margin-right: 0;
+  }
+}

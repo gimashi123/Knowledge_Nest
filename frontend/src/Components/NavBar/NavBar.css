@@ -1,0 +1,139 @@
+.nav_con {
+  width: 100%;
+  max-width: 1540px;
+  background-color: #0f6fb2;
+  position: fixed;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+  padding: 0 20px;
+  height: 65px;
+}
+
+.navbar {
+  width: 100%;
+  display: flex;
+  padding: 15px 0;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.3s ease;
+}
+
+.nav_item_set {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 40px;
+  width: 100%;
+}
+
+.nav_item_icon {
+  font-size: 33px;
+  color: #000000;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: relative;
+  padding: 5px;
+}
+
+.nav_item_icon_noty {
+  font-size: 28px;
+  color: #0f6fb2;
+  cursor: pointer;
+  position: relative;
+  padding: 5px;
+  animation: pulse 2s infinite;
+}
+
+.nav_bar_item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 25px;
+}
+
+.nav_item_icon:hover {
+  color: #000000;
+  transform: translateY(-3px);
+}
+
+/* Notification badge */
+.nav_item_icon_noty::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 8px;
+  height: 8px;
+  background-color: #e74c3c;
+  border-radius: 50%;
+  border: 2px solid white;
+}
+
+/* Logo/Site name styling */
+.site-logo {
+  font-size: 24px;
+  font-weight: 700;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.site-logo-icon {
+  font-size: 28px;
+}
+
+/* Search bar (optional) */
+.search-container {
+  flex-grow: 1;
+  max-width: 500px;
+  margin: 0 30px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px 15px;
+  border: 1px solid #e0e0e0;
+  border-radius: 25px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  background-color: #f9f9f9;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #0f6fb2;
+  box-shadow: 0 0 0 2px rgba(15, 111, 178, 0.2);
+  background-color: white;
+}
+
+/* Animations */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .nav_bar_item {
+    gap: 15px;
+  }
+  
+  .nav_item_icon, .nav_item_icon_noty {
+    font-size: 24px;
+  }
+  
+  .search-container {
+    margin: 0 15px;
+  }
+
+  
+}
