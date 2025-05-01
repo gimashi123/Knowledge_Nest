@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import {ProgressService} from "../../services/api.ts";
-import {Progress} from "../../types/progress.ts";
+import {ProgressService} from "@/services/api.ts";
+import {Progress} from "@/types/progress.ts";
 import ProgressForm from "./ProgressForm.tsx";
 import ProgressItem from "./ProgressItem.tsx";
 

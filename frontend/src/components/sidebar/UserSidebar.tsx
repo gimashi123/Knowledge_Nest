@@ -11,7 +11,7 @@ import {
     Package2
 } from "lucide-react";
 
-export function Sidebar() {
+export function UserSidebar() {
     const navigate = useNavigate();
     const { logoutUser, currentUser } = useAuth();
 
@@ -21,7 +21,7 @@ export function Sidebar() {
                 <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
                     <Link to="/" className="flex items-center gap-2 font-semibold">
                         <Package2 className="h-6 w-6" />
-                        <span className="">Admin Panel</span>
+                        <span className="">User</span>
                     </Link>
                 </div>
                 <div className="flex-1 p-2">
@@ -29,7 +29,7 @@ export function Sidebar() {
                         <Button
                             variant="ghost"
                             className="justify-start gap-2"
-                            onClick={() => navigate("/admin")}
+                            onClick={() => navigate("/admin-dashboard/progress")}
                         >
                             <LayoutDashboard className="h-4 w-4" />
                             Dashboard
