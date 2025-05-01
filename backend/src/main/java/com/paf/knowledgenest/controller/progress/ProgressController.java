@@ -1,8 +1,8 @@
-package com.paf.knowledgenest.controller;
+package com.paf.knowledgenest.controller.progress;
 
     import com.paf.knowledgenest.dto.requests.ProgressRequestDTO;
     import com.paf.knowledgenest.dto.responses.ProgressResponseDTO;
-    import com.paf.knowledgenest.service.ProgressService;
+    import com.paf.knowledgenest.service.progress.ProgressService;
     import org.springframework.beans.factory.annotation.Autowired;
     import org.springframework.http.HttpStatus;
     import org.springframework.http.ResponseEntity;
