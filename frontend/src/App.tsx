@@ -15,7 +15,6 @@ import OAuthSuccessPage from "@/pages/OAuthSuccessPage";
 import AdminDashboardPage from "@/pages/AdminDashboardPage";
 import AdminProfilePage from "@/pages/AdminProfilePage";
 import { AuthProvider, useAuth } from "@/contexts/auth-context";
-import LaunchPage from "@/pages/LaunchPage.tsx";
 
 // PrivateRoute component
 function PrivateRoute() {
@@ -29,7 +28,6 @@ export default function App() {
             <AuthProvider>
                 <Routes>
                     {/* Public Routes */}
-                    <Route path="/" element={<LaunchPage />} />
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/oauth-success" element={<OAuthSuccessPage />} />
