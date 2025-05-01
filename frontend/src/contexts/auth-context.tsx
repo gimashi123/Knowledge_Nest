@@ -12,6 +12,7 @@ export interface User {
 
 interface AuthContextType {
     currentUser: User | null;
+    loading : boolean
     accessToken: string | null;
     loginUser: (email: string, password: string) => Promise<void>;
     logoutUser: () => void;
@@ -22,6 +23,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [currentUser, setCurrentUser] = useState<User | null>(null);
     const [accessToken, setAccessToken] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -31,7 +33,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setAccessToken(token);
             setCurrentUser(JSON.parse(user));
         }
+        setLoading(false);
     }, []);
+
+    if (loading) {
+        return <div>Loading...</div>; // Or a spinner
+    }
 
     const loginUser = async (email: string, password: string) => {
         const res = await login(email, password);
@@ -55,7 +62,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ currentUser, accessToken, loginUser, logoutUser }}>
+        <AuthContext.Provider value={{ loading, currentUser, accessToken, loginUser, logoutUser }}>
             {children}
         </AuthContext.Provider>
     );

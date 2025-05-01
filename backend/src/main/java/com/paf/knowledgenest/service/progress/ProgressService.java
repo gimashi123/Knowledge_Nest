@@ -1,4 +1,4 @@
-package com.paf.knowledgenest.service;
+package com.paf.knowledgenest.service.progress;
 
 import com.paf.knowledgenest.dto.requests.ProgressRequestDTO;
 import com.paf.knowledgenest.dto.responses.ProgressResponseDTO;
@@ -33,12 +33,12 @@ public class ProgressService {
             try {
                 ProgressResponseDTO progressResponseDTO = new ProgressResponseDTO(); // this will be the response object (if any error it should return null)
 
-                if (progressRequestDTO.getTitle() == null || progressRequestDTO.getTopics() == null || progressRequestDTO.getProgress() == null) {
+                if (progressRequestDTO.getTitle() == null || progressRequestDTO.getTopics() == null ) {
                     log.error("addNewProgress: title and topics and progress are null");
                     return null;
                 }
 
-                if (progressRepository.existsProgressByProgressAndTitle(progressRequestDTO.getProgress(), progressRequestDTO.getTitle())) {
+                if (progressRepository.existsProgressByProgressAndTitle(0, progressRequestDTO.getTitle())) {
                     log.error("addNewProgress: progress already exists");
                     return null;
                 }
@@ -50,7 +50,7 @@ public class ProgressService {
                 //Set the values from ProgressRequestDTO to Progress
                 progress.setTitle(progressRequestDTO.getTitle());
                 progress.setTopics(progressRequestDTO.getTopics());
-                progress.setProgress(progressRequestDTO.getProgress());
+                progress.setProgress(0);
                 progress.setLastUpdate( LocalTime.now());
 
 
