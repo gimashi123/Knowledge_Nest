@@ -59,6 +59,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         localStorage.removeItem("user");
         setAccessToken(null);
         setCurrentUser(null);
+        navigate("/");
     };
 
     return (
