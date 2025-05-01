@@ -5,8 +5,8 @@ import {
     Route,
     Navigate,
     Outlet,
-} from "react-router-dom";
-
+}
+from "react-router-dom";
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
 import Dashboard from "@/pages/DashboardPage";

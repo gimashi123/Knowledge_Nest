@@ -1,0 +1,318 @@
+/* Progress Components Styling */
+
+/* ProgressList Component */
+.progress-list {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.progress-list h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #333;
+}
+
+.progress-items {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 30px;
+}
+
+/* ProgressItem Component */
+.progress-item {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  transition: transform 0.2s ease;
+}
+
+.progress-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.progress-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.progress-item-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.progress-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.edit-btn, .delete-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.edit-btn {
+  background-color: #e7f3ff;
+  color: #0077ff;
+}
+
+.edit-btn:hover {
+  background-color: #cce7ff;
+}
+
+.delete-btn {
+  background-color: #ffebee;
+  color: #f44336;
+}
+
+.delete-btn:hover {
+  background-color: #ffcdd2;
+}
+
+.progress-details {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.progress-bar-container {
+  position: relative;
+  height: 20px;
+  background-color: #f0f0f0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #4caf50, #8bc34a);
+  border-radius: 10px;
+  transition: width 0.3s ease;
+}
+
+.progress-percentage {
+  position: absolute;
+  top: 0;
+  right: 10px;
+  font-size: 12px;
+  line-height: 20px;
+  color: #333;
+  font-weight: 600;
+}
+
+.progress-topics {
+  margin-top: 10px;
+}
+
+.progress-topics h4 {
+  margin: 0 0 8px 0;
+  font-size: 1rem;
+  color: #555;
+}
+
+/* Topic checklist styling */
+.topic-checklist {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.topic-item-checkable {
+  display: flex;
+  align-items: center;
+  padding: 6px 10px;
+  background-color: #f0f7ff;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.topic-item-checkable:hover {
+  background-color: #e0f0ff;
+}
+
+.topic-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.topic-checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #4caf50;
+}
+
+.completed-topic {
+  text-decoration: line-through;
+  color: #4caf50;
+  font-weight: 500;
+}
+
+.progress-last-update {
+  margin-top: 5px;
+  font-size: 0.8rem;
+  color: #777;
+  text-align: right;
+}
+
+/* ProgressForm Component */
+.progress-form-container {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 30px;
+}
+
+.progress-form-container h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.progress-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-weight: 500;
+  color: #555;
+}
+
+.form-group input[type="text"],
+.form-group input[type="range"],
+.form-group input[type="time"] {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.form-group input[type="range"] {
+  padding: 0;
+}
+
+.form-group input[type="time"] {
+  width: 150px;
+  cursor: pointer;
+  color: #333;
+}
+
+.progress-help-text {
+  margin-top: 5px;
+  font-size: 0.8rem;
+  color: #666;
+  font-style: italic;
+}
+
+.topic-input-group {
+  display: flex;
+  gap: 10px;
+}
+
+.topic-input-group input {
+  flex: 1;
+}
+
+.add-topic-btn {
+  padding: 10px 15px;
+  background-color: #e7f3ff;
+  color: #0077ff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.add-topic-btn:hover {
+  background-color: #cce7ff;
+}
+
+.topics-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.topic-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background-color: #f0f7ff;
+  color: #0077ff;
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 0.85rem;
+}
+
+.remove-topic-btn {
+  background: none;
+  border: none;
+  color: #0077ff;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0 2px;
+}
+
+.remove-topic-btn:hover {
+  color: #f44336;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.submit-btn, .cancel-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.submit-btn {
+  background-color: #4caf50;
+  color: white;
+}
+
+.submit-btn:hover {
+  background-color: #43a047;
+}
+
+.cancel-btn {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+.cancel-btn:hover {
+  background-color: #e0e0e0;
+} 
