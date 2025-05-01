@@ -4,13 +4,17 @@ import com.paf.knowledgenest.dto.JwtAuthenticationResponse;
 import com.paf.knowledgenest.dto.LoginRequest;
 import com.paf.knowledgenest.dto.RegisterRequest;
 import com.paf.knowledgenest.dto.request.FollowerRequestDTO;
+import com.paf.knowledgenest.dto.response.LoginResponse;
+import com.paf.knowledgenest.dto.response.UserResponse;
 import com.paf.knowledgenest.model.user.User;
 import com.paf.knowledgenest.repository.user.UserRepository;
 import com.paf.knowledgenest.security.JwtUtils;
 import com.paf.knowledgenest.utils.ApiResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,6 +24,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Optional;
 
+@Slf4j
 @Service
 public class AuthService {
 
@@ -60,22 +65,44 @@ public class AuthService {
          return ApiResponse.successResponse("User Registered Successfully", jwtUtils.generateToken(user.getEmail()));
     }
 
-    public ApiResponse<JwtAuthenticationResponse> loginUser(LoginRequest request) {
+    public ApiResponse<LoginResponse> loginUser(LoginRequest request) {
         try {
-            //  Authenticate credentials (Spring Security will call CustomUserDetailsService)
+            // Authenticate user credentials
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+                    new UsernamePasswordAuthenticationToken(
+                            request.getEmail(), request.getPassword()
+                    )
             );
-            // Get the principal (this will be your CustomUserDetails implementation)
+
+            // Check if authentication is successful
+            if (authentication == null || !authentication.isAuthenticated()) {
+                return ApiResponse.errorResponse("Invalid email or password");
+            }
+
+            // Get UserDetails
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            //  Generate JWT using email (username)
+
+            // Generate JWT token
             String token = jwtUtils.generateToken(userDetails.getUsername());
-            return ApiResponse.successResponse("User Login Successfully",new JwtAuthenticationResponse(token));
+
+            LoginResponse loginResponse = LoginResponse.builder()
+                    .accessToken(token)
+                    .user(UserResponse.builder()
+                          .role(userDetails.getAuthorities().iterator().next().getAuthority())
+                            .email(userDetails.getUsername())
+                            .name(userDetails.getUsername())
+                            .build())
+                    .build();
+            return ApiResponse.successResponse("User Login Successfully", loginResponse);
+
+        } catch (BadCredentialsException e) {
+            log.error("Bad credentials: {}", e.getMessage());
+            return ApiResponse.errorResponse("Invalid email or password");
         } catch (Exception e) {
-            return ApiResponse.errorResponse("Unexpected Error Occurred while attempting to login");
+            log.error("Unexpected error during login: {}", e.getMessage(), e);
+            return ApiResponse.errorResponse("Unexpected error occurred during login");
         }
     }
-
 
 
     public Optional<User> getUserByEmail(String email) {

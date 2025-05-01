@@ -1,45 +1,23 @@
-import { useEffect, useState } from "react";
+import {  useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { getCurrentUser } from "../services/authService";
 import { Input } from "@/components/ui/input";
 import { Camera, Trash2, User, Mail, Award, Settings, ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
-import axios from "axios";
+import {useAuth} from "@/contexts/auth-context.tsx";
+import api from "@/utils/axiosInstance.ts";
 
 export default function ProfilePage() {
-  const [user, setUser] = useState<{ name: string; email: string; role: string; profilePic?: string } | null>(null);
   const [name, setName] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const navigate = useNavigate();
+  const {currentUser, logoutUser} = useAuth();
 
-  const handleLogout = () => {
-    const confirmLogout = window.confirm("Are you sure you want to logout?");
-    if (confirmLogout) {
-      localStorage.removeItem("token");
-      navigate("/login");
-      toast.success("Logged out successfully");
-    }
-  };
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const userData = await getCurrentUser();
-        setUser(userData);
-        setName(userData.name);
-      } catch (err) {
-        handleLogout();
-      }
-    };
-    fetchUser();
-  }, []);
 
   const handleNameUpdate = async () => {
     try {
-      await axios.put("http://localhost:8081/api/user/update-name", null, {
+      await api.put("api/user/update-name", null, {
         params: { name },
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
       });
       toast.success("Profile updated successfully");
     } catch {
@@ -52,17 +30,13 @@ export default function ProfilePage() {
     const formData = new FormData();
     formData.append("file", image);
     try {
-      await axios.post("http://localhost:8081/api/user/upload-photo", formData, {
+      await api.post("/api/user/upload-photo", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${localStorage.getItem("token")}`
         }
       });
       toast.success("Profile picture updated");
       setImage(null);
-      // Refresh user data to show new image
-      const userData = await getCurrentUser();
-      setUser(userData);
     } catch {
       toast.error("Upload failed. Please try again.");
     }
@@ -70,13 +44,9 @@ export default function ProfilePage() {
 
   const handleDeletePhoto = async () => {
     try {
-      await axios.delete("http://localhost:8081/api/user/delete-photo", {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-      });
+      await api.delete("/api/user/delete-photo");
       toast.success("Profile picture removed");
       // Refresh user data to remove image
-      const userData = await getCurrentUser();
-      setUser(userData);
     } catch {
       toast.error("Failed to remove picture");
     }
@@ -97,13 +67,13 @@ export default function ProfilePage() {
         <div className="w-10"></div> {/* Spacer for alignment */}
       </div>
 
-      {user && (
+      {currentUser && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Profile Picture Section */}
           <div className="bg-white rounded-2xl shadow p-6 flex flex-col items-center lg:col-span-1">
             <div className="relative w-32 h-32 rounded-full bg-gradient-to-br from-black-100 to-black-100 mb-4 overflow-hidden border-2 border-black-200">
-              {user.profilePic ? (
-                <img src={user.profilePic} alt="Profile" className="w-full h-full object-cover" />
+              {currentUser?.profilePic ? (
+                <img src={currentUser?.profilePic} alt="Profile" className="w-full h-full object-cover" />
               ) : (
                 <div className="flex items-center justify-center h-full">
                   <User className="w-16 h-16 text-black-400" />
@@ -122,7 +92,7 @@ export default function ProfilePage() {
                   onChange={(e) => setImage(e.target.files?.[0] || null)}
                 />
               </label>
-              {user.profilePic && (
+              {currentUser?.profilePic && (
                 <button
                   onClick={handleDeletePhoto}
                   className="inline-flex items-center gap-1 text-sm text-red-600 hover:text-red-800 transition-colors"
@@ -149,7 +119,7 @@ export default function ProfilePage() {
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <User className="w-4 h-4 text-purple-500" />
-                <span>{user.role} account</span>
+                <span>{currentUser?.role} account</span>
               </div>
             </div>
           </div>
@@ -163,7 +133,7 @@ export default function ProfilePage() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1 flex items-center gap-2">
+                <label className=" text-sm font-medium text-gray-600 mb-1 flex items-center gap-2">
                   <User className="w-4 h-4" />
                   Display Name
                 </label>
@@ -175,22 +145,22 @@ export default function ProfilePage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1 flex items-center gap-2">
+                <label className="block text-sm font-medium text-gray-600 mb-1  items-center gap-2">
                   <Mail className="w-4 h-4" />
                   Email Address
                 </label>
                 <div className="flex items-center h-10 px-3 text-sm border rounded-md bg-gray-50">
-                  {user.email}
+                  {currentUser?.email}
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1 flex items-center gap-2">
+                <label className="block text-sm font-medium text-gray-600 mb-1  items-center gap-2">
                   <Award className="w-4 h-4" />
                   Account Type
                 </label>
                 <div className="flex items-center h-10 px-3 text-sm border rounded-md bg-gray-50 capitalize">
-                  {user.role.toLowerCase()}
+                  {currentUser?.role.toLowerCase()}
                 </div>
               </div>
 
@@ -235,7 +205,7 @@ export default function ProfilePage() {
 
             <div className="mt-6 pt-4 border-t border-gray-200">
               <Button
-                onClick={handleLogout}
+                onClick={() => logoutUser()}
                 className="w-full bg-red-100 hover:bg-red-200 text-red-600"
               >
                 Logout

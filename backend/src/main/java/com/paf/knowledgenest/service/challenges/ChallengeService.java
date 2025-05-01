@@ -2,6 +2,7 @@ package com.paf.knowledgenest.service.challenges;
 
 import com.paf.knowledgenest.model.challenges.Challenge;
 import com.paf.knowledgenest.repository.challenges.ChallengeRepository;
+import com.paf.knowledgenest.utils.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,9 +15,15 @@ public class ChallengeService {
     @Autowired
     private ChallengeRepository challengeRepository;
 
-    // Create new challenge
-    public Challenge createChallenge(Challenge challenge) {
-        return challengeRepository.save(challenge);
+    // Create a new challenge
+    public ApiResponse<Challenge> createChallenge(Challenge challenge) {
+        try{
+            Challenge savedChallenge =  challengeRepository.save(challenge);
+
+            return ApiResponse.successResponse("Challenge Saved Successfully", savedChallenge);
+        } catch (Exception e) {
+            return ApiResponse.errorResponse("Unexpected Error Occurred while attempting to save challenge");
+        }
     }
 
     // Get all challenges (admin or user view)
@@ -40,20 +47,44 @@ public class ChallengeService {
     }
 
     // Update challenge
-    public Optional<Challenge> updateChallenge(String id, Challenge updatedChallenge) {
-        return challengeRepository.findById(id).map(challenge -> {
-            challenge.setTitle(updatedChallenge.getTitle());
-            challenge.setTasks(updatedChallenge.getTasks());
-            challenge.setSkillCategory(updatedChallenge.getSkillCategory());
-            challenge.setDifficultyLevel(updatedChallenge.getDifficultyLevel());
-            challenge.setTimeLimit(updatedChallenge.getTimeLimit());
-            return challengeRepository.save(challenge);
-        });
+    public ApiResponse<Challenge> updateChallenge(String id, Challenge updatedChallenge) {
+        try {
+            return challengeRepository.findById(id)
+                    .map(existingChallenge -> {
+                        existingChallenge.setTitle(updatedChallenge.getTitle());
+                        existingChallenge.setTasks(updatedChallenge.getTasks());
+                        existingChallenge.setSkillCategory(updatedChallenge.getSkillCategory());
+                        existingChallenge.setDifficultyLevel(updatedChallenge.getDifficultyLevel());
+                        existingChallenge.setTimeLimit(updatedChallenge.getTimeLimit());
+
+                        Challenge savedChallenge = challengeRepository.save(existingChallenge);
+                        return ApiResponse.successResponse("Challenge updated successfully", savedChallenge);
+                    })
+                    .orElse(ApiResponse.errorResponse("Challenge with ID " + id + " not found"));
+        } catch (Exception e) {
+            return ApiResponse.errorResponse("Failed to update challenge: " + e.getMessage());
+        }
     }
 
     // Delete challenge
-    public void deleteChallenge(String id) {
-        challengeRepository.deleteById(id);
+    public ApiResponse<Void> deleteChallenge(String id) {
+        try {
+            if (challengeRepository.existsById(id)) {
+                challengeRepository.deleteById(id);
+                return ApiResponse.successResponse(
+                        "Challenge with ID " + id + " deleted successfully",
+                        null
+                );
+            } else {
+                return ApiResponse.errorResponse(
+                        "Challenge with ID " + id + " not found"
+                );
+            }
+        } catch (Exception e) {
+            return ApiResponse.errorResponse(
+                    "Failed to delete challenge with ID " + id + ": " + e.getMessage()
+            );
+        }
     }
 
     // Block a challenge (if user doesn't complete in time)

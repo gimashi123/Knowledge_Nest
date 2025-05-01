@@ -3,6 +3,7 @@ package com.paf.knowledgenest.controller.user;
 import com.paf.knowledgenest.dto.RegisterRequest;
 import com.paf.knowledgenest.dto.LoginRequest;
 import com.paf.knowledgenest.dto.JwtAuthenticationResponse;
+import com.paf.knowledgenest.dto.response.LoginResponse;
 import com.paf.knowledgenest.model.user.User;
 
 import com.paf.knowledgenest.repository.user.UserRepository;
@@ -43,10 +44,10 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<JwtAuthenticationResponse>> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<ApiResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
 
         log.info("Login request: {}", request);
-        ApiResponse<JwtAuthenticationResponse>  response = authService.loginUser(request);
+        ApiResponse<LoginResponse>  response = authService.loginUser(request);
         if(response.isSuccess()) {
             return ResponseEntity.ok().body(response);
         } else {
@@ -57,11 +58,17 @@ public class AuthController {
 
     // added this to fetch user detail into frontend (dashboard)
     @GetMapping("/me")
-    public ResponseEntity<User> getCurrentUser(Authentication authentication) {
+    public ResponseEntity<?> getCurrentUser(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Unauthorized: No authentication info found");
+        }
+
         String email = authentication.getName();
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         return ResponseEntity.ok(user);
     }
+
 
 }

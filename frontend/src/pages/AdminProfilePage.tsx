@@ -1,47 +1,21 @@
-import { useEffect, useState } from "react";
+import {  useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { getCurrentUser } from "../services/authService";
 import { Input } from "@/components/ui/input";
 import { Camera, Trash2, Shield, Users, AlertTriangle } from "lucide-react";
 import toast from "react-hot-toast";
-import axios from "axios";
+import api from "@/utils/axiosInstance.ts";
+import {useAuth} from "@/contexts/auth-context.tsx";
 
 export default function AdminProfilePage() {
-  const [admin, setAdmin] = useState<{ name: string; email: string; role: string; profilePic?: string } | null>(null);
   const [name, setName] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const navigate = useNavigate();
-
-  const handleLogout = () => {
-    const confirmLogout = window.confirm("Are you sure you want to logout?");
-    if (confirmLogout) {
-      localStorage.removeItem("token");
-      navigate("/login");
-      toast.success("Logged out");
-    }
-  };
-
-  useEffect(() => {
-    const fetchAdmin = async () => {
-      try {
-        const adminData = await getCurrentUser();
-        if (adminData.role !== "ADMIN") {
-          navigate("/dashboard");
-          return;
-        }
-        setAdmin(adminData);
-        setName(adminData.name);
-      } catch (err) {
-        handleLogout();
-      }
-    };
-    fetchAdmin();
-  }, [navigate]);
+  const {currentUser, logoutUser} = useAuth();
 
   const handleNameUpdate = async () => {
     try {
-      await axios.put("http://localhost:8081/api/user/update-name", null, {
+      await api.put("/api/user/update-name", null, {
         params: { name },
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
       });
@@ -56,10 +30,9 @@ export default function AdminProfilePage() {
     const formData = new FormData();
     formData.append("file", image);
     try {
-      await axios.post("http://localhost:8081/api/user/upload-photo", formData, {
+      await api.post("/api/user/upload-photo", formData, {
         headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${localStorage.getItem("token")}`
+          "Content-Type": "multipart/form-data"
         }
       });
       toast.success("Photo uploaded");
@@ -71,9 +44,7 @@ export default function AdminProfilePage() {
 
   const handleDeletePhoto = async () => {
     try {
-      await axios.delete("http://localhost:8081/api/user/delete-photo", {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-      });
+      await api.delete("/api/user/delete-photo");
       toast.success("Photo deleted");
     } catch {
       toast.error("Delete failed");
@@ -82,15 +53,15 @@ export default function AdminProfilePage() {
 
   return (
     <div className="max-w-4xl mx-auto p-8 mt-20 bg-gradient-to-br from-white to-blue-50 shadow-xl rounded-3xl">
-      <h1 className="text-3xl font-bold text-blue-700 mb-6 text-center">Admin Profile</h1>
+      <h1 className="text-3xl font-bold text-blue-700 mb-6 text-center">currentUser? Profile</h1>
 
-      {admin && (
+      {currentUser && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Profile Picture Section */}
           <div className="bg-white rounded-2xl shadow p-6 flex flex-col items-center lg:col-span-1">
             <div className="w-32 h-32 rounded-full bg-gray-200 mb-4 overflow-hidden">
-              {admin.profilePic ? (
-                <img src={admin.profilePic} alt="Profile" className="w-full h-full object-cover" />
+              {currentUser?.profilePic ? (
+                <img src={currentUser?.profilePic} alt="Profile" className="w-full h-full object-cover" />
               ) : (
                 <span className="flex items-center justify-center h-full text-gray-500 text-sm">No Image</span>
               )}
@@ -123,10 +94,10 @@ export default function AdminProfilePage() {
             <div className="mt-6 w-full">
               <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
                 <Shield className="w-4 h-4 text-blue-500" />
-                <span>Admin Privileges</span>
+                <span>currentUser? Privileges</span>
               </div>
               <Button
-                onClick={() => navigate("/admin-dashboard")}
+                onClick={() => navigate("/currentUser?-dashboard")}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white mt-2"
               >
                 Back to Dashboard
@@ -147,8 +118,8 @@ export default function AdminProfilePage() {
             </div>
 
             <div className="mb-4">
-              <p className="text-sm"><strong>Email:</strong> {admin.email}</p>
-              <p className="text-sm"><strong>Role:</strong> {admin.role}</p>
+              <p className="text-sm"><strong>Email:</strong> {currentUser?.email}</p>
+              <p className="text-sm"><strong>Role:</strong> {currentUser?.role}</p>
             </div>
 
             <Button onClick={handleNameUpdate} className="w-full bg-black hover:bg-gray-800 text-white">
@@ -156,9 +127,9 @@ export default function AdminProfilePage() {
             </Button>
           </div>
 
-          {/* Admin Actions Section */}
+          {/* currentUser? Actions Section */}
           <div className="bg-white rounded-2xl shadow p-6 lg:col-span-1">
-            <h2 className="text-lg font-semibold mb-4 text-gray-800">Admin Quick Actions</h2>
+            <h2 className="text-lg font-semibold mb-4 text-gray-800">currentUser? Quick Actions</h2>
 
             <div className="space-y-3">
               <Button
@@ -188,7 +159,7 @@ export default function AdminProfilePage() {
 
             <div className="mt-6 pt-4 border-t border-gray-200">
               <Button
-                onClick={handleLogout}
+                onClick={()=> logoutUser()}
                 className="w-full bg-red-600 hover:bg-red-700 text-white"
               >
                 Logout
