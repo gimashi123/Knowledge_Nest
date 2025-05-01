@@ -1,17 +1,19 @@
-import axios from "axios";
+import api from "@/utils/axiosInstance.ts";
+import {User} from "@/contexts/auth-context.tsx";
 
-const API = "http://localhost:8081/api/auth";
 
-export const login = async (email: string, password: string) => {
-  const response = await axios.post(`${API}/login`, {
-    email,
-    password,
-  });
-  return response.data;
+export interface LoginResponse {
+  accessToken: string;
+  user: User;
+}
+
+export const login = async (email: string, password: string): Promise<LoginResponse> => {
+  const response = await api.post("/api/auth/login", { email, password });
+  return response.data.result;
 };
 
 export const register = async (name: string, email: string, password: string) => {
-  const response = await axios.post(`${API}/register`, {
+  const response = await api.post(`/api/auth/register`, {
     name,
     email,
     password,
@@ -19,6 +21,7 @@ export const register = async (name: string, email: string, password: string) =>
   return response.data;
 };
 
+/*
 export const getCurrentUser = async () => {
   const response = await axios.get(`${API}/me`, {
     headers: {
@@ -26,4 +29,4 @@ export const getCurrentUser = async () => {
     },
   });
   return response.data;
-};
+};*/
