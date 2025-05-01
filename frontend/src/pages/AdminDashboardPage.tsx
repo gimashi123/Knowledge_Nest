@@ -1,41 +1,21 @@
-import { useEffect, useState } from "react";
-import { getCurrentUser } from "../services/authService";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import {useAuth} from "@/contexts/auth-context.tsx";
 
 export default function AdminDashboardPage() {
-  const [admin, setAdmin] = useState<{ name: string; email: string; role: string } | null>(null);
   const navigate = useNavigate();
+  const {currentUser, logoutUser} = useAuth()
 
-  useEffect(() => {
-    const fetchAdmin = async () => {
-      try {
-        const userData = await getCurrentUser();
-        if (userData.role !== "ADMIN") {
-          navigate("/dashboard");
-          return;
-        }
-        setAdmin(userData);
-      } catch (error) {
-        navigate("/login");
-      }
-    };
-    fetchAdmin();
-  }, [navigate]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
-  };
 
   return (
     <div className="max-w-2xl mx-auto p-6 mt-20 bg-white shadow-md rounded-2xl text-center">
       <h1 className="text-2xl font-bold mb-4 text-blue-700">Admin Dashboard 🛠️</h1>
-      {admin && (
+      {currentUser && (
         <div className="mb-6">
-          <p><strong>Name:</strong> {admin.name}</p>
-          <p><strong>Email:</strong> {admin.email}</p>
-          <p><strong>Role:</strong> {admin.role}</p>
+          <p><strong>Name:</strong> {currentUser.name}</p>
+          <p><strong>Email:</strong> {currentUser.email}</p>
+          <p><strong>Role:</strong> {currentUser.role}</p>
         </div>
       )}
 
@@ -57,7 +37,7 @@ export default function AdminDashboardPage() {
         </ul>
       </div>
 
-      <Button onClick={handleLogout} className="mt-6 bg-red-600 hover:bg-red-700 text-white">
+      <Button onClick={()=>logoutUser()} className="mt-6 bg-red-600 hover:bg-red-700 text-white">
         Logout
       </Button>
     </div>
