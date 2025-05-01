@@ -1,12 +1,11 @@
+import {Outlet} from "react-router-dom";
+import {UserSidebar} from "@/components/sidebar/UserSidebar.tsx";
 
-import { Outlet } from "react-router-dom";
-import {AdminSidebar} from "@/components/sidebar/AdminSidebar.tsx";
-
-
-export default function AdminDashboardPage() {
+export const UserDashboardPage = () => {
     return (
+
         <div className="flex min-h-screen">
-            <AdminSidebar />
+            <UserSidebar />
 
             <main className="flex-1 ml-[220px] p-8">
                 <div className="max-w-6xl mx-auto">
@@ -15,4 +14,5 @@ export default function AdminDashboardPage() {
             </main>
         </div>
     );
-}
+
+};

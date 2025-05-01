@@ -50,7 +50,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if(res.user.role === "ROLE_ADMIN"){
             navigate("/admin-dashboard");
         }else{
-            navigate("/dashboard");
+            navigate("/user-dashboard");
         }
     };
 
