@@ -21,10 +21,10 @@ import {ProgressPage} from "@/pages/authorized/admin/ProgressPage.tsx";
 import {UserDashboardPage} from "@/pages/UserDashboardPage.tsx";
 import LaunchPage from "@/pages/LaunchPage.tsx";
 
-// PrivateRoute component
+
 function PrivateRoute() {
     const { currentUser } = useAuth();
-    return currentUser ? <Outlet /> : <Navigate to="/login" replace />;
+    return currentUser ? <Outlet /> : <Navigate to="/" replace />;
 }
 
 export default function App() {

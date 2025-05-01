@@ -1,8 +1,11 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Code2, ChefHat, Hammer, Trophy, Zap, Users, Award, BookOpen } from "lucide-react";
+import {useAuth} from "@/contexts/auth-context.tsx";
 
 export default function LaunchPage() {
+
+    const {currentUser} = useAuth()
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#f1f5fc] to-[#b4c3ed] flex flex-col">
             {/* Navigation Bar */}
@@ -17,11 +20,21 @@ export default function LaunchPage() {
                             About
                         </Link>
                     </Button>
-                    <Button asChild className="bg-[#44468f] hover:bg-[#393b7a] text-white">
-                        <Link to="/login" className="flex items-center gap-1">
-                            Get Started
-                        </Link>
-                    </Button>
+                    {
+                        currentUser != null ? (
+                            <Button variant="ghost" asChild>
+                                <Link to={currentUser.role === 'ROLE_ADMIN' ? '/admin-dashboard' : '/user-dashboard'} className="flex items-center gap-1 text-[#44468f]">
+                                    Dashboard
+                                </Link>
+                            </Button>
+                        ) : (
+                            <Button variant="ghost" asChild>
+                                <Link to="/login" className="flex items-center gap-1 text-[#44468f]">
+                                    Login
+                                </Link>
+                            </Button>
+                        )
+                    }
                 </div>
             </nav>
 
@@ -48,11 +61,16 @@ export default function LaunchPage() {
                                 Join Community
                             </Link>
                         </Button>
-                        <Button asChild variant="outline" className="gap-2 border-[#44468f] text-[#44468f] hover:bg-[#e0e6fa]" size="lg">
+                        {currentUser != null ? (<Button asChild variant="outline" className="gap-2 border-[#44468f] text-[#44468f] hover:bg-[#e0e6fa]" size="lg">
+                            <Link to={currentUser.role === 'ROLE_ADMIN' ? '/admin-dashboard' : '/user-dashboard'}>
+                                Go to Dashboard
+                            </Link>
+                        </Button>): (<Button asChild variant="outline" className="gap-2 border-[#44468f] text-[#44468f] hover:bg-[#e0e6fa]" size="lg">
                             <Link to="/register">
                                 Create Account
                             </Link>
-                        </Button>
+                        </Button>)}
+
                     </div>
 
                     {/* Skill Categories */}
@@ -87,7 +105,7 @@ export default function LaunchPage() {
             {/* Features Section */}
             <section className="py-16 bg-white">
                 <div className="max-w-6xl mx-auto px-6">
-                    <h2 className="text-2xl font-bold text-center mb-4 text-[#44468f]">Why Kowlage Nest?</h2>
+                    <h2 className="text-2xl font-bold text-center mb-4 text-[#44468f]">Why Knowledge Nest?</h2>
                     <p className="text-gray-600 text-center mb-12 max-w-2xl mx-auto">
                         Our unique features make skill-sharing rewarding and engaging
                     </p>
@@ -204,7 +222,7 @@ export default function LaunchPage() {
                     </div>
                 </div>
                 <div className="max-w-6xl mx-auto px-6 pt-8 mt-8 border-t border-[#5a5d9d] text-center text-sm">
-                    © {new Date().getFullYear()} Kowlage Nest. All rights reserved.
+                    © {new Date().getFullYear()} Knowledge Nest. All rights reserved.
                 </div>
             </footer>
         </div>
