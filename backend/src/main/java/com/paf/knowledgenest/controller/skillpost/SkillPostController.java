@@ -1,6 +1,8 @@
 package com.paf.knowledgenest.controller.skillpost;
 
 import com.paf.knowledgenest.dto.skillpost.SkillPostDto;
+import com.paf.knowledgenest.model.user.User;
+import com.paf.knowledgenest.repository.user.UserRepository;
 import com.paf.knowledgenest.service.skillpost.SkillPostService;
 import com.paf.knowledgenest.utils.ApiResponse;
 import jakarta.validation.Valid;
@@ -23,6 +25,7 @@ import java.util.List;
 public class SkillPostController {
 
     private final SkillPostService skillPostService;
+    private final UserRepository userRepository;
 
     // Create a new post
     @PostMapping
@@ -31,7 +34,13 @@ public class SkillPostController {
             Authentication authentication) {
         String userId = getUserIdFromAuth(authentication);
         String userName = authentication.getName();
+        
+        System.out.println("Creating post with request: " + request);
+        System.out.println("Creating post for userId: " + userId + ", userName: " + userName);
+        
         SkillPostDto.Response response = skillPostService.createPost(request, userId, userName);
+        
+        System.out.println("Created post successfully with ID: " + response.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -207,9 +216,18 @@ public class SkillPostController {
         if (authentication == null) {
             throw new UsernameNotFoundException("User not authenticated");
         }
-        // Authentication name contains the email address, similar to userRepository.findByEmail() pattern
-        // used elsewhere in your app. In a real implementation, you'd likely fetch the user ID from 
-        // your User entity using the email.
-        return authentication.getName();
+        
+        // Get the email from authentication
+        String email = authentication.getName();
+        
+        // Find the user by email to get the actual ID
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+        
+        // Log the user ID for debugging purposes
+        System.out.println("Found user ID: " + user.getId() + " for email: " + email);
+        
+        // Return the actual MongoDB ID of the user
+        return user.getId();
     }
 } 

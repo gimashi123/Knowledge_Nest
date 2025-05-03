@@ -1,13 +1,14 @@
 import  { createContext, useContext, useState, ReactNode, useEffect } from "react";
-import {  login } from "../services/authService";
+import {  login, getCurrentUser } from "../services/authService";
 import {useNavigate} from "react-router-dom";
 
 
 export interface User {
-    email: string;
+    id?: string;      // Optional ID field
+    email: string;    // Email is the primary identifier
     name: string;
     role: string;
-    profilePic: string;
+    profilePic?: string;
 }
 
 interface AuthContextType {
@@ -25,6 +26,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [accessToken, setAccessToken] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
+
+    // Fetch user details when token changes
+    useEffect(() => {
+        const fetchUserDetails = async () => {
+            if (accessToken) {
+                try {
+                    const userData = await getCurrentUser();
+                    if (userData) {
+                        console.log('Retrieved full user details:', userData);
+                        // Update user with complete profile including ID
+                        setCurrentUser(prev => ({
+                            ...prev as User,
+                            ...userData,
+                        }));
+                        // Update localStorage with complete user data
+                        localStorage.setItem("user", JSON.stringify({
+                            ...currentUser,
+                            ...userData,
+                        }));
+                    }
+                } catch (error) {
+                    console.error('Error fetching user details:', error);
+                }
+            }
+        };
+
+        fetchUserDetails();
+    }, [accessToken]);
 
     useEffect(() => {
         const token = localStorage.getItem("accessToken");
