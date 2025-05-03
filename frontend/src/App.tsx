@@ -20,6 +20,9 @@ import { AuthProvider, useAuth } from "@/contexts/auth-context";
 import {ProgressPage} from "@/pages/authorized/admin/ProgressPage.tsx";
 import {UserDashboardPage} from "@/pages/UserDashboardPage.tsx";
 import LaunchPage from "@/pages/LaunchPage.tsx";
+import ChallengeListPage from "@/pages/Challenges/ChallengeListPage.tsx";
+import {ChallengeForm} from "@/pages/Challenges/ChallengeForm.tsx";
+import ChallengeAttemptPage from "@/pages/Challenges/ChallengeAttemptPage.tsx";
 
 
 function PrivateRoute() {
@@ -63,6 +66,11 @@ export default function App() {
                             <Route path="/user-dashboard" element={<UserDashboardPage />}>
                                 {/*<Route index element={<AdminHome />} /> /!* Create this component *!/*/}
                                 <Route path="progress" element={<ProgressPage />} />
+
+                                <Route path="challenges" element={<ChallengeListPage />} />
+                                <Route path="add-challenges" element={<ChallengeForm />} />
+                                <Route path="challenge-attempt" element={<ChallengeAttemptPage />} />
+
                                 {/*<Route path="posts" element={<PostsPage />} />*/}
                                 {/*<Route path="users" element={<UsersPage />} />*/}
                                 {/*<Route path="settings" element={<SettingsPage />} />*/}

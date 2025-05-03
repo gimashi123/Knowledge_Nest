@@ -63,7 +63,7 @@ export function UserSidebar() {
                         <Button
                             variant="ghost"
                             className="justify-start gap-2"
-                            onClick={() => navigate("/user-dashboard/challenges/create")}
+                            onClick={() => navigate("/user-dashboard/add-challenges")}
                         >
                             <Trophy className="h-4 w-4" />
                             Create Challenge
