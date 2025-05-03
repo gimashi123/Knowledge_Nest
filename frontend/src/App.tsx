@@ -1,4 +1,3 @@
-
 import {
     BrowserRouter,
     Routes,
@@ -14,13 +13,14 @@ import ProfilePage from "@/pages/ProfilePage";
 import OAuthSuccessPage from "@/pages/OAuthSuccessPage";
 import AdminDashboardPage from "@/pages/AdminDashboardPage";
 import AdminProfilePage from "@/pages/AdminProfilePage";
+import AdminPostsPage from "@/pages/AdminPostsPage";
 import { AuthProvider, useAuth } from "@/contexts/auth-context";
-
 
 import {ProgressPage} from "@/pages/authorized/admin/ProgressPage.tsx";
 import {UserDashboardPage} from "@/pages/UserDashboardPage.tsx";
 import LaunchPage from "@/pages/LaunchPage.tsx";
-
+import SkillPostsPage from "@/pages/skillpost/SkillPostsPage";
+import SkillPostDetailPage from "@/pages/skillpost/SkillPostDetailPage";
 
 function PrivateRoute() {
     const { currentUser } = useAuth();
@@ -46,6 +46,14 @@ export default function App() {
                         <Route path="/user-dashboard" element={<UserDashboardPage />} />
                         <Route path="/admin-profile" element={<AdminProfilePage />} />
                         <Route path={'/admin-progress'} element={<ProgressPage/>} />
+                        
+                        {/* Admin Posts Pages */}
+                        <Route path="/admin/posts" element={<AdminPostsPage />} />
+                        <Route path="/admin/posts/:id" element={<AdminPostsPage />} />
+                        
+                        {/* Skill Post Routes */}
+                        <Route path="/skill-posts" element={<SkillPostsPage />} />
+                        <Route path="/skill-posts/:id" element={<SkillPostDetailPage />} />
 
                         <Route element={<PrivateRoute />}>
                             <Route path="/dashboard" element={<Dashboard />} />

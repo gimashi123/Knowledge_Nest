@@ -1,5 +1,5 @@
 // components/sidebar.tsx
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/auth-context";
 import {
@@ -13,7 +13,10 @@ import {
 
 export function AdminSidebar() {
     const navigate = useNavigate();
+    const location = useLocation();
     const { logoutUser, currentUser } = useAuth();
+    
+    const isActive = (path: string) => location.pathname === path;
 
     return (
         <div className="hidden border-r bg-muted/40 md:block w-[220px] fixed left-0 top-0 h-screen">
@@ -27,7 +30,7 @@ export function AdminSidebar() {
                 <div className="flex-1 p-2">
                     <nav className="grid items-start gap-1">
                         <Button
-                            variant="ghost"
+                            variant={isActive("/admin-dashboard/progress") ? "default" : "ghost"}
                             className="justify-start gap-2"
                             onClick={() => navigate("/admin-dashboard/progress")}
                         >
@@ -35,7 +38,7 @@ export function AdminSidebar() {
                             Dashboard
                         </Button>
                         <Button
-                            variant="ghost"
+                            variant={isActive("/admin/posts") ? "default" : "ghost"}
                             className="justify-start gap-2"
                             onClick={() => navigate("/admin/posts")}
                         >
@@ -43,7 +46,7 @@ export function AdminSidebar() {
                             Posts
                         </Button>
                         <Button
-                            variant="ghost"
+                            variant={isActive("/admin/users") ? "default" : "ghost"}
                             className="justify-start gap-2"
                             onClick={() => navigate("/admin/users")}
                         >
@@ -51,7 +54,7 @@ export function AdminSidebar() {
                             Users
                         </Button>
                         <Button
-                            variant="ghost"
+                            variant={isActive("/admin/settings") ? "default" : "ghost"}
                             className="justify-start gap-2"
                             onClick={() => navigate("/admin/settings")}
                         >
