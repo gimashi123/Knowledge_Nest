@@ -36,9 +36,21 @@ export default function SkillPostDetailPage() {
     setIsLoading(true);
     try {
       const fetchedPost = await SkillPostService.getById(id);
+      
+      if (!fetchedPost) {
+        console.error('Fetched post is null or undefined');
+        toast.error('Failed to load post data');
+        navigate('/skill-posts');
+        return;
+      }
+      
       setPost(fetchedPost);
-      setIsLiked(fetchedPost.likedBy.includes(currentUser?.id || ''));
-      setLikesCount(fetchedPost.likes);
+      
+      const likedBy = fetchedPost.likedBy || [];
+      const currentUserId = currentUser?.id || currentUser?.email || '';
+      
+      setIsLiked(currentUserId ? likedBy.includes(currentUserId) : false);
+      setLikesCount(fetchedPost.likes || 0);
     } catch (error) {
       console.error('Error fetching post:', error);
       toast.error('Failed to load post');
@@ -83,12 +95,17 @@ export default function SkillPostDetailPage() {
   };
 
   const handleLike = async () => {
-    if (!id) return;
+    if (!id || !currentUser) return;
     
     try {
       const updatedPost = await SkillPostService.toggleLike(id);
-      setIsLiked(updatedPost.likedBy.includes(currentUser?.id || ''));
-      setLikesCount(updatedPost.likes);
+      
+      // Add safe null checks when accessing properties
+      const likedBy = updatedPost.likedBy || [];
+      const currentUserId = currentUser.id || currentUser.email || '';
+      
+      setIsLiked(likedBy.includes(currentUserId));
+      setLikesCount(updatedPost.likes || 0);
       setPost(updatedPost);
     } catch (error) {
       console.error('Error toggling like:', error);
@@ -116,6 +133,31 @@ export default function SkillPostDetailPage() {
   };
 
   const isOwner = post?.userId === currentUser?.id;
+
+  // Safe render helper for content
+  const renderContent = () => {
+    if (!post.content) return <p className="text-muted-foreground">No content available</p>;
+    
+    return post.content.split('\n').map((paragraph, index) => (
+      paragraph ? <p key={index}>{paragraph}</p> : null
+    ));
+  };
+
+  // Safe render helper for tags
+  const renderTags = () => {
+    const tags = post.tags || [];
+    if (tags.length === 0) return null;
+    
+    return (
+      <div className="flex flex-wrap gap-2 pt-4">
+        {tags.map((tag) => (
+          <Badge key={tag} variant="secondary">
+            #{tag}
+          </Badge>
+        ))}
+      </div>
+    );
+  };
 
   if (isLoading) {
     return (
@@ -204,20 +246,10 @@ export default function SkillPostDetailPage() {
           <p className="text-muted-foreground">{post.description}</p>
           
           <div className="prose max-w-none">
-            {post.content.split('\n').map((paragraph, index) => (
-              <p key={index}>{paragraph}</p>
-            ))}
+            {renderContent()}
           </div>
           
-          {post.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 pt-4">
-              {post.tags.map((tag) => (
-                <Badge key={tag} variant="secondary">
-                  #{tag}
-                </Badge>
-              ))}
-            </div>
-          )}
+          {renderTags()}
         </CardContent>
         
         <CardFooter className="flex justify-between py-4 border-t">

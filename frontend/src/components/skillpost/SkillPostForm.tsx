@@ -95,8 +95,18 @@ export function SkillPostForm({ post, onSubmit, onCancel, isSubmitting }: SkillP
             <Label htmlFor="description">Description</Label>
             <Input
               id="description"
-              placeholder="Brief description of your post"
-              {...register("description", { required: "Description is required" })}
+              placeholder="Brief description of your post (min 10 characters)"
+              {...register("description", { 
+                required: "Description is required",
+                minLength: {
+                  value: 10,
+                  message: "Description must be at least 10 characters long"
+                },
+                maxLength: {
+                  value: 500,
+                  message: "Description must be less than 500 characters"
+                }
+              })}
             />
             {errors.description && (
               <p className="text-sm text-destructive">{errors.description.message}</p>

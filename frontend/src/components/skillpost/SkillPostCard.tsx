@@ -19,10 +19,19 @@ interface SkillPostCardProps {
 
 export function SkillPostCard({ post, onEdit, onDelete, currentUserId, adminView = false }: SkillPostCardProps) {
   const navigate = useNavigate();
-  const [isLiked, setIsLiked] = useState(post.likedBy.includes(currentUserId));
-  const [likesCount, setLikesCount] = useState(post.likes);
   
-  const isOwner = post.userId === currentUserId;
+  // Safe check for likedBy array - if it's undefined or null, default to an empty array
+  const likedBy = post.likedBy || [];
+  
+  // Safe check for currentUserId being valid before checking includes
+  const [isLiked, setIsLiked] = useState(
+    currentUserId ? likedBy.includes(currentUserId) : false
+  );
+  
+  const [likesCount, setLikesCount] = useState(post.likes || 0);
+  
+  // Safe check for userId comparison
+  const isOwner = currentUserId && post.userId === currentUserId;
   
   const formattedDate = post.createdAt ? 
     formatDistanceToNow(new Date(post.createdAt), { addSuffix: true }) : 
@@ -30,10 +39,15 @@ export function SkillPostCard({ post, onEdit, onDelete, currentUserId, adminView
   
   const handleLike = async (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card click when liking
+    
+    // Don't allow likes if there's no current user
+    if (!currentUserId) return;
+    
     try {
       const updatedPost = await SkillPostService.toggleLike(post.id);
-      setIsLiked(updatedPost.likedBy.includes(currentUserId));
-      setLikesCount(updatedPost.likes);
+      // Safe check when updating like status
+      setIsLiked(updatedPost.likedBy ? updatedPost.likedBy.includes(currentUserId) : false);
+      setLikesCount(updatedPost.likes || 0);
     } catch (error) {
       console.error('Error toggling like:', error);
     }
@@ -103,7 +117,7 @@ export function SkillPostCard({ post, onEdit, onDelete, currentUserId, adminView
         <p className="text-sm text-muted-foreground mb-4">{post.description}</p>
         <div className="line-clamp-3 text-sm mb-4">{post.content}</div>
         
-        {post.tags.length > 0 && (
+        {(post.tags && post.tags.length > 0) && (
           <div className="flex flex-wrap gap-2 mt-3">
             {post.tags.map((tag) => (
               <Badge key={tag} variant="secondary">
@@ -128,7 +142,7 @@ export function SkillPostCard({ post, onEdit, onDelete, currentUserId, adminView
           
           <Button variant="ghost" size="sm" className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
             <MessageCircleIcon className="h-4 w-4" />
-            <span>{post.comments.length}</span>
+            <span>{post.comments?.length || 0}</span>
           </Button>
         </div>
         

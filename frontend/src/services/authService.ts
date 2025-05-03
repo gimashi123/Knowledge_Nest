@@ -21,6 +21,18 @@ export const register = async (name: string, email: string, password: string) =>
   return response.data;
 };
 
+// Get current user details
+export const getCurrentUser = async (): Promise<User> => {
+  try {
+    const response = await api.get("/api/auth/me");
+    // Assuming the API returns the user object directly
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching current user:", error);
+    throw error;
+  }
+};
+
 /*
 export const getCurrentUser = async () => {
   const response = await axios.get(`${API}/me`, {

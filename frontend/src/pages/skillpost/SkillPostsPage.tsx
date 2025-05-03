@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth-context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogTrigger, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { SkillPostCard } from '@/components/skillpost/SkillPostCard';
 import { SkillPostForm } from '@/components/skillpost/SkillPostForm';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -12,6 +12,7 @@ import { SkillPostService } from '@/services/skillPostService';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { toast } from 'sonner';
+import { ErrorBoundary } from 'react-error-boundary';
 
 interface SkillPostsPageProps {
   adminView?: boolean;
@@ -20,16 +21,35 @@ interface SkillPostsPageProps {
 // Helper to safely get user ID
 const getUserId = (user: any): string => {
   if (!user) return '';
-  
-  // Check if user has an id property
-  if (typeof user === 'object' && user !== null) {
-    if ('id' in user) return String(user.id);
-    // Some auth systems use _id instead of id
-    if ('_id' in user) return String(user._id);
-    // Email can be used as identifier if id is not available
-    if ('email' in user) return String(user.email);
+
+  // When user object is available, log it for debugging
+  if (user) {
+    console.log('Current user object:', user);
   }
   
+  // Check for different potential ID fields
+  if (typeof user === 'object' && user !== null) {
+    // First try actual ID if available (this would be the MongoDB ObjectId)
+    if ('id' in user && user.id) {
+      console.log('Using user.id as userId:', user.id);
+      return String(user.id);
+    }
+    
+    // Next try MongoDB's _id format
+    if ('_id' in user && user._id) {
+      console.log('Using user._id as userId:', user._id);
+      return String(user._id);
+    }
+    
+    // Finally fall back to email if that's all we have
+    // This works with the current backend implementation
+    if ('email' in user && user.email) {
+      console.log('Using user.email as userId:', user.email);
+      return String(user.email);
+    }
+  }
+  
+  console.warn('No valid user ID found in user object:', user);
   return '';
 };
 
@@ -58,13 +78,17 @@ export default function SkillPostsPage({ adminView = false }: SkillPostsPageProp
     try {
       let response;
       
+      console.log('Fetching posts for tab:', tab, 'User ID:', userId);
+      
       switch (tab) {
         case 'trending':
           response = await SkillPostService.getTrending(page);
           break;
         case 'my-posts':
           if (userId) {
+            console.log('Fetching my posts with userId:', userId);
             response = await SkillPostService.getByUser(userId, page);
+            console.log('My posts response:', response);
           } else {
             // If no user is logged in, show empty result
             response = { content: [], totalPages: 0, totalElements: 0, number: 0, size: 10 };
@@ -118,13 +142,42 @@ export default function SkillPostsPage({ adminView = false }: SkillPostsPageProp
   const handleCreatePost = async (data: SkillPostRequest) => {
     setIsSubmitting(true);
     try {
-      await SkillPostService.create(data);
+      console.log('Submitting post data:', data);
+      
+      // Ensure all required fields are present
+      if (!data.title || !data.description || !data.content || !data.tags || data.tags.length === 0) {
+        toast.error('Please fill in all required fields');
+        setIsSubmitting(false);
+        return;
+      }
+      
+      // Enforce description length requirements
+      if (data.description.length < 10) {
+        toast.error('Description must be at least 10 characters long');
+        setIsSubmitting(false);
+        return;
+      }
+      
+      const createdPost = await SkillPostService.create(data);
+      console.log('Post created successfully:', createdPost);
+      
       toast.success('Post created successfully!');
       setIsFormOpen(false);
-      fetchPosts(currentPage);
-    } catch (error) {
+      
+      // Switch to My Posts tab and refresh posts
+      setActiveTab('my-posts');
+      fetchPosts(0, 'my-posts');
+    } catch (error: any) {
       console.error('Error creating post:', error);
-      toast.error('Failed to create post');
+      
+      // Show more specific error message based on the error
+      if (error.message && error.message.includes('Description must be')) {
+        toast.error(error.message);
+      } else if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error('Failed to create post: ' + (error.message || 'Unknown error'));
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -185,21 +238,84 @@ export default function SkillPostsPage({ adminView = false }: SkillPostsPageProp
       );
     } 
     
-    if (posts.length > 0) {
+    if (!posts) {
+      console.error('Posts array is undefined');
       return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {posts.map((post) => (
-            <SkillPostCard
-              key={post.id}
-              post={post}
-              onEdit={openEditDialog}
-              onDelete={(id) => setDeletingPostId(id)}
-              currentUserId={userId}
-              adminView={adminView}
-            />
-          ))}
+        <div className="text-center p-8">
+          <h3 className="text-xl font-medium">Error loading posts</h3>
+          <p className="text-muted-foreground mt-2">
+            There was an error loading the posts. Please try again.
+          </p>
+          <Button onClick={() => fetchPosts(currentPage)} className="mt-4">
+            Retry
+          </Button>
         </div>
       );
+    }
+    
+    if (posts.length > 0) {
+      try {
+        // Validate posts before rendering to catch errors
+        const validPosts = posts.filter(post => {
+          // Check if post has all required fields
+          const isValid = post && 
+            typeof post === 'object' && 
+            post.id && 
+            post.title && 
+            post.description;
+          
+          if (!isValid) {
+            console.error('Invalid post object detected:', post);
+          }
+          
+          return isValid;
+        });
+        
+        if (validPosts.length === 0) {
+          return (
+            <div className="text-center p-8">
+              <h3 className="text-xl font-medium">No valid posts found</h3>
+              <p className="text-muted-foreground mt-2">
+                There was an issue with the post data. Please try refreshing.
+              </p>
+            </div>
+          );
+        }
+        
+        return (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {validPosts.map((post) => (
+              <ErrorBoundary
+                key={post.id}
+                fallback={
+                  <div className="border p-4 rounded-lg shadow-sm">
+                    <p className="text-destructive">Error rendering this post</p>
+                  </div>
+                }
+              >
+                <SkillPostCard
+                  key={post.id}
+                  post={post}
+                  onEdit={openEditDialog}
+                  onDelete={(id) => setDeletingPostId(id)}
+                  currentUserId={userId}
+                  adminView={adminView}
+                />
+              </ErrorBoundary>
+            ))}
+          </div>
+        );
+      } catch (error) {
+        console.error('Error rendering posts:', error);
+        return (
+          <div className="text-center p-8">
+            <h3 className="text-xl font-medium">Error rendering posts</h3>
+            <p className="text-muted-foreground mt-2">
+              There was an error displaying the posts. Please try again.
+            </p>
+          </div>
+        );
+      }
     }
     
     return (
@@ -305,6 +421,11 @@ export default function SkillPostsPage({ adminView = false }: SkillPostsPageProp
           </DialogTrigger>
           <DialogContent className="sm:max-w-[600px]">
             <DialogTitle>{editingPost ? 'Edit Skill Post' : 'Create New Skill Post'}</DialogTitle>
+            <DialogDescription>
+              {editingPost 
+                ? 'Update your skill post details below.' 
+                : 'Share your knowledge with the community by creating a new skill post.'}
+            </DialogDescription>
             <SkillPostForm
               post={editingPost || undefined}
               onSubmit={editingPost ? handleUpdatePost : handleCreatePost}

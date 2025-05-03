@@ -9,6 +9,9 @@ axios.interceptors.request.use(
     const token = localStorage.getItem('accessToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      console.log(`Adding auth token to request: ${config.method?.toUpperCase()} ${config.url}`);
+    } else {
+      console.warn(`No auth token found for request: ${config.method?.toUpperCase()} ${config.url}`);
     }
     return config;
   },
@@ -56,8 +59,11 @@ const MOCK_DATA: SkillPost[] = [
 ];
 
 // A flag to determine whether to use the mock service or real API
-// Set to true to use mock data, false to use real API
-const USE_MOCK = true;
+// Set to false to use real API, true to use mock data
+const USE_MOCK = false;
+
+// Log which mode we're using
+console.log('SkillPostService using ' + (USE_MOCK ? 'MOCK' : 'REAL API') + ' mode');
 
 // Mock service implementation
 const MockSkillPostService = {
@@ -82,6 +88,8 @@ const MockSkillPostService = {
   },
   
   create: async (post: SkillPostRequest): Promise<SkillPost> => {
+    console.log('MOCK SERVICE: Creating a new post with data:', post);
+    
     // Try to get the current user info from localStorage
     let userId = 'current-user';
     let userName = 'currentuser';
@@ -90,11 +98,16 @@ const MockSkillPostService = {
       const userStr = localStorage.getItem('user');
       if (userStr) {
         const user = JSON.parse(userStr);
-        userId = user.id || user._id || user.email || userId;
+        // Prioritize id over email to match backend behavior
+        userId = user.id || user.email || userId;
         userName = user.name || user.userName || userName;
+        
+        console.log('MOCK SERVICE: Creating post with user ID:', userId, 'User name:', userName);
+      } else {
+        console.warn('MOCK SERVICE: No user found in localStorage when creating post');
       }
     } catch (error) {
-      console.error('Error parsing user from localStorage:', error);
+      console.error('MOCK SERVICE: Error parsing user from localStorage:', error);
     }
     
     const newPost: SkillPost = {
@@ -109,6 +122,7 @@ const MockSkillPostService = {
       comments: []
     };
     
+    console.log('MOCK SERVICE: Created new mock post:', newPost);
     MOCK_DATA.unshift(newPost);
     return newPost;
   },
@@ -136,7 +150,21 @@ const MockSkillPostService = {
   
   // Implement other methods similar to the real service but using MOCK_DATA
   getByUser: async (userId: string, page = 0, size = 10): Promise<SkillPostResponse> => {
-    const filtered = MOCK_DATA.filter(p => p.userId === userId);
+    console.log('MOCK SERVICE: Fetching posts for user ID:', userId);
+    // When in fallback mode, see what user posts exist in MOCK_DATA
+    console.log('Available mock posts:', MOCK_DATA.map(post => ({ id: post.id, userId: post.userId, title: post.title })));
+    
+    // Filter posts by the provided userId
+    const filtered = MOCK_DATA.filter(p => {
+      const matchesUserId = p.userId === userId;
+      if (matchesUserId) {
+        console.log('Found matching post for userId', userId, ':', p.title);
+      }
+      return matchesUserId;
+    });
+    
+    console.log(`MOCK SERVICE: Found ${filtered.length} posts for user ${userId}`);
+    
     const start = page * size;
     const end = start + size;
     const paginatedData = filtered.slice(start, end);
@@ -274,13 +302,38 @@ export const SkillPostService = USE_MOCK ? MockSkillPostService : {
   // Get all posts with pagination
   getAll: async (page = 0, size = 10, sortBy = 'createdAt', sortDir = 'desc'): Promise<SkillPostResponse> => {
     try {
+      console.log(`Fetching all posts - page: ${page}, size: ${size}, sortBy: ${sortBy}, sortDir: ${sortDir}`);
       const response = await axios.get(
         `${API_URL}?page=${page}&size=${size}&sortBy=${sortBy}&sortDir=${sortDir}`
       );
-      return response.data;
-    } catch (error) {
+      
+      // Validate response structure
+      const data = response.data;
+      if (!data.content || !Array.isArray(data.content)) {
+        console.error('Response data structure is not as expected:', data);
+        // Return a valid empty response structure
+        return {
+          content: [],
+          totalElements: 0,
+          totalPages: 0,
+          number: page,
+          size: size
+        };
+      }
+      
+      console.log(`Retrieved ${data.content.length} posts out of ${data.totalElements} total`);
+      return data;
+    } catch (error: any) {
       console.error('Error fetching skill posts:', error);
+      console.error('Error details:', {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+        url: `${API_URL}?page=${page}&size=${size}&sortBy=${sortBy}&sortDir=${sortDir}`
+      });
+      
       // Fallback to mock if real API fails
+      console.log('Falling back to mock service for getAll');
       return MockSkillPostService.getAll(page, size);
     }
   },
@@ -300,11 +353,70 @@ export const SkillPostService = USE_MOCK ? MockSkillPostService : {
   // Create new post
   create: async (post: SkillPostRequest): Promise<SkillPost> => {
     try {
-      const response = await axios.post(API_URL, post);
+      // Log that we're about to create a post
+      console.log('Creating new post with data:', post);
+      
+      // Validate required fields before sending
+      if (!post.title) {
+        console.error('Post title is missing or empty');
+        throw new Error('Title is required');
+      }
+      
+      if (!post.description || post.description.length < 10) {
+        console.error('Post description is too short (minimum 10 characters)');
+        throw new Error('Description must be at least 10 characters long');
+      }
+      
+      if (!post.content) {
+        console.error('Post content is missing or empty');
+        throw new Error('Content is required');
+      }
+      
+      if (!post.tags || post.tags.length === 0) {
+        console.error('Post tags are missing');
+        throw new Error('At least one tag is required');
+      }
+      
+      // Get auth token to confirm it's available
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        console.warn('No auth token found when creating post - this may cause authorization errors');
+      }
+      
+      // Make the API call with the token
+      const response = await axios.post(API_URL, post, {
+        headers: {
+          'Authorization': `Bearer ${token || ''}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      console.log('Post created successfully, response:', response.data);
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating skill post:', error);
+      
+      // Show more detailed error information
+      if (error.response) {
+        console.error('Error response status:', error.response.status);
+        console.error('Error response data:', error.response.data);
+        
+        // Extract validation errors if available
+        const validationErrors = error.response?.data?.fieldErrors || 
+                                 error.response?.data?.errors ||
+                                 error.response?.data?.message;
+        if (validationErrors) {
+          console.error('Validation errors:', validationErrors);
+        }
+      }
+      
+      // Check if this is an auth error
+      if (error.response?.status === 403 || error.response?.status === 401) {
+        console.error('Authentication error - check that you are logged in and your token is valid');
+      }
+      
       // Fallback to mock if real API fails
+      console.log('Falling back to mock service for post creation');
       return MockSkillPostService.create(post);
     }
   },
@@ -346,11 +458,56 @@ export const SkillPostService = USE_MOCK ? MockSkillPostService : {
   // Get posts by user
   getByUser: async (userId: string, page = 0, size = 10): Promise<SkillPostResponse> => {
     try {
+      console.log(`Making API call to get posts for user: ${userId}`);
+      
+      if (!userId) {
+        console.error('Cannot fetch posts for undefined userId');
+        throw new Error('User ID is required to fetch posts');
+      }
+      
+      // Make the API call with explicit logging
+      console.log(`GET ${API_URL}/user/${userId}?page=${page}&size=${size}`);
       const response = await axios.get(`${API_URL}/user/${userId}?page=${page}&size=${size}`);
+      
+      // Verify the response structure is correct
+      const data = response.data;
+      console.log('Response data structure:', {
+        hasContent: Array.isArray(data.content),
+        totalElements: data.totalElements,
+        totalPages: data.totalPages,
+        number: data.number,
+        size: data.size
+      });
+      
+      if (!data.content || !Array.isArray(data.content)) {
+        console.error('Response does not contain the expected content array:', data);
+        // Provide a valid response structure even if the backend didn't
+        return {
+          content: [],
+          totalElements: 0,
+          totalPages: 0,
+          number: page,
+          size: size
+        };
+      }
+      
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Error fetching skill posts for user ${userId}:`, error);
+      console.error('Error details:', {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+        url: `${API_URL}/user/${userId}?page=${page}&size=${size}`
+      });
+      
+      // Check if it's due to user token not having access
+      if (error.response?.status === 403) {
+        console.warn('Access forbidden - may be an authentication issue');
+      }
+      
       // Fallback to mock if real API fails
+      console.log('Falling back to mock service for getByUser');
       return MockSkillPostService.getByUser(userId, page, size);
     }
   },
