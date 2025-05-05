@@ -22,36 +22,36 @@ interface SkillPostsPageProps {
 
 // Helper to safely get user ID
 const getUserId = (user: any): string => {
-  if (!user) return '';
+  if (!user) {
+    console.warn('No user object provided to getUserId');
+    return '';
+  }
 
   // When user object is available, log it for debugging
-  if (user) {
-    console.log('Current user object:', user);
-  }
+  console.log('Current user object:', user);
   
   // Check for different potential ID fields
   if (typeof user === 'object' && user !== null) {
-    // First try actual ID if available (this would be the MongoDB ObjectId)
+    // First try MongoDB ID which should be the primary choice
     if ('id' in user && user.id) {
-      console.log('Using user.id as userId:', user.id);
+      console.log('Using MongoDB ID as userId:', user.id);
       return String(user.id);
     }
     
-    // Next try MongoDB's _id format
+    // Next try MongoDB's _id format (fallback)
     if ('_id' in user && user._id) {
-      console.log('Using user._id as userId:', user._id);
+      console.log('Using MongoDB _id as userId:', user._id);
       return String(user._id);
     }
     
-    // Finally fall back to email if that's all we have
-    // This works with the current backend implementation
+    // Last resort: use email (this shouldn't be necessary after our fixes)
     if ('email' in user && user.email) {
-      console.log('Using user.email as userId:', user.email);
+      console.warn('Falling back to email as userId - this is not optimal:', user.email);
       return String(user.email);
     }
   }
   
-  console.warn('No valid user ID found in user object:', user);
+  console.error('No valid user ID found in user object:', user);
   return '';
 };
 
@@ -99,6 +99,19 @@ export default function SkillPostsPage({ adminView = false }: SkillPostsPageProp
             console.log('Fetching my posts with userId:', userId);
             response = await SkillPostService.getByUser(userId, page);
             console.log('My posts response:', response);
+            // Log details about the posts for debugging
+            if (response && response.content) {
+              console.log(`Retrieved ${response.content.length} posts for user ID ${userId}`);
+              // Check if any posts match our user ID
+              const matchingPosts = response.content.filter(post => post.userId === userId);
+              console.log(`${matchingPosts.length} posts have matching userId`);
+              
+              // If there's a mismatch, check what userIds are in the posts
+              if (matchingPosts.length !== response.content.length) {
+                const uniqueUserIds = [...new Set(response.content.map(post => post.userId))];
+                console.log('Post userIds in response:', uniqueUserIds);
+              }
+            }
           } else {
             // If no user is logged in, show empty result
             response = { content: [], totalPages: 0, totalElements: 0, number: 0, size: 10 };

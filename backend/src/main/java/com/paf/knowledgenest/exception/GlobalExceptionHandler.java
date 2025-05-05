@@ -1,6 +1,7 @@
 package com.paf.knowledgenest.exception;
 
 import com.paf.knowledgenest.utils.ApiResponse;
+import org.springframework.data.mongodb.UncategorizedMongoDbException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -58,11 +59,25 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.errorResponse("Validation failed", errors));
     }
 
-    @ExceptionHandler(Exception.class)
+    @ExceptionHandler(UncategorizedMongoDbException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ResponseEntity<ApiResponse<String>> handleGenericException(Exception ex) {
+    public ResponseEntity<ApiResponse<String>> handleMongoDbException(UncategorizedMongoDbException ex) {
+        // Log the detailed exception for debugging
+        ex.printStackTrace();
+        
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.errorResponse("An unexpected error occurred: " + ex.getMessage()));
+                .body(ApiResponse.errorResponse("Database connection error. Please try again later."));
+    }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ResponseEntity<ApiResponse<String>> handleGeneralException(Exception ex) {
+        // Log the detailed exception for debugging
+        ex.printStackTrace();
+        
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.errorResponse("An unexpected error occurred. Please try again later."));
     }
 } 

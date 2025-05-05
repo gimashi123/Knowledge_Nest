@@ -68,9 +68,10 @@ public class AuthController {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         
-        // Create a response with properly formatted role
+        // Create a response with properly formatted role and user ID
         com.paf.knowledgenest.dto.response.UserResponse userResponse = 
             com.paf.knowledgenest.dto.response.UserResponse.builder()
+                .id(user.getId())  // Include MongoDB ID 
                 .name(user.getName())
                 .email(user.getEmail())
                 .role("ROLE_" + user.getRole())

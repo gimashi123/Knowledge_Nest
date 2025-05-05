@@ -42,27 +42,31 @@ public class AuthService {
     }
 
     public ApiResponse<String> registerUser(RegisterRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
-            return ApiResponse.errorResponse("Email address already in use.");
+        try {
+            if (userRepository.existsByEmail(request.getEmail())) {
+                return ApiResponse.errorResponse("Email address already in use.");
+            }
+
+            String hashedPassword = passwordEncoder.encode(request.getPassword());
+
+            User user = new User();
+            user.setEmail(request.getEmail());
+            user.setPassword(hashedPassword);
+            user.setName(request.getName());
+
+            if(request.getRole() != null) {
+                user.setRole(request.getRole());
+            } else {
+                user.setRole("USER");
+            }
+
+            // Save user once
+            User savedUser = userRepository.save(user);
+            return ApiResponse.successResponse("User Registered Successfully", jwtUtils.generateToken(savedUser.getEmail()));
+        } catch (Exception e) {
+            log.error("Error registering user: {}", e.getMessage(), e);
+            return ApiResponse.errorResponse("Registration failed. Please try again later.");
         }
-
-        String hashedPassword = passwordEncoder.encode(request.getPassword());
-
-        User user = new User();
-        user.setEmail(request.getEmail());
-        user.setPassword(hashedPassword);
-        user.setName(request.getName());
-
-        if(request.getRole() != null) {
-            user.setRole(request.getRole());
-        } else {
-            user.setRole("USER");
-        }
-
-        userRepository.save(user);
-
-        userRepository.save(user);
-         return ApiResponse.successResponse("User Registered Successfully", jwtUtils.generateToken(user.getEmail()));
     }
 
     public ApiResponse<LoginResponse> loginUser(LoginRequest request) {
@@ -96,6 +100,7 @@ public class AuthService {
             LoginResponse loginResponse = LoginResponse.builder()
                     .accessToken(token)
                     .user(UserResponse.builder()
+                          .id(user.getId())
                           .role("ROLE_" + user.getRole())  // Ensure ROLE_ prefix is added
                           .email(user.getEmail())
                           .name(user.getName())
