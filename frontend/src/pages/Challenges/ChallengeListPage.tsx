@@ -111,8 +111,8 @@ export default function ChallengeListPage() {
                         </CardHeader>
                         <CardContent>
                             <div className="flex justify-between items-center">
-                                <Button asChild variant="outline">
-                                    <Link to={`/challenges/${challenge.id}/attempt`}>Attempt</Link>
+                                <Button asChild variant="outline" onClick={() => navigate(`/${challenge.id}/attempt`)}>
+                                    <Link to={`/challenge-attempt/${challenge.id}/attempt`}>Attempt</Link>
                                 </Button>
                                 <Button asChild variant="ghost">
                                     <Link to={`/challenges/${challenge.id}`}>Details</Link>

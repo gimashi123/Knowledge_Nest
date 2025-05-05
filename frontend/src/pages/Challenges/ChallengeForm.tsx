@@ -175,7 +175,10 @@ export function ChallengeForm({ initialData }: ChallengeFormProps) {
                         >
                             Cancel
                         </Button>
-                        <Button type="submit">
+                        <Button
+                            type="submit"
+                            onClick={()=>navigate('/user-dashboard/challenges')}
+                        >
                             {initialData ? 'Update Challenge' : 'Create Challenge'}
                         </Button>
                     </div>

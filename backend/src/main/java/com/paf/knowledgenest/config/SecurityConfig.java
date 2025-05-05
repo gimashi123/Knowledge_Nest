@@ -42,6 +42,7 @@ public class SecurityConfig {
 //                .securityMatcher("/**") removed this for a test
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/challenges/**").permitAll() // new - challenges
                         .requestMatchers("/api/skill-posts/**").authenticated()
                         .anyRequest().authenticated()
                 )
