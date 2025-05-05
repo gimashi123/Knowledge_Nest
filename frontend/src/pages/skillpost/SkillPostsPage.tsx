@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/auth-context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } 
 import { SkillPostCard } from '@/components/skillpost/SkillPostCard';
 import { SkillPostForm } from '@/components/skillpost/SkillPostForm';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { PlusIcon, SearchIcon, ChevronLeftIcon, ChevronRightIcon, X } from 'lucide-react';
+import { PlusIcon, SearchIcon, ChevronLeftIcon, ChevronRightIcon, X, Filter, Check } from 'lucide-react';
 import { SkillPost, SkillPostRequest } from '@/types/skillpost';
 import { SkillPostService } from '@/services/skillPostService';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -15,6 +15,13 @@ import { toast } from 'sonner';
 import { ErrorBoundary } from 'react-error-boundary';
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { 
+  Popover,
+  PopoverContent,
+  PopoverTrigger 
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { Command, CommandGroup, CommandItem, CommandList, CommandInput } from "@/components/ui/command";
 
 interface SkillPostsPageProps {
   adminView?: boolean;
@@ -75,6 +82,10 @@ export default function SkillPostsPage({ adminView = false }: SkillPostsPageProp
   const [selectedPostIds, setSelectedPostIds] = useState<string[]>([]);
   const [isBatchDeleteDialogOpen, setIsBatchDeleteDialogOpen] = useState(false);
   const [isBatchSelectionMode, setIsBatchSelectionMode] = useState(false);
+
+  const [availableTags, setAvailableTags] = useState<string[]>([]);
+  const [tagSearchValue, setTagSearchValue] = useState('');
+  const [isTagPopoverOpen, setIsTagPopoverOpen] = useState(false);
 
   const userId = getUserId(currentUser);
   
@@ -162,6 +173,17 @@ export default function SkillPostsPage({ adminView = false }: SkillPostsPageProp
     fetchPosts(0, 'search');
   };
 
+  // Function to refresh available tags
+  const refreshTags = async () => {
+    try {
+      const tags = await SkillPostService.getAllTags();
+      setAvailableTags(tags);
+      console.log('Tags refreshed:', tags);
+    } catch (error) {
+      console.error('Error refreshing tags:', error);
+    }
+  };
+
   const handleCreatePost = async (data: SkillPostRequest) => {
     setIsSubmitting(true);
     try {
@@ -186,6 +208,9 @@ export default function SkillPostsPage({ adminView = false }: SkillPostsPageProp
       
       toast.success('Post created successfully!');
       setIsFormOpen(false);
+      
+      // Refresh the tags list to include any new tags from the created post
+      await refreshTags();
       
       // Switch to My Posts tab and refresh posts
       setActiveTab('my-posts');
@@ -215,6 +240,10 @@ export default function SkillPostsPage({ adminView = false }: SkillPostsPageProp
       toast.success('Post updated successfully!');
       setIsFormOpen(false);
       setEditingPost(null);
+      
+      // Refresh tags after updating a post in case tags were changed
+      await refreshTags();
+      
       fetchPosts(currentPage);
     } catch (error) {
       console.error('Error updating post:', error);
@@ -540,6 +569,154 @@ export default function SkillPostsPage({ adminView = false }: SkillPostsPageProp
     );
   };
 
+  // Fetch all available tags when the component mounts
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const tags = await SkillPostService.getAllTags();
+        setAvailableTags(tags);
+        console.log('Available tags loaded:', tags);
+      } catch (error) {
+        console.error('Error fetching tags:', error);
+      }
+    };
+    
+    fetchTags();
+  }, []);
+  
+  // Filter the available tags based on search input
+  const filteredTags = tagSearchValue
+    ? availableTags.filter(tag => 
+        tag.toLowerCase().includes(tagSearchValue.toLowerCase()))
+    : availableTags;
+  
+  // Toggle tag selection
+  const toggleTag = (tag: string) => {
+    setSelectedTags(prev => {
+      if (prev.includes(tag)) {
+        return prev.filter(t => t !== tag);
+      } else {
+        return [...prev, tag];
+      }
+    });
+  };
+  
+  // Apply tag filters when selected tags change
+  useEffect(() => {
+    if (selectedTags.length > 0) {
+      fetchPostsByTags(selectedTags);
+    } else if (activeTab === 'all') {
+      fetchPosts(0, 'all');
+    }
+  }, [selectedTags]);
+
+  // Render tag filtering UI
+  const renderTagFilter = () => {
+    return (
+      <div className="flex flex-wrap items-start gap-3 my-4">
+        <Popover open={isTagPopoverOpen} onOpenChange={setIsTagPopoverOpen}>
+          <PopoverTrigger asChild>
+            <Button 
+              variant="outline" 
+              className="flex items-center gap-2 pl-3"
+              aria-expanded={isTagPopoverOpen}
+            >
+              <Filter className="h-4 w-4" />
+              <span>Filter by Tags</span>
+              {selectedTags.length > 0 && (
+                <Badge variant="secondary" className="ml-2 px-1 font-normal rounded-full">
+                  {selectedTags.length}
+                </Badge>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[300px] p-0" align="start">
+            <Command className="rounded-lg border shadow-md">
+              <CommandInput 
+                placeholder="Search for tags..." 
+                value={tagSearchValue} 
+                onValueChange={setTagSearchValue}
+              />
+              <CommandList className="max-h-[300px] overflow-auto">
+                <CommandGroup heading="Available Tags">
+                  {filteredTags.length > 0 ? (
+                    filteredTags.map(tag => (
+                      <CommandItem
+                        key={tag}
+                        onSelect={() => toggleTag(tag)}
+                        className="flex items-center gap-2 cursor-pointer"
+                      >
+                        <div className="flex items-center gap-2 flex-1">
+                          <Checkbox 
+                            id={`tag-${tag}`}
+                            checked={selectedTags.includes(tag)}
+                            onCheckedChange={() => toggleTag(tag)}
+                          />
+                          <label htmlFor={`tag-${tag}`} className="flex-1 cursor-pointer">
+                            {tag}
+                          </label>
+                        </div>
+                        {selectedTags.includes(tag) && (
+                          <Check className="h-4 w-4 text-primary ml-auto" />
+                        )}
+                      </CommandItem>
+                    ))
+                  ) : (
+                    <div className="py-6 text-center text-sm text-muted-foreground">
+                      {tagSearchValue ? 'No matching tags found.' : 'No tags available.'}
+                    </div>
+                  )}
+                </CommandGroup>
+              </CommandList>
+              {selectedTags.length > 0 && (
+                <div className="p-2 border-t">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="w-full text-xs justify-center"
+                    onClick={() => setSelectedTags([])}
+                  >
+                    Clear All Selections
+                  </Button>
+                </div>
+              )}
+            </Command>
+          </PopoverContent>
+        </Popover>
+        
+        {/* Display selected tags */}
+        {selectedTags.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2 flex-1">
+            <span className="text-sm font-medium text-muted-foreground">Active filters:</span>
+            {selectedTags.map(tag => (
+              <Badge 
+                key={tag} 
+                variant="secondary"
+                className="flex items-center gap-1 px-2 py-1"
+              >
+                {tag}
+                <X 
+                  className="h-3 w-3 ml-1 cursor-pointer" 
+                  onClick={() => handleRemoveTag(tag)} 
+                />
+              </Badge>
+            ))}
+            {selectedTags.length > 1 && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-7 px-2 text-xs"
+                onClick={() => setSelectedTags([])}
+              >
+                Clear All
+              </Button>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -584,31 +761,8 @@ export default function SkillPostsPage({ adminView = false }: SkillPostsPageProp
         </form>
       </div>
       
-      {/* Tag filter input */}
-      <div className="flex items-center mb-4">
-        <Input
-          placeholder="Add a tag..."
-          value={tagInput}
-          onChange={(e) => setTagInput(e.target.value)}
-          onKeyDown={handleTagKeyDown}
-          className="w-full md:w-[300px]"
-        />
-        <Button onClick={handleAddTag} className="ml-2">
-          Add Tag
-        </Button>
-      </div>
-      
-      {/* Display selected tags */}
-      {selectedTags.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-4">
-          {selectedTags.map((tag) => (
-            <Badge key={tag} className="flex items-center gap-1">
-              {tag}
-              <X className="h-4 w-4 cursor-pointer" onClick={() => handleRemoveTag(tag)} />
-            </Badge>
-          ))}
-        </div>
-      )}
+      {/* Tag filtering component */}
+      {renderTagFilter()}
       
       <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList className="mb-4">

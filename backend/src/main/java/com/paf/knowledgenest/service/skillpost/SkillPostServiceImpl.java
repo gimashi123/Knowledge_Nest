@@ -292,4 +292,27 @@ public class SkillPostServiceImpl implements SkillPostService {
         
         return new PageImpl<>(responses, postPage.getPageable(), postPage.getTotalElements());
     }
+
+    @Override
+    public List<String> getAllUniqueTags() {
+        // Get all skill posts
+        List<SkillPost> allPosts = skillPostRepository.findAll();
+        
+        // Extract all tags and collect them into a set to ensure uniqueness
+        Set<String> uniqueTags = new HashSet<>();
+        
+        System.out.println("Collecting tags from " + allPosts.size() + " posts");
+        for (SkillPost post : allPosts) {
+            if (post.getTags() != null && !post.getTags().isEmpty()) {
+                uniqueTags.addAll(post.getTags());
+            }
+        }
+        
+        // Convert to a sorted list
+        List<String> sortedTags = new ArrayList<>(uniqueTags);
+        Collections.sort(sortedTags);
+        
+        System.out.println("Found " + sortedTags.size() + " unique tags");
+        return sortedTags;
+    }
 } 

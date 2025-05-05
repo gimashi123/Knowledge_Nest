@@ -24,6 +24,9 @@ public interface SkillPostService {
     Page<SkillPostDto.Response> searchPostsByKeyword(String keyword, Pageable pageable, String currentUserId);
     Page<SkillPostDto.Response> getTrendingPosts(Pageable pageable, String currentUserId);
     
+    // Tag methods
+    List<String> getAllUniqueTags();
+    
     // Like functionality
     SkillPostDto.Response toggleLike(String postId, String userId);
     
