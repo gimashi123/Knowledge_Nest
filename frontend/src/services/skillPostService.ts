@@ -287,6 +287,25 @@ const MockSkillPostService = {
     };
   },
 
+  getByTags: async (tags: string[], page = 0, size = 10): Promise<SkillPostResponse> => {
+    // Filter posts that have at least one of the requested tags
+    const filtered = MOCK_DATA.filter(post => 
+      post.tags.some(tag => tags.includes(tag))
+    );
+    
+    const start = page * size;
+    const end = start + size;
+    const paginatedData = filtered.slice(start, end);
+    
+    return {
+      content: paginatedData,
+      totalElements: filtered.length,
+      totalPages: Math.ceil(filtered.length / size),
+      number: page,
+      size: size
+    };
+  },
+
   deleteMultiple: async (ids: string[]): Promise<void> => {
     for (const id of ids) {
       const index = MOCK_DATA.findIndex(p => p.id === id);
@@ -524,6 +543,20 @@ export const SkillPostService = USE_MOCK ? MockSkillPostService : {
     }
   },
 
+  // Get posts by multiple tags
+  getByTags: async (tags: string[], page = 0, size = 10): Promise<SkillPostResponse> => {
+    try {
+      // Convert array of tags to comma-separated query parameter
+      const tagsParam = tags.join(',');
+      const response = await axios.get(`${API_URL}/tags?tags=${tagsParam}&page=${page}&size=${size}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching skill posts with tags ${tags}:`, error);
+      // Fallback to mock if real API fails
+      return MockSkillPostService.getByTags(tags, page, size);
+    }
+  },
+
   // Search posts by keyword
   search: async (keyword: string, page = 0, size = 10): Promise<SkillPostResponse> => {
     try {
@@ -595,4 +628,4 @@ export const SkillPostService = USE_MOCK ? MockSkillPostService : {
       return MockSkillPostService.deleteComment(postId, commentId);
     }
   }
-}; 
+};
