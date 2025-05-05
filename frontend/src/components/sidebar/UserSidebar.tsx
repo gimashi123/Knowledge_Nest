@@ -8,7 +8,8 @@ import {
     FileText,
     Settings,
     LogOut,
-    Package2
+    Package2,
+    Trophy // Added Trophy icon for challenges
 } from "lucide-react";
 
 export function UserSidebar() {
@@ -49,6 +50,23 @@ export function UserSidebar() {
                         >
                             <Users className="h-4 w-4" />
                             Users
+                        </Button>
+                        {/* Challenges Section */}
+                        <Button
+                            variant="ghost"
+                            className="justify-start gap-2"
+                            onClick={() => navigate("/user-dashboard/challenges")}
+                        >
+                            <Trophy className="h-4 w-4" />
+                            View Challenges
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            className="justify-start gap-2"
+                            onClick={() => navigate("/user-dashboard/add-challenges")}
+                        >
+                            <Trophy className="h-4 w-4" />
+                            Create Challenge
                         </Button>
                         <Button
                             variant="ghost"

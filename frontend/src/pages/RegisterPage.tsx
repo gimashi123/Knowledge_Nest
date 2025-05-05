@@ -1,8 +1,9 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { register } from "../services/authService";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useNavigate, Link } from "react-router-dom";
+import { BookOpen } from "lucide-react";
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
@@ -22,35 +23,82 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="max-w-md mx-auto p-6 shadow-md rounded-2xl bg-white mt-20">
-      <h2 className="text-xl font-semibold mb-4">Register</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <Input
-          type="text"
-          placeholder="Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <Input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <Input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        {error && <p className="text-red-500 text-sm">{error}</p>}
-        <Button type="submit" className="w-full">
-          Register
-        </Button>
-        <p className="text-sm text-center pt-2">
-          Already have an account? <Link to="/login" className="text-blue-600">Login</Link>
-        </p>
-      </form>
-    </div>
+      <div className="min-h-screen bg-[#f1f5fc] flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <div className="flex flex-col items-center mb-8">
+            <BookOpen className="text-[#44468f] w-10 h-10 mb-2" />
+            <h1 className="text-2xl font-bold text-[#44468f]">Create Your Account</h1>
+            <p className="text-gray-600">Join our community of learners</p>
+          </div>
+
+          <div className="bg-white p-8 rounded-xl shadow-sm border border-[#b4c3ed]">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                    Full Name
+                  </label>
+                  <Input
+                      id="name"
+                      type="text"
+                      placeholder="Enter your name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="bg-[#f1f5fc] border-[#b4c3ed] focus:border-[#44468f]"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                    Email Address
+                  </label>
+                  <Input
+                      id="email"
+                      type="email"
+                      placeholder="Enter your email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="bg-[#f1f5fc] border-[#b4c3ed] focus:border-[#44468f]"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                    Password
+                  </label>
+                  <Input
+                      id="password"
+                      type="password"
+                      placeholder="Create a password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="bg-[#f1f5fc] border-[#b4c3ed] focus:border-[#44468f]"
+                  />
+                </div>
+              </div>
+
+              {error && (
+                  <div className="text-red-500 text-sm text-center">
+                    {error}
+                  </div>
+              )}
+
+              <Button
+                  type="submit"
+                  className="w-full bg-[#44468f] hover:bg-[#393b7a] text-white"
+              >
+                Register
+              </Button>
+
+              <div className="text-center text-sm text-gray-600 pt-2">
+                Already have an account?{" "}
+                <Link to="/login" className="text-[#44468f] hover:underline font-medium">
+                  Sign in
+                </Link>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
   );
 }

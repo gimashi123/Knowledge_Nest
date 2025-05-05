@@ -1,3 +1,4 @@
+
 import {
     BrowserRouter,
     Routes,
@@ -16,9 +17,14 @@ import AdminProfilePage from "@/pages/AdminProfilePage";
 import AdminPostsPage from "@/pages/AdminPostsPage";
 import { AuthProvider, useAuth } from "@/contexts/auth-context";
 
+
 import {ProgressPage} from "@/pages/authorized/admin/ProgressPage.tsx";
 import {UserDashboardPage} from "@/pages/UserDashboardPage.tsx";
 import LaunchPage from "@/pages/LaunchPage.tsx";
+import ChallengeListPage from "@/pages/Challenges/ChallengeListPage.tsx";
+import {ChallengeForm} from "@/pages/Challenges/ChallengeForm.tsx";
+import ChallengeAttemptPage from "@/pages/Challenges/ChallengeAttemptPage.tsx";
+
 import SkillPostsPage from "@/pages/skillpost/SkillPostsPage";
 import SkillPostDetailPage from "@/pages/skillpost/SkillPostDetailPage";
 
@@ -46,11 +52,11 @@ export default function App() {
                         <Route path="/user-dashboard" element={<UserDashboardPage />} />
                         <Route path="/admin-profile" element={<AdminProfilePage />} />
                         <Route path={'/admin-progress'} element={<ProgressPage/>} />
-                        
+
                         {/* Admin Posts Pages */}
                         <Route path="/admin/posts" element={<AdminPostsPage />} />
                         <Route path="/admin/posts/:id" element={<AdminPostsPage />} />
-                        
+
                         {/* Skill Post Routes */}
                         <Route path="/skill-posts" element={<SkillPostsPage />} />
                         <Route path="/skill-posts/:id" element={<SkillPostDetailPage />} />
@@ -71,6 +77,11 @@ export default function App() {
                             <Route path="/user-dashboard" element={<UserDashboardPage />}>
                                 {/*<Route index element={<AdminHome />} /> /!* Create this component *!/*/}
                                 <Route path="progress" element={<ProgressPage />} />
+
+                                <Route path="challenges" element={<ChallengeListPage />} />
+                                <Route path="add-challenges" element={<ChallengeForm />} />
+                                <Route path="challenge-attempt" element={<ChallengeAttemptPage />} />
+
                                 {/*<Route path="posts" element={<PostsPage />} />*/}
                                 {/*<Route path="users" element={<UsersPage />} />*/}
                                 {/*<Route path="settings" element={<SettingsPage />} />*/}
