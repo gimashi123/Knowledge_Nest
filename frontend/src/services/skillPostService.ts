@@ -313,6 +313,13 @@ const MockSkillPostService = {
         MOCK_DATA.splice(index, 1);
       }
     }
+  },
+
+  getAllTags: async (): Promise<string[]> => {
+    // Extract tags from MOCK_DATA
+    const tags = new Set<string>();
+    MOCK_DATA.forEach(post => post.tags.forEach(tag => tags.add(tag)));
+    return Array.from(tags);
   }
 };
 
@@ -546,12 +553,17 @@ export const SkillPostService = USE_MOCK ? MockSkillPostService : {
   // Get posts by multiple tags
   getByTags: async (tags: string[], page = 0, size = 10): Promise<SkillPostResponse> => {
     try {
-      // Convert array of tags to comma-separated query parameter
-      const tagsParam = tags.join(',');
-      const response = await axios.get(`${API_URL}/tags?tags=${tagsParam}&page=${page}&size=${size}`);
+      // Join tags as comma-separated list in the query parameter
+      const tagsParam = encodeURIComponent(tags.join(','));
+      console.log(`Fetching posts with tags: [${tags.join(', ')}], page: ${page}, size: ${size}`);
+      const url = `${API_URL}/tags?tags=${tagsParam}&page=${page}&size=${size}`;
+      console.log(`Making request to: ${url}`);
+      
+      const response = await axios.get(url);
+      console.log(`Retrieved ${response.data.content.length} posts with tags: [${tags.join(', ')}]`);
       return response.data;
     } catch (error) {
-      console.error(`Error fetching skill posts with tags ${tags}:`, error);
+      console.error(`Error fetching skill posts with tags [${tags.join(', ')}]:`, error);
       // Fallback to mock if real API fails
       return MockSkillPostService.getByTags(tags, page, size);
     }
@@ -626,6 +638,18 @@ export const SkillPostService = USE_MOCK ? MockSkillPostService : {
       console.error(`Error deleting comment ${commentId} for skill post ${postId}:`, error);
       // Fallback to mock if real API fails
       return MockSkillPostService.deleteComment(postId, commentId);
+    }
+  },
+
+  // Get all unique tags
+  getAllTags: async (): Promise<string[]> => {
+    try {
+      const response = await axios.get(`${API_URL}/tags/all`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching all tags:', error);
+      // Fallback to extracting tags from mock data
+      return MockSkillPostService.getAllTags();
     }
   }
 };

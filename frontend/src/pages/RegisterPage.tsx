@@ -3,21 +3,48 @@ import { register } from "../services/authService";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useNavigate, Link } from "react-router-dom";
+import { AlertCircle } from "lucide-react";
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Simple validation
+    if (!name || !email || !password) {
+      setError("All fields are required");
+      return;
+    }
+    
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters long");
+      return;
+    }
+    
+    setIsLoading(true);
+    setError("");
+    
     try {
       await register(name, email, password);
       navigate("/login");
-    } catch (err) {
-      setError("Registration failed. Email may already be in use.");
+    } catch (err: any) {
+      console.error("Registration error:", err);
+      if (err.response && err.response.data && err.response.data.message) {
+        // Display specific error from the backend
+        setError(err.response.data.message);
+      } else if (err.response && err.response.status === 500) {
+        setError("Server error. Please try again later or contact support.");
+      } else {
+        setError("Registration failed. Please check your connection and try again.");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -30,22 +57,31 @@ export default function RegisterPage() {
           placeholder="Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
+          required
         />
         <Input
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          required
         />
         <Input
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          required
+          minLength={6}
         />
-        {error && <p className="text-red-500 text-sm">{error}</p>}
-        <Button type="submit" className="w-full">
-          Register
+        {error && (
+          <div className="bg-red-50 p-3 rounded-md flex items-start gap-2">
+            <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-red-800">{error}</p>
+          </div>
+        )}
+        <Button type="submit" className="w-full" disabled={isLoading}>
+          {isLoading ? "Registering..." : "Register"}
         </Button>
         <p className="text-sm text-center pt-2">
           Already have an account? <Link to="/login" className="text-blue-600">Login</Link>
