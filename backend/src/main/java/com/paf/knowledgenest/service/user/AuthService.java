@@ -81,17 +81,25 @@ public class AuthService {
 
             // Get UserDetails
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-
+            
+            // Get the full user from repository to get accurate user data including name
+            Optional<User> userOpt = userRepository.findByEmail(userDetails.getUsername());
+            if (userOpt.isEmpty()) {
+                return ApiResponse.errorResponse("User not found");
+            }
+            
+            User user = userOpt.get();
+            
             // Generate JWT token
             String token = jwtUtils.generateToken(userDetails.getUsername());
 
             LoginResponse loginResponse = LoginResponse.builder()
                     .accessToken(token)
                     .user(UserResponse.builder()
-                          .role(userDetails.getAuthorities().iterator().next().getAuthority())
-                            .email(userDetails.getUsername())
-                            .name(userDetails.getUsername())
-                            .build())
+                          .role("ROLE_" + user.getRole())  // Ensure ROLE_ prefix is added
+                          .email(user.getEmail())
+                          .name(user.getName())
+                          .build())
                     .build();
             return ApiResponse.successResponse("User Login Successfully", loginResponse);
 

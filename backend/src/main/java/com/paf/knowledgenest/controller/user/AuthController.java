@@ -67,7 +67,16 @@ public class AuthController {
         String email = authentication.getName();
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        return ResponseEntity.ok(user);
+        
+        // Create a response with properly formatted role
+        com.paf.knowledgenest.dto.response.UserResponse userResponse = 
+            com.paf.knowledgenest.dto.response.UserResponse.builder()
+                .name(user.getName())
+                .email(user.getEmail())
+                .role("ROLE_" + user.getRole())
+                .build();
+                
+        return ResponseEntity.ok(userResponse);
     }
 
 
