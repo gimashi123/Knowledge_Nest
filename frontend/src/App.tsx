@@ -21,10 +21,26 @@ import {UserDashboardPage} from "@/pages/UserDashboardPage.tsx";
 import LaunchPage from "@/pages/LaunchPage.tsx";
 import SkillPostsPage from "@/pages/skillpost/SkillPostsPage";
 import SkillPostDetailPage from "@/pages/skillpost/SkillPostDetailPage";
+import UserSkillPostsPage from "@/pages/UserSkillPostsPage.tsx";
+import UserSettingsPage from "@/pages/UserSettingsPage.tsx";
 
 function PrivateRoute() {
     const { currentUser } = useAuth();
     return currentUser ? <Outlet /> : <Navigate to="/" replace />;
+}
+
+function AdminRoute() {
+    const { currentUser } = useAuth();
+    return currentUser && currentUser.role === "ROLE_ADMIN" ? 
+        <Outlet /> : 
+        <Navigate to="/user-dashboard" replace />;
+}
+
+function UserRoute() {
+    const { currentUser } = useAuth();
+    return currentUser && currentUser.role !== "ROLE_ADMIN" ? 
+        <Outlet /> : 
+        <Navigate to="/admin-dashboard" replace />;
 }
 
 export default function App() {
@@ -38,46 +54,27 @@ export default function App() {
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/oauth-success" element={<OAuthSuccessPage />} />
 
-                    {/* Private Routes */}
+                    {/* Private Routes for Everyone */}
                     <Route element={<PrivateRoute />}>
                         <Route path="/dashboard" element={<Dashboard />} />
                         <Route path="/profile" element={<ProfilePage />} />
-                        <Route path="/admin-dashboard" element={<AdminDashboardPage />} />
-                        <Route path="/user-dashboard" element={<UserDashboardPage />} />
-                        <Route path="/admin-profile" element={<AdminProfilePage />} />
-                        <Route path={'/admin-progress'} element={<ProgressPage/>} />
                         
-                        {/* Admin Posts Pages */}
-                        <Route path="/admin/posts" element={<AdminPostsPage />} />
-                        <Route path="/admin/posts/:id" element={<AdminPostsPage />} />
-                        
-                        {/* Skill Post Routes */}
-                        <Route path="/skill-posts" element={<SkillPostsPage />} />
-                        <Route path="/skill-posts/:id" element={<SkillPostDetailPage />} />
-
-                        <Route element={<PrivateRoute />}>
-                            <Route path="/dashboard" element={<Dashboard />} />
-                            <Route path="/profile" element={<ProfilePage />} />
-
-                            {/* Admin Nested Routes */}
-                            <Route path="/admin-dashboard" element={<AdminDashboardPage />}>
-                                {/*<Route index element={<AdminHome />} /> /!* Create this component *!/*/}
-                                <Route path="progress" element={<ProgressPage />} />
-                                {/*<Route path="posts" element={<PostsPage />} />*/}
-                                {/*<Route path="users" element={<UsersPage />} />*/}
-                                {/*<Route path="settings" element={<SettingsPage />} />*/}
-                                <Route path="admin-profile" element={<AdminProfilePage />} />
-                            </Route>
-                            <Route path="/user-dashboard" element={<UserDashboardPage />}>
-                                {/*<Route index element={<AdminHome />} /> /!* Create this component *!/*/}
-                                <Route path="progress" element={<ProgressPage />} />
-                                {/*<Route path="posts" element={<PostsPage />} />*/}
-                                {/*<Route path="users" element={<UsersPage />} />*/}
-                                {/*<Route path="settings" element={<SettingsPage />} />*/}
-                                <Route path="admin-profile" element={<AdminProfilePage />} />
-                            </Route>
+                        {/* Admin Only Routes */}
+                        <Route element={<AdminRoute />}>
+                            <Route path="/admin-dashboard" element={<AdminDashboardPage />} />
+                            <Route path="/admin-profile" element={<AdminProfilePage />} />
+                            <Route path="/admin-progress" element={<ProgressPage/>} />
+                            <Route path="/admin/posts" element={<AdminPostsPage />} />
+                            <Route path="/admin/posts/:id" element={<AdminPostsPage />} />
                         </Route>
-
+                        
+                        {/* Regular User Routes */}
+                        <Route element={<UserRoute />}>
+                            <Route path="/user-dashboard" element={<UserDashboardPage />} />
+                            <Route path="/skill-posts" element={<UserSkillPostsPage />} />
+                            <Route path="/skill-posts/:id" element={<UserSkillPostsPage />} />
+                            <Route path="/user-settings" element={<UserSettingsPage />} />
+                        </Route>
                     </Route>
                 </Routes>
             </AuthProvider>

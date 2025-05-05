@@ -6,13 +6,15 @@ import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } 
 import { SkillPostCard } from '@/components/skillpost/SkillPostCard';
 import { SkillPostForm } from '@/components/skillpost/SkillPostForm';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { PlusIcon, SearchIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
+import { PlusIcon, SearchIcon, ChevronLeftIcon, ChevronRightIcon, X } from 'lucide-react';
 import { SkillPost, SkillPostRequest } from '@/types/skillpost';
 import { SkillPostService } from '@/services/skillPostService';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { toast } from 'sonner';
 import { ErrorBoundary } from 'react-error-boundary';
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface SkillPostsPageProps {
   adminView?: boolean;
@@ -65,6 +67,14 @@ export default function SkillPostsPage({ adminView = false }: SkillPostsPageProp
   const [deletingPostId, setDeletingPostId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState('');
+  const [showTagFilter, setShowTagFilter] = useState(false);
+  
+  // Add state for batch selection and deletion
+  const [selectedPostIds, setSelectedPostIds] = useState<string[]>([]);
+  const [isBatchDeleteDialogOpen, setIsBatchDeleteDialogOpen] = useState(false);
+  const [isBatchSelectionMode, setIsBatchSelectionMode] = useState(false);
 
   const userId = getUserId(currentUser);
   
@@ -226,6 +236,107 @@ export default function SkillPostsPage({ adminView = false }: SkillPostsPageProp
     setEditingPost(null);
   };
 
+  // Add handler for adding a tag
+  const handleAddTag = () => {
+    const tag = tagInput.trim().toLowerCase();
+    if (tag && !selectedTags.includes(tag)) {
+      setSelectedTags([...selectedTags, tag]);
+      setTagInput('');
+      // When adding a tag, switch to the all tab but apply tag filter
+      setActiveTab('all');
+      fetchPostsByTags([...selectedTags, tag]);
+    }
+  };
+
+  // Add handler for removing a tag
+  const handleRemoveTag = (tagToRemove: string) => {
+    const updatedTags = selectedTags.filter(tag => tag !== tagToRemove);
+    setSelectedTags(updatedTags);
+    
+    if (updatedTags.length === 0) {
+      // If no tags are selected anymore, revert to all posts
+      setActiveTab('all');
+      fetchPosts(0, 'all');
+    } else {
+      fetchPostsByTags(updatedTags);
+    }
+  };
+
+  // Add handler for tag key press (enter)
+  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && tagInput.trim()) {
+      e.preventDefault();
+      handleAddTag();
+    }
+  };
+
+  // Add function to fetch posts by tags
+  const fetchPostsByTags = async (tags: string[]) => {
+    if (tags.length === 0) return;
+    
+    setIsLoading(true);
+    try {
+      const response = await SkillPostService.getByTags(tags, currentPage);
+      setPosts(response.content);
+      setTotalPages(response.totalPages);
+      setCurrentPage(response.number);
+    } catch (error) {
+      console.error('Error fetching posts by tags:', error);
+      toast.error('Failed to load posts with selected tags');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Add handler for toggling batch selection mode
+  const toggleBatchSelectionMode = () => {
+    setIsBatchSelectionMode(prev => !prev);
+    if (isBatchSelectionMode) {
+      // Clear selections when exiting batch mode
+      setSelectedPostIds([]);
+    }
+  };
+
+  // Add handler for selecting/deselecting a post
+  const togglePostSelection = (postId: string) => {
+    setSelectedPostIds(prev => {
+      if (prev.includes(postId)) {
+        return prev.filter(id => id !== postId);
+      } else {
+        return [...prev, postId];
+      }
+    });
+  };
+
+  // Add handler for selecting all posts
+  const selectAllPosts = () => {
+    if (posts.length === selectedPostIds.length) {
+      setSelectedPostIds([]);
+    } else {
+      setSelectedPostIds(posts.map(post => post.id));
+    }
+  };
+
+  // Add handler for batch deletion
+  const handleBatchDelete = async () => {
+    if (selectedPostIds.length === 0) return;
+    
+    try {
+      await SkillPostService.deleteMultiple(selectedPostIds);
+      toast.success(`${selectedPostIds.length} posts deleted successfully!`);
+      // Reset selection state
+      setSelectedPostIds([]);
+      setIsBatchSelectionMode(false);
+      // Refresh posts
+      fetchPosts(currentPage);
+    } catch (error) {
+      console.error('Error deleting posts in batch:', error);
+      toast.error('Failed to delete selected posts');
+    } finally {
+      setIsBatchDeleteDialogOpen(false);
+    }
+  };
+
   // Function to render the post content based on loading state and available posts
   const renderPostContent = () => {
     if (isLoading) {
@@ -293,14 +404,23 @@ export default function SkillPostsPage({ adminView = false }: SkillPostsPageProp
                   </div>
                 }
               >
-                <SkillPostCard
-                  key={post.id}
-                  post={post}
-                  onEdit={openEditDialog}
-                  onDelete={(id) => setDeletingPostId(id)}
-                  currentUserId={userId}
-                  adminView={adminView}
-                />
+                <div className="relative">
+                  {isBatchSelectionMode && (
+                    <Checkbox
+                      className="absolute top-2 left-2"
+                      checked={selectedPostIds.includes(post.id)}
+                      onCheckedChange={() => togglePostSelection(post.id)}
+                    />
+                  )}
+                  <SkillPostCard
+                    key={post.id}
+                    post={post}
+                    onEdit={openEditDialog}
+                    onDelete={(id) => setDeletingPostId(id)}
+                    currentUserId={userId}
+                    adminView={adminView}
+                  />
+                </div>
               </ErrorBoundary>
             ))}
           </div>
@@ -451,6 +571,32 @@ export default function SkillPostsPage({ adminView = false }: SkillPostsPageProp
         </form>
       </div>
       
+      {/* Tag filter input */}
+      <div className="flex items-center mb-4">
+        <Input
+          placeholder="Add a tag..."
+          value={tagInput}
+          onChange={(e) => setTagInput(e.target.value)}
+          onKeyDown={handleTagKeyDown}
+          className="w-full md:w-[300px]"
+        />
+        <Button onClick={handleAddTag} className="ml-2">
+          Add Tag
+        </Button>
+      </div>
+      
+      {/* Display selected tags */}
+      {selectedTags.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-4">
+          {selectedTags.map((tag) => (
+            <Badge key={tag} className="flex items-center gap-1">
+              {tag}
+              <X className="h-4 w-4 cursor-pointer" onClick={() => handleRemoveTag(tag)} />
+            </Badge>
+          ))}
+        </div>
+      )}
+      
       <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList className="mb-4">
           <TabsTrigger value="all">All Posts</TabsTrigger>
@@ -478,6 +624,22 @@ export default function SkillPostsPage({ adminView = false }: SkillPostsPageProp
       
       {renderPagination()}
       
+      <div className="flex justify-end mt-4">
+        <Button variant="secondary" onClick={toggleBatchSelectionMode}>
+          {isBatchSelectionMode ? 'Cancel Batch Selection' : 'Batch Select'}
+        </Button>
+        {isBatchSelectionMode && (
+          <Button 
+            variant="destructive" 
+            className="ml-2" 
+            onClick={() => setIsBatchDeleteDialogOpen(true)}
+            disabled={selectedPostIds.length === 0}
+          >
+            Delete Selected
+          </Button>
+        )}
+      </div>
+      
       <AlertDialog open={!!deletingPostId} onOpenChange={(open) => !open && setDeletingPostId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -494,6 +656,23 @@ export default function SkillPostsPage({ adminView = false }: SkillPostsPageProp
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      
+      <AlertDialog open={isBatchDeleteDialogOpen} onOpenChange={setIsBatchDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the selected posts.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleBatchDelete} className="bg-destructive text-destructive-foreground">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
-} 
+}

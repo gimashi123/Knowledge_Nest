@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { SkillPostForm } from '@/components/skillpost/SkillPostForm';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { ArrowLeftIcon, HeartIcon, MessageCircleIcon, Share2Icon, EditIcon, TrashIcon } from 'lucide-react';
+import { ArrowLeftIcon, HeartIcon, MessageCircleIcon, Share2Icon, EditIcon, TrashIcon, Edit2Icon } from 'lucide-react';
 import { SkillPost, SkillPostRequest, CommentRequest } from '@/types/skillpost';
 import { SkillPostService } from '@/services/skillPostService';
 import { Textarea } from '@/components/ui/textarea';
@@ -29,6 +29,10 @@ export default function SkillPostDetailPage() {
   const [isCommentSubmitting, setIsCommentSubmitting] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [deletingCommentId, setDeletingCommentId] = useState<string | null>(null);
+  const [editCommentContent, setEditCommentContent] = useState("");
+  const [isEditingComment, setIsEditingComment] = useState(false);
 
   const fetchPost = async () => {
     if (!id) return;
@@ -132,11 +136,50 @@ export default function SkillPostDetailPage() {
     }
   };
 
+  const handleEditComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!id || !editingCommentId || !editCommentContent.trim()) return;
+    
+    setIsEditingComment(true);
+    try {
+      const commentRequest: CommentRequest = { content: editCommentContent.trim() };
+      const updatedPost = await SkillPostService.updateComment(id, editingCommentId, commentRequest);
+      setPost(updatedPost);
+      setEditingCommentId(null);
+      setEditCommentContent("");
+      toast.success('Comment updated successfully!');
+    } catch (error) {
+      console.error('Error updating comment:', error);
+      toast.error('Failed to update comment');
+    } finally {
+      setIsEditingComment(false);
+    }
+  };
+
+  const handleDeleteComment = async () => {
+    if (!id || !deletingCommentId) return;
+    
+    try {
+      const updatedPost = await SkillPostService.deleteComment(id, deletingCommentId);
+      setPost(updatedPost);
+      setDeletingCommentId(null);
+      toast.success('Comment deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting comment:', error);
+      toast.error('Failed to delete comment');
+    }
+  };
+
+  const startEditComment = (commentId: string, currentContent: string) => {
+    setEditingCommentId(commentId);
+    setEditCommentContent(currentContent);
+  };
+
   const isOwner = post?.userId === currentUser?.id;
 
   // Safe render helper for content
   const renderContent = () => {
-    if (!post.content) return <p className="text-muted-foreground">No content available</p>;
+    if (!post || !post.content) return <p className="text-muted-foreground">No content available</p>;
     
     return post.content.split('\n').map((paragraph, index) => (
       paragraph ? <p key={index}>{paragraph}</p> : null
@@ -145,6 +188,8 @@ export default function SkillPostDetailPage() {
 
   // Safe render helper for tags
   const renderTags = () => {
+    if (!post) return null;
+    
     const tags = post.tags || [];
     if (tags.length === 0) return null;
     
@@ -318,10 +363,56 @@ export default function SkillPostDetailPage() {
                         </p>
                       </div>
                     </div>
+                    
+                    {/* Add edit/delete buttons for comment owner */}
+                    {comment.userId === currentUser?.id && (
+                      <div className="flex space-x-2">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => startEditComment(comment.id, comment.content)}
+                        >
+                          <Edit2Icon className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          className="text-destructive"
+                          onClick={() => setDeletingCommentId(comment.id)}
+                        >
+                          <TrashIcon className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <p>{comment.content}</p>
+                  {editingCommentId === comment.id ? (
+                    <form onSubmit={handleEditComment} className="space-y-2">
+                      <Textarea
+                        value={editCommentContent}
+                        onChange={(e) => setEditCommentContent(e.target.value)}
+                        className="w-full"
+                      />
+                      <div className="flex justify-end space-x-2">
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          onClick={() => setEditingCommentId(null)}
+                        >
+                          Cancel
+                        </Button>
+                        <Button 
+                          type="submit"
+                          disabled={!editCommentContent.trim() || isEditingComment}
+                        >
+                          {isEditingComment ? 'Saving...' : 'Save'}
+                        </Button>
+                      </div>
+                    </form>
+                  ) : (
+                    <p>{comment.content}</p>
+                  )}
                 </CardContent>
               </Card>
             ))}
@@ -350,6 +441,27 @@ export default function SkillPostDetailPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Add comment deletion confirmation dialog */}
+      <AlertDialog open={!!deletingCommentId} onOpenChange={(open) => !open && setDeletingCommentId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Comment</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this comment? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteComment} 
+              className="bg-destructive text-destructive-foreground"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
-} 
+}

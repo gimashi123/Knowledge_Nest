@@ -65,6 +65,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setLoading(false);
     }, []);
 
+    // Redirect to appropriate dashboard based on user role
+    useEffect(() => {
+        if (currentUser && !loading) {
+            const path = window.location.pathname;
+            // Only redirect if at root, login, or register
+            if (path === '/' || path === '/login' || path === '/register') {
+                if (currentUser.role === "ROLE_ADMIN") {
+                    navigate("/admin-dashboard");
+                } else {
+                    navigate("/user-dashboard");
+                }
+            }
+        }
+    }, [currentUser, loading, navigate]);
+
     if (loading) {
         return <div>Loading...</div>; // Or a spinner
     }
