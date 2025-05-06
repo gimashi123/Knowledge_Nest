@@ -53,46 +53,79 @@ export default function ChallengeAttemptPage() {
     };
 
     if (loading) {
-        return <div>Loading challenge...</div>;
+        return <div className="flex justify-center items-center h-screen">Loading challenge...</div>;
     }
 
     if (!challenge) {
-        return <div>Challenge not found</div>;
+        return <div className="flex justify-center items-center h-screen">Challenge not found</div>;
     }
 
     return (
-        <div className="container mx-auto py-8">
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold">{challenge.title}</h1>
-                {startTime && (
-                    <Timer
-                        initialMinutes={challenge.timeLimit}
-                        onComplete={submitAttempt}
-                    />
-                )}
+        <div className="container mx-auto py-8 max-w-4xl">
+            {/* Challenge Header Section */}
+            <div className="bg-white shadow-sm rounded-lg p-6 mb-6 border border-gray-200">
+                <div className="flex justify-between items-start">
+                    <div>
+                        <h1 className="text-3xl font-bold text-gray-800 mb-2">{challenge.title}</h1>
+                        <p className="text-gray-600 mb-4">Test your skills with this timed challenge</p>
+                    </div>
+                    {startTime && (
+                        <div className="bg-red-50 px-4 py-2 rounded-lg border border-red-200">
+                            <Timer
+                                initialMinutes={challenge.timeLimit}
+                                onComplete={submitAttempt}
+                            />
+                        </div>
+                    )}
+                </div>
+
+                {/* Instructions Section */}
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 mt-4">
+                    <h2 className="font-semibold text-blue-800 mb-2">Instructions:</h2>
+                    <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                        <li>You have {challenge.timeLimit} minutes to complete all tasks.</li>
+                        <li>Answer all questions to the best of your ability.</li>
+                        <li>Write clear and concise responses for each task.</li>
+                        <li>The timer will automatically submit your answers when time expires.</li>
+                        <li>You can submit early using the button at the bottom.</li>
+                    </ul>
+                </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-6">
+            {/* Tasks Section */}
+            <div className="space-y-6">
                 {challenge.tasks.map((task, index) => (
-                    <Card key={index}>
-                        <CardHeader>
-                            <CardTitle>Task {index + 1}</CardTitle>
+                    <Card key={index} className="hover:shadow-md transition-shadow">
+                        <CardHeader className="bg-gray-50 border-b">
+                            <CardTitle className="flex items-center">
+                                <span className="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">
+                                    {index + 1}
+                                </span>
+                                <span className="text-lg">Task {index + 1}</span>
+                            </CardTitle>
                         </CardHeader>
-                        <CardContent>
-                            <p className="mb-4">{task}</p>
+                        <CardContent className="p-6">
+                            <p className="mb-4 text-gray-700">{task}</p>
                             <textarea
-                                className="w-full min-h-[100px] p-2 border rounded"
-                                placeholder="Enter your answer..."
+                                className="w-full min-h-[120px] p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                                placeholder="Type your answer here..."
                                 value={answers[index]}
                                 onChange={(e) => handleAnswerChange(index, e.target.value)}
                             />
+                            <div className="text-xs text-gray-500 mt-1">
+                                Character count: {answers[index].length}
+                            </div>
                         </CardContent>
                     </Card>
                 ))}
             </div>
 
-            <div className="mt-6 flex justify-end">
-                <Button onClick={submitAttempt} className="px-8 py-4">
+            {/* Submit Button Section */}
+            <div className="mt-8 flex justify-end">
+                <Button
+                    onClick={submitAttempt}
+                    className="px-8 py-4 text-lg bg-green-600 hover:bg-green-700 transition-colors shadow-md"
+                >
                     Submit Challenge
                 </Button>
             </div>
