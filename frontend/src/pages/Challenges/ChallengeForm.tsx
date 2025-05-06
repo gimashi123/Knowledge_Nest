@@ -9,13 +9,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Challenge } from '@/types/challenge';
 import { api } from '@/lib/api';
 import { useNavigate } from 'react-router-dom';
+import { Plus } from 'lucide-react';
 
 const formSchema = z.object({
     title: z.string().min(3, 'Title must be at least 3 characters'),
     skillCategory: z.enum(['coding', 'cooking', 'diy']),
     difficultyLevel: z.enum(['beginner', 'intermediate', 'pro']),
     timeLimit: z.number().min(1, 'Time limit must be at least 1 minute'),
-    tasks: z.array(z.string().min(5, 'Task must be at least 5 characters')).length(5, 'Exactly 5 tasks required'),
+    tasks: z.array(z.string().min(5, 'Task must be at least 5 characters')).min(1, 'At least 1 task required'),
 });
 
 interface ChallengeFormProps {
@@ -31,15 +32,17 @@ export function ChallengeForm({ initialData }: ChallengeFormProps) {
             skillCategory: 'coding',
             difficultyLevel: 'beginner',
             timeLimit: 5,
-            tasks: ['', '', '', '', ''],
+            tasks: [''],
         },
     });
+
+    const tasks = form.watch('tasks');
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         try {
             const challengeData = {
                 ...values,
-                creatorId: 'current-user-id', // Replace with actual user ID from auth context
+                creatorId: 'current-user-id',
             };
 
             if (initialData) {
@@ -54,9 +57,17 @@ export function ChallengeForm({ initialData }: ChallengeFormProps) {
         }
     };
 
+    const addTask = () => {
+        form.setValue('tasks', [...tasks, '']);
+    };
+
+    const removeTask = (index: number) => {
+        form.setValue('tasks', tasks.filter((_, i) => i !== index));
+    };
+
     return (
-        <div className="container mx-auto py-8">
-            <h1 className="text-3xl font-bold mb-6">
+        <div className="container mx-auto py-8 max-w-2xl">
+            <h1 className="text-2xl font-bold mb-8">
                 {initialData ? 'Edit Challenge' : 'Create New Challenge'}
             </h1>
 
@@ -67,7 +78,7 @@ export function ChallengeForm({ initialData }: ChallengeFormProps) {
                         name="title"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Challenge Title</FormLabel>
+                                <FormLabel className="font-medium">Challenge Title *</FormLabel>
                                 <FormControl>
                                     <Input placeholder="Enter challenge title" {...field} />
                                 </FormControl>
@@ -76,17 +87,17 @@ export function ChallengeForm({ initialData }: ChallengeFormProps) {
                         )}
                     />
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <FormField
                             control={form.control}
                             name="skillCategory"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Skill Category</FormLabel>
+                                    <FormLabel className="font-medium">Skill Category *</FormLabel>
                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                                         <FormControl>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Select a category" />
+                                                <SelectValue placeholder="Select category" />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
@@ -105,7 +116,7 @@ export function ChallengeForm({ initialData }: ChallengeFormProps) {
                             name="difficultyLevel"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Difficulty Level</FormLabel>
+                                    <FormLabel className="font-medium">Difficulty Level *</FormLabel>
                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                                         <FormControl>
                                             <SelectTrigger>
@@ -129,13 +140,14 @@ export function ChallengeForm({ initialData }: ChallengeFormProps) {
                         name="timeLimit"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Time Limit (minutes)</FormLabel>
+                                <FormLabel className="font-medium">Time Limit (minutes) *</FormLabel>
                                 <FormControl>
                                     <Input
                                         type="number"
                                         min="1"
                                         onChange={(e) => field.onChange(parseInt(e.target.value))}
                                         value={field.value}
+                                        placeholder="Enter time limit"
                                     />
                                 </FormControl>
                                 <FormMessage />
@@ -144,30 +156,78 @@ export function ChallengeForm({ initialData }: ChallengeFormProps) {
                     />
 
                     <div className="space-y-4">
-                        <FormLabel>Challenge Tasks (5 required)</FormLabel>
-                        {[0, 1, 2, 3, 4].map((index) => (
-                            <FormField
-                                key={index}
-                                control={form.control}
-                                name={`tasks.${index}`}
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Task {index + 1}</FormLabel>
-                                        <FormControl>
-                                            <Textarea
-                                                placeholder={`Enter task ${index + 1}`}
-                                                className="min-h-[80px]"
-                                                {...field}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+                        <FormLabel className="font-medium">Challenge Tasks ({tasks.length}/5)</FormLabel>
+                        {tasks.map((_, index) => (
+                            <div key={index} className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                    <FormLabel>Task {index + 1} *</FormLabel>
+                                    {index > 0 && (
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            className="text-red-500 hover:text-red-600"
+                                            onClick={() => removeTask(index)}
+                                        >
+                                            Remove
+                                        </Button>
+                                    )}
+                                </div>
+                                <FormField
+                                    control={form.control}
+                                    name={`tasks.${index}`}
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormControl>
+                                                <Textarea
+                                                    placeholder={`Enter task ${index + 1}`}
+                                                    className="min-h-[80px]"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
                         ))}
+                        {tasks.length < 5 && (
+                            <Button
+                                type="button"
+                                variant="outline"
+                                className="w-full mt-2"
+                                onClick={addTask}
+                            >
+                                <Plus className="w-4 h-4 mr-2" />
+                                Add Task
+                            </Button>
+                        )}
                     </div>
 
-                    <div className="flex justify-end gap-4">
+                    {/*<FormField*/}
+                    {/*    control={form.control}*/}
+                    {/*    name="difficultyLevel"*/}
+                    {/*    render={({ field }) => (*/}
+                    {/*        <FormItem>*/}
+                    {/*            <FormLabel className="font-medium">Difficulty Level *</FormLabel>*/}
+                    {/*            <Select onValueChange={field.onChange} defaultValue={field.value}>*/}
+                    {/*                <FormControl>*/}
+                    {/*                    <SelectTrigger>*/}
+                    {/*                        <SelectValue placeholder="Select difficulty" />*/}
+                    {/*                    </SelectTrigger>*/}
+                    {/*                </FormControl>*/}
+                    {/*                <SelectContent>*/}
+                    {/*                    <SelectItem value="beginner">Beginner</SelectItem>*/}
+                    {/*                    <SelectItem value="intermediate">Intermediate</SelectItem>*/}
+                    {/*                    <SelectItem value="pro">Pro</SelectItem>*/}
+                    {/*                </SelectContent>*/}
+                    {/*            </Select>*/}
+                    {/*            <FormMessage />*/}
+                    {/*        </FormItem>*/}
+                    {/*    )}*/}
+                    {/*/>*/}
+
+                    <div className="flex justify-end gap-4 pt-4">
                         <Button
                             type="button"
                             variant="outline"
@@ -175,10 +235,7 @@ export function ChallengeForm({ initialData }: ChallengeFormProps) {
                         >
                             Cancel
                         </Button>
-                        <Button
-                            type="submit"
-                            onClick={()=>navigate('/user-dashboard/challenges')}
-                        >
+                        <Button type="submit">
                             {initialData ? 'Update Challenge' : 'Create Challenge'}
                         </Button>
                     </div>
