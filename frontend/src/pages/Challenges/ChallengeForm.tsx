@@ -171,7 +171,7 @@ export function ChallengeForm({ initialData }: ChallengeFormProps) {
                         <Button
                             type="button"
                             variant="outline"
-                            onClick={() => navigate('/challenges')}
+                            onClick={() => navigate('/user-dashboard/challenges')}
                         >
                             Cancel
                         </Button>

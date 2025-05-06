@@ -1,8 +1,10 @@
+type ChallengeCategory = 'coding' | 'cooking' | 'diy';
+
 export interface Challenge {
     id: string;
     title: string;
     creatorId: string;
-    skillCategory: 'coding' | 'cooking' | 'diy';
+    skillCategory: ChallengeCategory;
     difficultyLevel: 'beginner' | 'intermediate' | 'pro';
     tasks: string[];
     timeLimit: number;
