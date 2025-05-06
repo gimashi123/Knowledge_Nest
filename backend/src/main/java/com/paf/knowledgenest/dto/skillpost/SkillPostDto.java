@@ -32,6 +32,8 @@ public class SkillPostDto {
 
         @NotBlank(message = "Content is required")
         private String content;
+        
+        private String youtubeUrl;
 
         @NotEmpty(message = "At least one tag is required")
         private List<String> tags = new ArrayList<>();
@@ -45,6 +47,7 @@ public class SkillPostDto {
         private String title;
         private String description;
         private String content;
+        private String youtubeUrl;
         private String userId;
         private String userName;
         private List<String> tags;
@@ -60,6 +63,7 @@ public class SkillPostDto {
             response.setTitle(skillPost.getTitle());
             response.setDescription(skillPost.getDescription());
             response.setContent(skillPost.getContent());
+            response.setYoutubeUrl(skillPost.getYoutubeUrl());
             response.setUserId(skillPost.getUserId());
             response.setUserName(skillPost.getUserName());
             response.setTags(skillPost.getTags());

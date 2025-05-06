@@ -3,6 +3,7 @@ export interface SkillPost {
   title: string;
   description: string;
   content: string;
+  youtubeUrl?: string;
   userId: string;
   userName: string;
   tags: string[];
@@ -25,6 +26,7 @@ export interface SkillPostRequest {
   title: string;
   description: string;
   content: string;
+  youtubeUrl?: string;
   tags: string[];
 }
 

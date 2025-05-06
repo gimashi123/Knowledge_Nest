@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { HeartIcon, MessageCircleIcon, Share2Icon, MoreHorizontalIcon, Calendar } from "lucide-react";
+import { HeartIcon, MessageCircleIcon, Share2Icon, MoreHorizontalIcon, Calendar, YoutubeIcon } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { SkillPost } from "@/types/skillpost";
 import { SkillPostService } from "@/services/skillPostService";
 import { formatDistanceToNow } from 'date-fns';
+import { extractYoutubeVideoId, getYoutubeThumbnailUrl } from "@/utils/youtubeUtils";
 
 interface SkillPostCardProps {
   post: SkillPost;
@@ -36,6 +37,10 @@ export function SkillPostCard({ post, onEdit, onDelete, currentUserId, adminView
   const formattedDate = post.createdAt ? 
     formatDistanceToNow(new Date(post.createdAt), { addSuffix: true }) : 
     'recently';
+  
+  // Get YouTube thumbnail if available
+  const videoId = extractYoutubeVideoId(post.youtubeUrl);
+  const thumbnailUrl = videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : null;
   
   const handleLike = async (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card click when liking
@@ -76,6 +81,36 @@ export function SkillPostCard({ post, onEdit, onDelete, currentUserId, adminView
       className="w-full hover:shadow-md transition-shadow cursor-pointer"
       onClick={handleCardClick}
     >
+      {/* Display YouTube thumbnail if available */}
+      {thumbnailUrl && (
+        <div className="relative aspect-video overflow-hidden rounded-t-lg">
+          <img 
+            src={thumbnailUrl} 
+            alt="YouTube Video Thumbnail" 
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              console.error('Thumbnail failed to load:', thumbnailUrl);
+              e.currentTarget.onerror = null;
+              // Try default quality if high quality fails
+              e.currentTarget.src = `https://img.youtube.com/vi/${videoId}/default.jpg`;
+            }}
+          />
+          <div className="absolute inset-0 bg-black/20 hover:bg-black/10 transition-colors duration-200">
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-14 h-14 flex items-center justify-center bg-red-600 rounded-full">
+                <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+          <div className="absolute bottom-3 right-3 bg-red-600 text-white p-1 rounded-lg flex items-center gap-1">
+            <YoutubeIcon className="h-4 w-4" />
+            <span className="text-xs font-medium">YouTube</span>
+          </div>
+        </div>
+      )}
+    
       <CardHeader className="pb-3">
         <div className="flex justify-between items-start">
           <div>

@@ -31,6 +31,7 @@ public class SkillPostServiceImpl implements SkillPostService {
         skillPost.setTitle(request.getTitle());
         skillPost.setDescription(request.getDescription());
         skillPost.setContent(request.getContent());
+        skillPost.setYoutubeUrl(request.getYoutubeUrl());
         skillPost.setTags(request.getTags());
         skillPost.setUserId(userId);
         skillPost.setUserName(userName);
@@ -63,6 +64,7 @@ public class SkillPostServiceImpl implements SkillPostService {
         post.setTitle(request.getTitle());
         post.setDescription(request.getDescription());
         post.setContent(request.getContent());
+        post.setYoutubeUrl(request.getYoutubeUrl());
         post.setTags(request.getTags());
         post.setUpdatedAt(LocalDateTime.now());
         
