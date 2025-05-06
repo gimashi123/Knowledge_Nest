@@ -7,6 +7,7 @@ import com.paf.knowledgenest.exception.UnauthorizedException;
 import com.paf.knowledgenest.model.skillpost.Comment;
 import com.paf.knowledgenest.model.skillpost.SkillPost;
 import com.paf.knowledgenest.repository.skillpost.SkillPostRepository;
+import com.paf.knowledgenest.service.notification.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 public class SkillPostServiceImpl implements SkillPostService {
 
     private final SkillPostRepository skillPostRepository;
+    private final NotificationService notificationService;
 
     @Override
     public SkillPostDto.Response createPost(SkillPostDto.Request request, String userId, String userName) {
@@ -204,6 +206,29 @@ public class SkillPostServiceImpl implements SkillPostService {
         } else {
             post.getLikedBy().add(userId);
             post.setLikes(post.getLikes() + 1);
+            
+            // Create a notification for the post owner when their post is liked
+            // Only if the liker is not the post owner
+            if (!post.getUserId().equals(userId)) {
+                try {
+                    // Get the user's name from the session or user object
+                    String likerName = getUserName(userId);
+                    
+                    notificationService.createLikeNotification(
+                        post.getUserId(),       // Post owner receives the notification
+                        userId,                 // User who liked the post
+                        likerName,              // Now using actual username instead of "A user"
+                        postId,                 // The post that was liked
+                        post.getTitle()         // Title of the post
+                    );
+                    
+                    System.out.println("Created like notification: User " + userId + " (" + likerName + ") liked post " + postId + " owned by " + post.getUserId());
+                } catch (Exception e) {
+                    // Log the error but don't fail the like operation
+                    System.err.println("Error creating notification: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
         }
         
         SkillPost updatedPost = skillPostRepository.save(post);
@@ -225,10 +250,123 @@ public class SkillPostServiceImpl implements SkillPostService {
         comment.setCreatedAt(now);
         comment.setUpdatedAt(now);
         
+        // If this is a reply to another comment, set the parent ID
+        if (request.getParentCommentId() != null && !request.getParentCommentId().isEmpty()) {
+            return replyToComment(postId, request.getParentCommentId(), request, userId, userName);
+        }
+        
         post.getComments().add(comment);
         SkillPost updatedPost = skillPostRepository.save(post);
         
+        // Create a notification for the post owner when someone comments on their post
+        // Only if the commenter is not the post owner
+        if (!post.getUserId().equals(userId)) {
+            notificationService.createCommentNotification(
+                post.getUserId(),       // Post owner receives the notification
+                userId,                 // User who commented
+                userName,               // Name of the commenter
+                postId,                 // The post that was commented on
+                post.getTitle(),        // Title of the post
+                comment.getId(),        // ID of the comment
+                comment.getContent()    // Content of the comment
+            );
+        }
+        
         return SkillPostDto.Response.fromSkillPost(updatedPost, userId);
+    }
+    
+    @Override
+    public SkillPostDto.Response replyToComment(String postId, String parentCommentId, 
+                                           SkillPostDto.CommentRequest request, 
+                                           String userId, String userName) {
+        SkillPost post = skillPostRepository.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("SkillPost", "id", postId));
+        
+        // Find the parent comment
+        Optional<Comment> parentCommentOpt = findCommentById(post.getComments(), parentCommentId);
+        
+        if (parentCommentOpt.isEmpty()) {
+            throw new ResourceNotFoundException("Comment", "id", parentCommentId);
+        }
+        
+        Comment parentComment = parentCommentOpt.get();
+        
+        // Create the reply comment
+        Comment reply = new Comment();
+        reply.setId(UUID.randomUUID().toString());
+        reply.setUserId(userId);
+        reply.setUserName(userName);
+        reply.setContent(request.getContent());
+        reply.setParentCommentId(parentCommentId);
+        
+        LocalDateTime now = LocalDateTime.now();
+        reply.setCreatedAt(now);
+        reply.setUpdatedAt(now);
+        
+        // Add the reply to the parent comment's replies list
+        if (parentComment.getReplies() == null) {
+            parentComment.setReplies(new ArrayList<>());
+        }
+        parentComment.getReplies().add(reply);
+        
+        // Save the updated post
+        SkillPost updatedPost = skillPostRepository.save(post);
+        
+        // Create a notification for the parent comment owner
+        // Only if the replier is not the comment owner
+        if (!parentComment.getUserId().equals(userId)) {
+            notificationService.createCommentReplyNotification(
+                parentComment.getUserId(),  // Comment owner receives the notification
+                userId,                     // User who replied
+                userName,                   // Name of the replier
+                postId,                     // The post containing the comment
+                post.getTitle(),            // Title of the post
+                parentCommentId,            // ID of the parent comment
+                reply.getId(),              // ID of the reply comment
+                reply.getContent()          // Content of the reply
+            );
+        }
+        
+        // Also notify the post owner if they're different from the parent comment owner
+        // and different from the replier
+        if (!post.getUserId().equals(parentComment.getUserId()) && 
+            !post.getUserId().equals(userId)) {
+            notificationService.createCommentNotification(
+                post.getUserId(),        // Post owner receives the notification
+                userId,                  // User who replied
+                userName,                // Name of the replier
+                postId,                  // The post ID
+                post.getTitle(),         // Title of the post
+                reply.getId(),           // ID of the reply
+                reply.getContent()       // Content of the reply
+            );
+        }
+        
+        return SkillPostDto.Response.fromSkillPost(updatedPost, userId);
+    }
+    
+    // Helper method to find a comment by ID (including in nested replies)
+    private Optional<Comment> findCommentById(List<Comment> comments, String commentId) {
+        if (comments == null || comments.isEmpty()) {
+            return Optional.empty();
+        }
+        
+        // First, check the top-level comments
+        for (Comment comment : comments) {
+            if (comment.getId().equals(commentId)) {
+                return Optional.of(comment);
+            }
+            
+            // If not found, recursively check in replies
+            if (comment.getReplies() != null && !comment.getReplies().isEmpty()) {
+                Optional<Comment> found = findCommentById(comment.getReplies(), commentId);
+                if (found.isPresent()) {
+                    return found;
+                }
+            }
+        }
+        
+        return Optional.empty();
     }
 
     @Override
@@ -316,5 +454,25 @@ public class SkillPostServiceImpl implements SkillPostService {
         
         System.out.println("Found " + sortedTags.size() + " unique tags");
         return sortedTags;
+    }
+
+    // Helper method to get user name
+    private String getUserName(String userId) {
+        try {
+            // Try to find a post by this user to get their name
+            List<SkillPost> userPosts = skillPostRepository.findByUserId(userId);
+            if (!userPosts.isEmpty()) {
+                String userName = userPosts.get(0).getUserName();
+                if (userName != null && !userName.isEmpty()) {
+                    return userName;
+                }
+            }
+            
+            // Fallback to default name if user has no posts or no name set
+            return "User";
+        } catch (Exception e) {
+            System.err.println("Error getting user name: " + e.getMessage());
+            return "User";
+        }
     }
 } 

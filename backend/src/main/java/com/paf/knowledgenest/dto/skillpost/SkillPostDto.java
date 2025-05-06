@@ -85,6 +85,9 @@ public class SkillPostDto {
         @NotBlank(message = "Comment content is required")
         @Size(min = 3, max = 1000, message = "Comment must be between 3 and 1000 characters")
         private String content;
+        
+        // Optional parent comment ID if this is a reply
+        private String parentCommentId;
     }
 
     @Data
@@ -97,6 +100,8 @@ public class SkillPostDto {
         private String content;
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
+        private String parentCommentId;
+        private List<CommentDto> replies;
 
         public static CommentDto fromComment(Comment comment) {
             CommentDto dto = new CommentDto();
@@ -106,6 +111,17 @@ public class SkillPostDto {
             dto.setContent(comment.getContent());
             dto.setCreatedAt(comment.getCreatedAt());
             dto.setUpdatedAt(comment.getUpdatedAt());
+            dto.setParentCommentId(comment.getParentCommentId());
+            
+            // Map nested replies if any
+            if (comment.getReplies() != null && !comment.getReplies().isEmpty()) {
+                dto.setReplies(comment.getReplies().stream()
+                    .map(CommentDto::fromComment)
+                    .collect(Collectors.toList()));
+            } else {
+                dto.setReplies(new ArrayList<>());
+            }
+            
             return dto;
         }
     }

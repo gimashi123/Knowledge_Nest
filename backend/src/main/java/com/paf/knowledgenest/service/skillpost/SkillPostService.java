@@ -34,4 +34,7 @@ public interface SkillPostService {
     SkillPostDto.Response addComment(String postId, SkillPostDto.CommentRequest request, String userId, String userName);
     SkillPostDto.Response updateComment(String postId, String commentId, SkillPostDto.CommentRequest request, String userId);
     SkillPostDto.Response deleteComment(String postId, String commentId, String userId);
+    
+    // Comment reply functionality
+    SkillPostDto.Response replyToComment(String postId, String parentCommentId, SkillPostDto.CommentRequest request, String userId, String userName);
 } 

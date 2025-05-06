@@ -104,10 +104,6 @@ export function SkillPostCard({ post, onEdit, onDelete, currentUserId, adminView
               </div>
             </div>
           </div>
-          <div className="absolute bottom-3 right-3 bg-red-600 text-white p-1 rounded-lg flex items-center gap-1">
-            <YoutubeIcon className="h-4 w-4" />
-            <span className="text-xs font-medium">YouTube</span>
-          </div>
         </div>
       )}
     

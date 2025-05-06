@@ -20,6 +20,9 @@ export interface Comment {
   userId: string;
   userName: string;
   createdAt: string;
+  updatedAt?: string;
+  parentCommentId?: string;
+  replies?: Comment[];
 }
 
 export interface SkillPostRequest {
@@ -32,6 +35,7 @@ export interface SkillPostRequest {
 
 export interface CommentRequest {
   content: string;
+  parentCommentId?: string;
 }
 
 export interface SkillPostResponse {
