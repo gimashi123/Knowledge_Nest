@@ -204,7 +204,7 @@ export default function ChallengeListPage() {
                                     </Button>
                                 </div>
                                 <Button asChild variant="default">
-                                    <Link to={`/challenge-attempt/${challenge.id}/attempt`}>Attempt Challenge</Link>
+                                    <Link to={`/user-dashboard/challenge-attempt/${challenge.id}/attempt`}>Attempt Challenge</Link>
                                 </Button>
                             </div>
                         </CardContent>

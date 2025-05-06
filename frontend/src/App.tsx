@@ -69,7 +69,7 @@ export default function App() {
 
                                 <Route path="challenges" element={<ChallengeListPage />} />
                                 <Route path="add-challenges" element={<ChallengeForm />} />
-                                <Route path="challenge-attempt" element={<ChallengeAttemptPage />} />
+                                <Route path="challenge-attempt/:id/attempt" element={<ChallengeAttemptPage />} />
 
                                 {/*<Route path="posts" element={<PostsPage />} />*/}
                                 {/*<Route path="users" element={<UsersPage />} />*/}
