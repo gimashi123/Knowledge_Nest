@@ -20,10 +20,16 @@ export default function ChallengeAttemptPage() {
         const fetchChallenge = async () => {
             try {
                 const response = await api.get(`/api/challenges/${id}`);
-                setChallenge(response.data);
+                const fetchedChallenge = response.data;
+
+                // Ensure tasks is always an array to avoid runtime .map() error
+                if (!Array.isArray(fetchedChallenge.tasks)) {
+                    fetchedChallenge.tasks = [];
+                }
+
+                setChallenge(fetchedChallenge);
                 setStartTime(new Date());
-                // Auto-expand the first task
-                setExpandedTask(0);
+                setExpandedTask(0); // Auto-expand first task
             } catch (error) {
                 console.error('Error fetching challenge:', error);
             } finally {
@@ -73,7 +79,7 @@ export default function ChallengeAttemptPage() {
             <div className="flex flex-col md:flex-row gap-6">
                 {/* Main Content (Left Side) */}
                 <div className="md:w-2/3">
-                    {/* Challenge Header Section */}
+                    {/* Challenge Header */}
                     <div className="bg-white shadow-sm rounded-lg p-6 mb-6 border border-gray-200">
                         <div className="flex justify-between items-start">
                             <div>
@@ -93,58 +99,59 @@ export default function ChallengeAttemptPage() {
 
                     {/* Tasks Section */}
                     <div className="space-y-4">
-                        {challenge.tasks.map((task, index) => (
-                            <Card key={index} className="hover:shadow-md transition-shadow overflow-hidden">
-                                <button
-                                    type="button"
-                                    className="w-full text-left"
-                                    onClick={() => toggleTask(index)}
-                                >
-                                    <CardHeader className="bg-gray-50 border-b">
-                                        <CardTitle className="flex items-center justify-between">
-                                            <div className="flex items-center">
-                                                <span className="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">
-                                                    {index + 1}
-                                                </span>
-                                                <span className="text-lg">Task {index + 1}</span>
-                                            </div>
-                                            {expandedTask === index ? (
-                                                <ChevronUp className="h-5 w-5 text-gray-500" />
-                                            ) : (
-                                                <ChevronDown className="h-5 w-5 text-gray-500" />
-                                            )}
-                                        </CardTitle>
-                                    </CardHeader>
-                                </button>
+                        {Array.isArray(challenge.tasks) &&
+                            challenge.tasks.map((task, index) => (
+                                <Card key={index} className="hover:shadow-md transition-shadow overflow-hidden">
+                                    <button
+                                        type="button"
+                                        className="w-full text-left"
+                                        onClick={() => toggleTask(index)}
+                                    >
+                                        <CardHeader className="bg-gray-50 border-b">
+                                            <CardTitle className="flex items-center justify-between">
+                                                <div className="flex items-center">
+                                                    <span className="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">
+                                                        {index + 1}
+                                                    </span>
+                                                    <span className="text-lg">Task {index + 1}</span>
+                                                </div>
+                                                {expandedTask === index ? (
+                                                    <ChevronUp className="h-5 w-5 text-gray-500" />
+                                                ) : (
+                                                    <ChevronDown className="h-5 w-5 text-gray-500" />
+                                                )}
+                                            </CardTitle>
+                                        </CardHeader>
+                                    </button>
 
-                                {expandedTask === index && (
-                                    <CardContent className="p-6 animate-in fade-in">
-                                        <p className="mb-4 text-gray-700">{task}</p>
-                                        <textarea
-                                            className="w-full min-h-[120px] p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                                            placeholder="Type your answer here..."
-                                            value={answers[index]}
-                                            onChange={(e) => handleAnswerChange(index, e.target.value)}
-                                        />
-                                        <div className="flex justify-between items-center mt-2">
-                                            <div className="text-xs text-gray-500">
-                                                Character count: {answers[index].length}
+                                    {expandedTask === index && (
+                                        <CardContent className="p-6 animate-in fade-in">
+                                            <p className="mb-4 text-gray-700">{task}</p>
+                                            <textarea
+                                                className="w-full min-h-[120px] p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                                                placeholder="Type your answer here..."
+                                                value={answers[index]}
+                                                onChange={(e) => handleAnswerChange(index, e.target.value)}
+                                            />
+                                            <div className="flex justify-between items-center mt-2">
+                                                <div className="text-xs text-gray-500">
+                                                    Character count: {answers[index].length}
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    className="text-sm text-blue-600 hover:text-blue-800"
+                                                    onClick={() => toggleTask(index)}
+                                                >
+                                                    Collapse task
+                                                </button>
                                             </div>
-                                            <button
-                                                type="button"
-                                                className="text-sm text-blue-600 hover:text-blue-800"
-                                                onClick={() => toggleTask(index)}
-                                            >
-                                                Collapse task
-                                            </button>
-                                        </div>
-                                    </CardContent>
-                                )}
-                            </Card>
-                        ))}
+                                        </CardContent>
+                                    )}
+                                </Card>
+                            ))}
                     </div>
 
-                    {/* Submit Button Section */}
+                    {/* Submit Button */}
                     <div className="mt-8 flex justify-end">
                         <Button
                             onClick={submitAttempt}
@@ -155,7 +162,7 @@ export default function ChallengeAttemptPage() {
                     </div>
                 </div>
 
-                {/* Instructions Sidebar (Right Side) */}
+                {/* Instructions Sidebar */}
                 <div className="md:w-1/3">
                     <div className="bg-white shadow-sm rounded-lg p-6 border border-gray-200 sticky top-6">
                         <h2 className="font-semibold text-blue-800 mb-4 text-xl">Instructions</h2>
