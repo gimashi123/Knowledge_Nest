@@ -29,10 +29,10 @@ export function UserSidebar() {
                         <Button
                             variant="ghost"
                             className="justify-start gap-2"
-                            onClick={() => navigate("/admin-dashboard/progress")}
+                            onClick={() => navigate("/user-dashboard/progress")}
                         >
                             <LayoutDashboard className="h-4 w-4" />
-                            Dashboard
+                            Progress
                         </Button>
                         <Button
                             variant="ghost"

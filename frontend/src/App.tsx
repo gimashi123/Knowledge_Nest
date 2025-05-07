@@ -14,11 +14,12 @@ import ProfilePage from "@/pages/ProfilePage";
 import OAuthSuccessPage from "@/pages/OAuthSuccessPage";
 import AdminDashboardPage from "@/pages/AdminDashboardPage";
 import AdminProfilePage from "@/pages/AdminProfilePage";
+
 import { AuthProvider, useAuth } from "@/contexts/auth-context";
 
-import {ProgressPage} from "@/pages/authorized/admin/ProgressPage.tsx";
 import {UserDashboardPage} from "@/pages/UserDashboardPage.tsx";
 import LaunchPage from "@/pages/LaunchPage.tsx";
+import {ProgressPage} from "@/pages/authorized/user/ProgressTrack.tsx";
 
 
 function PrivateRoute() {
@@ -44,7 +45,6 @@ export default function App() {
                         <Route path="/admin-dashboard" element={<AdminDashboardPage />} />
                         <Route path="/user-dashboard" element={<UserDashboardPage />} />
                         <Route path="/admin-profile" element={<AdminProfilePage />} />
-                        <Route path={'/admin-progress'} element={<ProgressPage/>} />
 
                         <Route element={<PrivateRoute />}>
                             <Route path="/dashboard" element={<Dashboard />} />
@@ -53,7 +53,6 @@ export default function App() {
                             {/* Admin Nested Routes */}
                             <Route path="/admin-dashboard" element={<AdminDashboardPage />}>
                                 {/*<Route index element={<AdminHome />} /> /!* Create this component *!/*/}
-                                <Route path="progress" element={<ProgressPage />} />
                                 {/*<Route path="posts" element={<PostsPage />} />*/}
                                 {/*<Route path="users" element={<UsersPage />} />*/}
                                 {/*<Route path="settings" element={<SettingsPage />} />*/}
@@ -61,7 +60,7 @@ export default function App() {
                             </Route>
                             <Route path="/user-dashboard" element={<UserDashboardPage />}>
                                 {/*<Route index element={<AdminHome />} /> /!* Create this component *!/*/}
-                                <Route path="progress" element={<ProgressPage />} />
+                                <Route path="progress" element={<ProgressPage/>} />
                                 {/*<Route path="posts" element={<PostsPage />} />*/}
                                 {/*<Route path="users" element={<UsersPage />} />*/}
                                 {/*<Route path="settings" element={<SettingsPage />} />*/}
