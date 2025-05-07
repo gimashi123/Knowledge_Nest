@@ -8,13 +8,14 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { SkillPostForm } from '@/components/skillpost/SkillPostForm';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { ArrowLeftIcon, HeartIcon, MessageCircleIcon, Share2Icon, EditIcon, TrashIcon, Edit2Icon } from 'lucide-react';
+import { ArrowLeftIcon, HeartIcon, MessageCircleIcon, Share2Icon, EditIcon, TrashIcon, Edit2Icon, YoutubeIcon } from 'lucide-react';
 import { SkillPost, SkillPostRequest, CommentRequest } from '@/types/skillpost';
 import { SkillPostService } from '@/services/skillPostService';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { extractYoutubeVideoId, getYoutubeEmbedUrl } from '@/utils/youtubeUtils';
 
 export default function SkillPostDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -186,6 +187,42 @@ export default function SkillPostDetailPage() {
     ));
   };
 
+  // Helper to render YouTube video if present
+  const renderYoutubeVideo = () => {
+    if (!post || !post.youtubeUrl) return null;
+    
+    const videoId = extractYoutubeVideoId(post.youtubeUrl);
+    if (!videoId) return null;
+    
+    const embedUrl = `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`;
+    
+    return (
+      <div className="my-6">
+        <div className="relative w-full pt-[56.25%] rounded-lg overflow-hidden shadow-lg">
+          <iframe
+            className="absolute top-0 left-0 w-full h-full"
+            src={embedUrl}
+            title="YouTube video"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          ></iframe>
+        </div>
+        <div className="mt-2 flex items-center text-sm text-muted-foreground">
+          <YoutubeIcon className="h-4 w-4 mr-1 text-red-500" />
+          <a 
+            href={post.youtubeUrl} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="hover:text-primary hover:underline"
+            onClick={(e) => e.stopPropagation()}
+          >
+            Watch on YouTube
+          </a>
+        </div>
+      </div>
+    );
+  };
+
   // Safe render helper for tags
   const renderTags = () => {
     if (!post) return null;
@@ -248,10 +285,16 @@ export default function SkillPostDetailPage() {
                 </div>
                 <span className="mx-2">•</span>
                 <span>
-                  {post.createdAt ? format(new Date(post.createdAt), 'MMM d, yyyy') : 'Recently'}
+                  {post.createdAt ? format(new Date(post.createdAt), 'MMM d, yyyy') : 'Unknown date'}
                 </span>
-                {post.updatedAt && post.updatedAt !== post.createdAt && (
-                  <span className="ml-2 text-muted-foreground">(Edited)</span>
+                {post.youtubeUrl && (
+                  <>
+                    <span className="mx-2">•</span>
+                    <div className="flex items-center text-red-500">
+                      <YoutubeIcon className="h-4 w-4 mr-1" />
+                      <span>YouTube</span>
+                    </div>
+                  </>
                 )}
               </CardDescription>
             </div>
@@ -260,8 +303,9 @@ export default function SkillPostDetailPage() {
               <div className="flex space-x-2">
                 <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button variant="outline" size="icon">
+                    <Button variant="outline" size="sm" className="flex items-center gap-1">
                       <EditIcon className="h-4 w-4" />
+                      <span>Edit</span>
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-[600px]">
@@ -275,22 +319,23 @@ export default function SkillPostDetailPage() {
                 </Dialog>
                 
                 <Button 
-                  variant="outline" 
-                  size="icon" 
-                  className="text-destructive" 
+                  variant="destructive" 
+                  size="sm" 
+                  className="flex items-center gap-1"
                   onClick={() => setShowDeleteAlert(true)}
                 >
                   <TrashIcon className="h-4 w-4" />
+                  <span>Delete</span>
                 </Button>
               </div>
             )}
           </div>
         </CardHeader>
         
-        <CardContent className="space-y-6">
-          <p className="text-muted-foreground">{post.description}</p>
+        <CardContent className="space-y-4">
+          {renderYoutubeVideo()}
           
-          <div className="prose max-w-none">
+          <div className="space-y-4 prose prose-sm max-w-none">
             {renderContent()}
           </div>
           
