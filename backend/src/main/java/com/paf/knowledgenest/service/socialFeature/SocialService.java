@@ -1,23 +1,28 @@
 package com.paf.knowledgenest.service.socialFeature;
 
 
-import com.paf.knowledgenest.dto.request.FollowerRequestDTO;
+import com.paf.knowledgenest.dto.requests.ProgressRequestDTO;
+import com.paf.knowledgenest.dto.responses.UserResponse;
+import com.paf.knowledgenest.dto.responses.skillPost.FollowerFollowingDTO;
+import com.paf.knowledgenest.dto.responses.skillPost.UserFollowResponse;
 import com.paf.knowledgenest.model.user.User;
 import com.paf.knowledgenest.repository.user.UserRepository;
 import com.paf.knowledgenest.utils.ApiResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 public class SocialService {
 
     @Autowired
     private UserRepository userRepository;
 
-    public ApiResponse<Boolean> followUser(FollowerRequestDTO followerRequestDTO) {
+    public ApiResponse<Boolean> followUser(ProgressRequestDTO.FollowerRequestDTO followerRequestDTO) {
         try {
             if (followerRequestDTO.getFollowerId().equals(followerRequestDTO.getUserId())) {
                 throw new RuntimeException("You can't follow yourself");
@@ -52,7 +57,7 @@ public class SocialService {
         }
     }
 
-    public ApiResponse<Boolean> unfollowUser(FollowerRequestDTO followerRequestDTO) {
+    public ApiResponse<Boolean> unfollowUser(ProgressRequestDTO.FollowerRequestDTO followerRequestDTO) {
         try {
             if (followerRequestDTO.getFollowerId().equals(followerRequestDTO.getUserId())) {
                 throw new RuntimeException("You can't unfollow yourself");
@@ -105,6 +110,24 @@ public class SocialService {
             return ApiResponse.errorResponse("Unexpected error occurred while fetching following users");
         }
     }
+    public ApiResponse<List<User>> getFollowersUsers(String userId) {
+        try {
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            List<String> followerIds = user.getFollowers();
+            if (followerIds == null || followerIds.isEmpty()) {
+                return ApiResponse.successResponse("User has no followers", new ArrayList<>());
+            }
+
+            List<User> followerUsers = userRepository.findAllById(followerIds);
+            return ApiResponse.successResponse("Followers fetched", followerUsers);
+        } catch (RuntimeException e) {
+            return ApiResponse.errorResponse(e.getMessage());
+        } catch (Exception e) {
+            return ApiResponse.errorResponse("Unexpected error occurred while fetching followers");
+        }
+    }
 
     public ApiResponse<Boolean> deleteUser(String userId) {
         try {
@@ -122,6 +145,54 @@ public class SocialService {
         }
     }
 
+
+    public ApiResponse<FollowerFollowingDTO> getFollowersAndFolowingUsers(String userId) {
+        try {
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            List<String> followers = user.getFollowers();
+            List<String> following = user.getFollowing();
+
+            // Handle potential nulls
+            if (followers == null) followers = new ArrayList<>();
+            if (following == null) following = new ArrayList<>();
+
+            List<UserFollowResponse> followerDTO = followers.stream().map(followerId -> {
+                User follower = userRepository.findById(followerId)
+                        .orElseThrow(() -> new RuntimeException("User not found"));
+                return UserFollowResponse.builder()
+                        .email(follower.getEmail())
+                        .name(follower.getName())
+                        .username(follower.getUsername())
+                        .profilePic(follower.getProfilePic())
+                        .userId(follower.getId())
+                        .build();
+            }).toList();
+
+            List<UserFollowResponse> followingDTO = following.stream().map(followingId -> {
+                User followingUser = userRepository.findById(followingId)
+                        .orElseThrow(() -> new RuntimeException("User not found"));
+                return UserFollowResponse.builder()
+                        .email(followingUser.getEmail())
+                        .name(followingUser.getName())
+                        .username(followingUser.getUsername())
+                        .profilePic(followingUser.getProfilePic())
+                        .userId(followingUser.getId())
+                        .build();
+            }).toList();
+
+            FollowerFollowingDTO response = new FollowerFollowingDTO();
+            response.setFollowers(followerDTO);
+            response.setFollowings(followingDTO);
+
+            return ApiResponse.successResponse("Followers/Following fetched", response);
+
+        } catch (Exception e) {
+            log.error("Error in getFollowersAndFolowingUsers: {}", e.getMessage(), e);
+            return ApiResponse.errorResponse("Unexpected error occurred while fetching followers");
+        }
+    }
 
 
 

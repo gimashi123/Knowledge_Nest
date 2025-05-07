@@ -1,11 +1,9 @@
 package com.paf.knowledgenest.service.user;
 
-import com.paf.knowledgenest.dto.JwtAuthenticationResponse;
 import com.paf.knowledgenest.dto.LoginRequest;
 import com.paf.knowledgenest.dto.RegisterRequest;
-import com.paf.knowledgenest.dto.request.FollowerRequestDTO;
-import com.paf.knowledgenest.dto.response.LoginResponse;
-import com.paf.knowledgenest.dto.response.UserResponse;
+import com.paf.knowledgenest.dto.responses.LoginResponse;
+import com.paf.knowledgenest.dto.responses.UserResponse;
 import com.paf.knowledgenest.model.user.User;
 import com.paf.knowledgenest.repository.user.UserRepository;
 import com.paf.knowledgenest.security.JwtUtils;
@@ -21,7 +19,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Optional;
 
 @Slf4j

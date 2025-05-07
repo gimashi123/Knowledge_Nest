@@ -1,4 +1,4 @@
-package com.paf.knowledgenest.dto.skillpost;
+package com.paf.knowledgenest.dto.requests.skillPost;
 
 import com.paf.knowledgenest.model.skillpost.Comment;
 import com.paf.knowledgenest.model.skillpost.SkillPost;
@@ -12,8 +12,6 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class SkillPostDto {

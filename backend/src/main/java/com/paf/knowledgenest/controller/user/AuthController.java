@@ -2,8 +2,8 @@ package com.paf.knowledgenest.controller.user;
 
 import com.paf.knowledgenest.dto.RegisterRequest;
 import com.paf.knowledgenest.dto.LoginRequest;
-import com.paf.knowledgenest.dto.JwtAuthenticationResponse;
-import com.paf.knowledgenest.dto.response.LoginResponse;
+import com.paf.knowledgenest.dto.responses.LoginResponse;
+import com.paf.knowledgenest.dto.responses.UserResponse;
 import com.paf.knowledgenest.model.user.User;
 
 import com.paf.knowledgenest.repository.user.UserRepository;
@@ -69,8 +69,8 @@ public class AuthController {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         
         // Create a response with properly formatted role and user ID
-        com.paf.knowledgenest.dto.response.UserResponse userResponse = 
-            com.paf.knowledgenest.dto.response.UserResponse.builder()
+        UserResponse userResponse =
+            UserResponse.builder()
                 .id(user.getId())  // Include MongoDB ID 
                 .name(user.getName())
                 .email(user.getEmail())

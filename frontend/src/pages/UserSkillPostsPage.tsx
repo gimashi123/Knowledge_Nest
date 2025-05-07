@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { UserSidebar } from '@/components/sidebar/UserSidebar';
 import SkillPostsPage from '@/pages/skillpost/SkillPostsPage';

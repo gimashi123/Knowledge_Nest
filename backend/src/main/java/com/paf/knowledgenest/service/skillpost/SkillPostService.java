@@ -1,7 +1,6 @@
 package com.paf.knowledgenest.service.skillpost;
 
-import com.paf.knowledgenest.dto.skillpost.SkillPostDto;
-import com.paf.knowledgenest.model.skillpost.SkillPost;
+import com.paf.knowledgenest.dto.requests.skillPost.SkillPostDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

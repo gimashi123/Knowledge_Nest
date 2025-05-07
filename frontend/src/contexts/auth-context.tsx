@@ -34,7 +34,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 try {
                     const userData = await getCurrentUser();
                     if (userData) {
-                        console.log('Retrieved full user details:', userData);
                         // Update user with complete profile including ID
                         setCurrentUser(prev => ({
                             ...prev as User,
@@ -120,3 +119,4 @@ export const useAuth = (): AuthContextType => {
     }
     return context;
 };
+

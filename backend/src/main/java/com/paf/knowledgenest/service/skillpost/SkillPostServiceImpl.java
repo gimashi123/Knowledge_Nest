@@ -1,6 +1,6 @@
 package com.paf.knowledgenest.service.skillpost;
 
-import com.paf.knowledgenest.dto.skillpost.SkillPostDto;
+import com.paf.knowledgenest.dto.requests.skillPost.SkillPostDto;
 import com.paf.knowledgenest.exception.BatchOperationException;
 import com.paf.knowledgenest.exception.ResourceNotFoundException;
 import com.paf.knowledgenest.exception.UnauthorizedException;
@@ -11,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

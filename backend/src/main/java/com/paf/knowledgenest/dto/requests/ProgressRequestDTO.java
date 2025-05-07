@@ -9,4 +9,10 @@ public class ProgressRequestDTO {
         private String title;
         private List<String> topics;
         private Integer progress;
+
+    @Data
+    public static class FollowerRequestDTO {
+        private String userId;
+        private String followerId;
+    }
 }

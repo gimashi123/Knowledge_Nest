@@ -1,6 +1,6 @@
 package com.paf.knowledgenest.controller.skillpost;
 
-import com.paf.knowledgenest.dto.skillpost.SkillPostDto;
+import com.paf.knowledgenest.dto.requests.skillPost.SkillPostDto;
 import com.paf.knowledgenest.model.user.User;
 import com.paf.knowledgenest.repository.user.UserRepository;
 import com.paf.knowledgenest.service.skillpost.SkillPostService;

@@ -13,17 +13,14 @@ api.interceptors.request.use((config) => {
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
     }
-    
-    // Log request for debugging
-    console.log(`Adding auth token to request: ${config.method?.toUpperCase()} ${config.url}`);
-    
+
     return config;
 });
 
 // Add response interceptor for debugging
 api.interceptors.response.use(
     (response) => {
-        console.log(`API Response from ${response.config.url}:`, response.status);
+
         return response;
     },
     (error) => {

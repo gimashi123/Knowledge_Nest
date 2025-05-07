@@ -1,4 +1,4 @@
-package com.paf.knowledgenest.dto.response;
+package com.paf.knowledgenest.dto.responses;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
