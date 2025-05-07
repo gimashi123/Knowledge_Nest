@@ -10,7 +10,7 @@ import {
     Settings,
     LogOut,
     Package2,
-    Trophy // Added Trophy icon for challenges
+    Trophy, // Added Trophy icon for challenges
     GraduationCap
 } from "lucide-react";
 
@@ -60,7 +60,7 @@ export function UserSidebar() {
                         <Button
                             variant="ghost"
                             className="justify-start gap-2"
-                            onClick={() => navigate("/user-dashboard/challenges")}
+                            onClick={() => navigate("/challenges")}
                         >
                             <Trophy className="h-4 w-4" />
                             View Challenges
@@ -68,7 +68,7 @@ export function UserSidebar() {
                         <Button
                             variant="ghost"
                             className="justify-start gap-2"
-                            onClick={() => navigate("/user-dashboard/add-challenges")}
+                            onClick={() => navigate("/add-challenges")}
                         >
                             <Trophy className="h-4 w-4" />
                             Create Challenge
