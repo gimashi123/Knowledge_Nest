@@ -17,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -131,13 +132,18 @@ public class SkillPostController {
     // Get posts by multiple tags
     @GetMapping("/tags")
     public ResponseEntity<Page<SkillPostDto.Response>> getPostsByTags(
-            @RequestParam List<String> tags,
+            @RequestParam String tags,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             Authentication authentication) {
         String userId = getUserIdFromAuth(authentication);
         Pageable pageable = PageRequest.of(page, size);
-        Page<SkillPostDto.Response> posts = skillPostService.getPostsByTags(tags, pageable, userId);
+        
+        // Split comma-separated tags
+        List<String> tagList = Arrays.asList(tags.split(","));
+        System.out.println("Filtering by tags: " + tagList);
+        
+        Page<SkillPostDto.Response> posts = skillPostService.getPostsByTags(tagList, pageable, userId);
         return ResponseEntity.ok(posts);
     }
 
@@ -188,6 +194,24 @@ public class SkillPostController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    // Reply to a comment
+    @PostMapping("/{postId}/comments/{commentId}/replies")
+    public ResponseEntity<SkillPostDto.Response> replyToComment(
+            @PathVariable String postId,
+            @PathVariable String commentId,
+            @Valid @RequestBody SkillPostDto.CommentRequest request,
+            Authentication authentication) {
+        String userId = getUserIdFromAuth(authentication);
+        String userName = authentication.getName();
+        
+        // Set the parent comment ID in the request
+        request.setParentCommentId(commentId);
+        
+        SkillPostDto.Response response = skillPostService.replyToComment(
+            postId, commentId, request, userId, userName);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
     // Update comment
     @PutMapping("/{postId}/comments/{commentId}")
     public ResponseEntity<SkillPostDto.Response> updateComment(
@@ -209,6 +233,17 @@ public class SkillPostController {
         String userId = getUserIdFromAuth(authentication);
         SkillPostDto.Response response = skillPostService.deleteComment(postId, commentId, userId);
         return ResponseEntity.ok(response);
+    }
+
+    // Get all unique tags
+    @GetMapping("/tags/all")
+    public ResponseEntity<List<String>> getAllTags(Authentication authentication) {
+        // Check authentication
+        getUserIdFromAuth(authentication);
+        
+        // Get all unique tags from the service
+        List<String> tags = skillPostService.getAllUniqueTags();
+        return ResponseEntity.ok(tags);
     }
 
     // Helper method to extract userId from authentication

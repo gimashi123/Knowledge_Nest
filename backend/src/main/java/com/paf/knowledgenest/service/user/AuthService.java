@@ -42,27 +42,31 @@ public class AuthService {
     }
 
     public ApiResponse<String> registerUser(RegisterRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
-            return ApiResponse.errorResponse("Email address already in use.");
+        try {
+            if (userRepository.existsByEmail(request.getEmail())) {
+                return ApiResponse.errorResponse("Email address already in use.");
+            }
+
+            String hashedPassword = passwordEncoder.encode(request.getPassword());
+
+            User user = new User();
+            user.setEmail(request.getEmail());
+            user.setPassword(hashedPassword);
+            user.setName(request.getName());
+
+            if(request.getRole() != null) {
+                user.setRole(request.getRole());
+            } else {
+                user.setRole("USER");
+            }
+
+            // Save user once
+            User savedUser = userRepository.save(user);
+            return ApiResponse.successResponse("User Registered Successfully", jwtUtils.generateToken(savedUser.getEmail()));
+        } catch (Exception e) {
+            log.error("Error registering user: {}", e.getMessage(), e);
+            return ApiResponse.errorResponse("Registration failed. Please try again later.");
         }
-
-        String hashedPassword = passwordEncoder.encode(request.getPassword());
-
-        User user = new User();
-        user.setEmail(request.getEmail());
-        user.setPassword(hashedPassword);
-        user.setName(request.getName());
-
-        if(request.getRole() != null) {
-            user.setRole(request.getRole());
-        } else {
-            user.setRole("USER");
-        }
-
-        userRepository.save(user);
-
-        userRepository.save(user);
-         return ApiResponse.successResponse("User Registered Successfully", jwtUtils.generateToken(user.getEmail()));
     }
 
     public ApiResponse<LoginResponse> loginUser(LoginRequest request) {
@@ -81,17 +85,26 @@ public class AuthService {
 
             // Get UserDetails
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-
+            
+            // Get the full user from repository to get accurate user data including name
+            Optional<User> userOpt = userRepository.findByEmail(userDetails.getUsername());
+            if (userOpt.isEmpty()) {
+                return ApiResponse.errorResponse("User not found");
+            }
+            
+            User user = userOpt.get();
+            
             // Generate JWT token
             String token = jwtUtils.generateToken(userDetails.getUsername());
 
             LoginResponse loginResponse = LoginResponse.builder()
                     .accessToken(token)
                     .user(UserResponse.builder()
-                          .role(userDetails.getAuthorities().iterator().next().getAuthority())
-                            .email(userDetails.getUsername())
-                            .name(userDetails.getUsername())
-                            .build())
+                          .id(user.getId())
+                          .role("ROLE_" + user.getRole())  // Ensure ROLE_ prefix is added
+                          .email(user.getEmail())
+                          .name(user.getName())
+                          .build())
                     .build();
             return ApiResponse.successResponse("User Login Successfully", loginResponse);
 
