@@ -1,4 +1,3 @@
-
 import {
     BrowserRouter,
     Routes,
@@ -18,13 +17,14 @@ import AdminPostsPage from "@/pages/AdminPostsPage";
 import { AuthProvider, useAuth } from "@/contexts/auth-context";
 import { NotificationProvider } from "@/contexts/notification-context";
 
-import {ProgressPage} from "@/pages/authorized/admin/ProgressPage.tsx";
+
 import {UserDashboardPage} from "@/pages/UserDashboardPage.tsx";
 import LaunchPage from "@/pages/LaunchPage.tsx";
 import ChallengeListPage from "@/pages/Challenges/ChallengeListPage.tsx";
 import {ChallengeForm} from "@/pages/Challenges/ChallengeForm.tsx";
 import ChallengeAttemptPage from "@/pages/Challenges/ChallengeAttemptPage.tsx";
 import {ProgressPage} from "@/pages/authorized/user/ProgressTrack.tsx";
+
 
 import SkillPostsPage from "@/pages/skillpost/SkillPostsPage";
 import SkillPostDetailPage from "@/pages/skillpost/SkillPostDetailPage";
@@ -113,9 +113,11 @@ export default function App() {
                                 <Route path="/user-settings" element={<UserSettingsPage />} />
                             </Route>
                         </Route>
+                        </Route>
                     </Routes>
                 </NotificationProvider>
             </AuthProvider>
         </BrowserRouter>
     );
 }
+

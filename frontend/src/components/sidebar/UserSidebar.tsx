@@ -36,7 +36,7 @@ export function UserSidebar() {
                             variant={isActive("/user-dashboard") ? "default" : "ghost"}
                             className="justify-start gap-2"
                             onClick={() => navigate("/user-dashboard")}
-                            onClick={() => navigate("/user-dashboard/progress")}
+                            //onClick={() => navigate("/user-dashboard/progress")}
                         >
                             <LayoutDashboard className="h-4 w-4" />
                             Progress
