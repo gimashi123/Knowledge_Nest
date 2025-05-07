@@ -6,10 +6,10 @@ import {
     LayoutDashboard,
     BookOpen,
     User,
-    FileText,
+    // FileText,
     Settings,
     LogOut,
-    Package2,
+    // Package2,
     Trophy, // Added Trophy icon for challenges
     GraduationCap
 } from "lucide-react";
