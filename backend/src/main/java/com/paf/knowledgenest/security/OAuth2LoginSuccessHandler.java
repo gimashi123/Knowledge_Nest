@@ -1,4 +1,3 @@
-/*
 package com.paf.knowledgenest.security;
 
 import com.paf.knowledgenest.model.user.Role;
@@ -58,4 +57,4 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         response.sendRedirect("http://localhost:5173/oauth-success?token=" + token);
     }
 }
-*/
+
