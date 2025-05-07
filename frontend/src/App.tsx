@@ -15,6 +15,7 @@ import AdminDashboardPage from "@/pages/AdminDashboardPage";
 import AdminProfilePage from "@/pages/AdminProfilePage";
 import AdminPostsPage from "@/pages/AdminPostsPage";
 import { AuthProvider, useAuth } from "@/contexts/auth-context";
+import { NotificationProvider } from "@/contexts/notification-context";
 
 import {ProgressPage} from "@/pages/authorized/admin/ProgressPage.tsx";
 import {UserDashboardPage} from "@/pages/UserDashboardPage.tsx";
@@ -47,36 +48,38 @@ export default function App() {
     return (
         <BrowserRouter>
             <AuthProvider>
-                <Routes>
-                    {/* Public Routes */}
-                    <Route path={'/'} element={<LaunchPage/>} />
-                    <Route path="/login" element={<LoginPage />} />
-                    <Route path="/register" element={<RegisterPage />} />
-                    <Route path="/oauth-success" element={<OAuthSuccessPage />} />
+                <NotificationProvider>
+                    <Routes>
+                        {/* Public Routes */}
+                        <Route path={'/'} element={<LaunchPage/>} />
+                        <Route path="/login" element={<LoginPage />} />
+                        <Route path="/register" element={<RegisterPage />} />
+                        <Route path="/oauth-success" element={<OAuthSuccessPage />} />
 
-                    {/* Private Routes for Everyone */}
-                    <Route element={<PrivateRoute />}>
-                        <Route path="/dashboard" element={<Dashboard />} />
-                        <Route path="/profile" element={<ProfilePage />} />
-                        
-                        {/* Admin Only Routes */}
-                        <Route element={<AdminRoute />}>
-                            <Route path="/admin-dashboard" element={<AdminDashboardPage />} />
-                            <Route path="/admin-profile" element={<AdminProfilePage />} />
-                            <Route path="/admin-progress" element={<ProgressPage/>} />
-                            <Route path="/admin/posts" element={<AdminPostsPage />} />
-                            <Route path="/admin/posts/:id" element={<AdminPostsPage />} />
+                        {/* Private Routes for Everyone */}
+                        <Route element={<PrivateRoute />}>
+                            <Route path="/dashboard" element={<Dashboard />} />
+                            <Route path="/profile" element={<ProfilePage />} />
+                            
+                            {/* Admin Only Routes */}
+                            <Route element={<AdminRoute />}>
+                                <Route path="/admin-dashboard" element={<AdminDashboardPage />} />
+                                <Route path="/admin-profile" element={<AdminProfilePage />} />
+                                <Route path="/admin-progress" element={<ProgressPage/>} />
+                                <Route path="/admin/posts" element={<AdminPostsPage />} />
+                                <Route path="/admin/posts/:id" element={<AdminPostsPage />} />
+                            </Route>
+                            
+                            {/* Regular User Routes */}
+                            <Route element={<UserRoute />}>
+                                <Route path="/user-dashboard" element={<UserDashboardPage />} />
+                                <Route path="/skill-posts" element={<SkillPostsPage />} />
+                                <Route path="/skill-posts/:id" element={<SkillPostDetailPage />} />
+                                <Route path="/user-settings" element={<UserSettingsPage />} />
+                            </Route>
                         </Route>
-                        
-                        {/* Regular User Routes */}
-                        <Route element={<UserRoute />}>
-                            <Route path="/user-dashboard" element={<UserDashboardPage />} />
-                            <Route path="/skill-posts" element={<UserSkillPostsPage />} />
-                            <Route path="/skill-posts/:id" element={<UserSkillPostsPage />} />
-                            <Route path="/user-settings" element={<UserSettingsPage />} />
-                        </Route>
-                    </Route>
-                </Routes>
+                    </Routes>
+                </NotificationProvider>
             </AuthProvider>
         </BrowserRouter>
     );

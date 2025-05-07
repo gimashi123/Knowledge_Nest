@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { Command, CommandGroup, CommandItem, CommandList, CommandInput } from "@/components/ui/command";
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
 
 interface SkillPostsPageProps {
   adminView?: boolean;
@@ -718,128 +719,130 @@ export default function SkillPostsPage({ adminView = false }: SkillPostsPageProp
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">{adminView ? 'Manage Skill Posts' : 'Skill Posts'}</h1>
-        
-        <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-          <DialogTrigger asChild>
-            <Button className="flex items-center gap-2">
-              <PlusIcon className="h-4 w-4" />
-              <span>Create Post</span>
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[600px]">
-            <DialogTitle>{editingPost ? 'Edit Skill Post' : 'Create New Skill Post'}</DialogTitle>
-            <DialogDescription>
-              {editingPost 
-                ? 'Update your skill post details below.' 
-                : 'Share your knowledge with the community by creating a new skill post.'}
-            </DialogDescription>
-            <SkillPostForm
-              post={editingPost || undefined}
-              onSubmit={editingPost ? handleUpdatePost : handleCreatePost}
-              onCancel={closeDialog}
-              isSubmitting={isSubmitting}
-            />
-          </DialogContent>
-        </Dialog>
-      </div>
-      
-      {/* Search form outside of Tabs */}
-      <div className="flex justify-end mb-4">
-        <form onSubmit={handleSearch} className="flex w-full md:w-auto">
-          <Input
-            placeholder="Search skill posts..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full md:w-[300px]"
-          />
-          <Button type="submit" variant="secondary" className="ml-2">
-            <SearchIcon className="h-4 w-4" />
-          </Button>
-        </form>
-      </div>
-      
-      {/* Tag filtering component */}
-      {renderTagFilter()}
-      
-      <Tabs value={activeTab} onValueChange={handleTabChange}>
-        <TabsList className="mb-4">
-          <TabsTrigger value="all">All Posts</TabsTrigger>
-          <TabsTrigger value="trending">Trending</TabsTrigger>
-          <TabsTrigger value="my-posts">My Posts</TabsTrigger>
-        </TabsList>
+    <DashboardLayout>
+      <div className="container mx-auto py-6 space-y-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold">{adminView ? 'Manage Skill Posts' : 'Skill Posts'}</h1>
           
-        {/* Content for each tab */}
-        <TabsContent value="all" className="mt-0">
-          {renderPostContent()}
-        </TabsContent>
+          <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+            <DialogTrigger asChild>
+              <Button className="flex items-center gap-2">
+                <PlusIcon className="h-4 w-4" />
+                <span>Create Post</span>
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[600px]">
+              <DialogTitle>{editingPost ? 'Edit Skill Post' : 'Create New Skill Post'}</DialogTitle>
+              <DialogDescription>
+                {editingPost 
+                  ? 'Update your skill post details below.' 
+                  : 'Share your knowledge with the community by creating a new skill post.'}
+              </DialogDescription>
+              <SkillPostForm
+                post={editingPost || undefined}
+                onSubmit={editingPost ? handleUpdatePost : handleCreatePost}
+                onCancel={closeDialog}
+                isSubmitting={isSubmitting}
+              />
+            </DialogContent>
+          </Dialog>
+        </div>
         
-        <TabsContent value="trending" className="mt-0">
-          {renderPostContent()}
-        </TabsContent>
+        {/* Search form outside of Tabs */}
+        <div className="flex justify-end mb-4">
+          <form onSubmit={handleSearch} className="flex w-full md:w-auto">
+            <Input
+              placeholder="Search skill posts..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full md:w-[300px]"
+            />
+            <Button type="submit" variant="secondary" className="ml-2">
+              <SearchIcon className="h-4 w-4" />
+            </Button>
+          </form>
+        </div>
         
-        <TabsContent value="my-posts" className="mt-0">
-          {renderPostContent()}
-        </TabsContent>
+        {/* Tag filtering component */}
+        {renderTagFilter()}
         
-        <TabsContent value="search" className="mt-0">
-          {renderPostContent()}
-        </TabsContent>
-      </Tabs>
-      
-      {renderPagination()}
-      
-      <div className="flex justify-end mt-4">
-        <Button variant="secondary" onClick={toggleBatchSelectionMode}>
-          {isBatchSelectionMode ? 'Cancel Batch Selection' : 'Batch Select'}
-        </Button>
-        {isBatchSelectionMode && (
-          <Button 
-            variant="destructive" 
-            className="ml-2" 
-            onClick={() => setIsBatchDeleteDialogOpen(true)}
-            disabled={selectedPostIds.length === 0}
-          >
-            Delete Selected
+        <Tabs value={activeTab} onValueChange={handleTabChange}>
+          <TabsList className="mb-4">
+            <TabsTrigger value="all">All Posts</TabsTrigger>
+            <TabsTrigger value="trending">Trending</TabsTrigger>
+            <TabsTrigger value="my-posts">My Posts</TabsTrigger>
+          </TabsList>
+            
+          {/* Content for each tab */}
+          <TabsContent value="all" className="mt-0">
+            {renderPostContent()}
+          </TabsContent>
+          
+          <TabsContent value="trending" className="mt-0">
+            {renderPostContent()}
+          </TabsContent>
+          
+          <TabsContent value="my-posts" className="mt-0">
+            {renderPostContent()}
+          </TabsContent>
+          
+          <TabsContent value="search" className="mt-0">
+            {renderPostContent()}
+          </TabsContent>
+        </Tabs>
+        
+        {renderPagination()}
+        
+        <div className="flex justify-end mt-4">
+          <Button variant="secondary" onClick={toggleBatchSelectionMode}>
+            {isBatchSelectionMode ? 'Cancel Batch Selection' : 'Batch Select'}
           </Button>
-        )}
+          {isBatchSelectionMode && (
+            <Button 
+              variant="destructive" 
+              className="ml-2" 
+              onClick={() => setIsBatchDeleteDialogOpen(true)}
+              disabled={selectedPostIds.length === 0}
+            >
+              Delete Selected
+            </Button>
+          )}
+        </div>
+        
+        <AlertDialog open={!!deletingPostId} onOpenChange={(open) => !open && setDeletingPostId(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete your post.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeletePost} className="bg-destructive text-destructive-foreground">
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+        
+        <AlertDialog open={isBatchDeleteDialogOpen} onOpenChange={setIsBatchDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete the selected posts.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleBatchDelete} className="bg-destructive text-destructive-foreground">
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
-      
-      <AlertDialog open={!!deletingPostId} onOpenChange={(open) => !open && setDeletingPostId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete your post.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeletePost} className="bg-destructive text-destructive-foreground">
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-      
-      <AlertDialog open={isBatchDeleteDialogOpen} onOpenChange={setIsBatchDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the selected posts.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleBatchDelete} className="bg-destructive text-destructive-foreground">
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
+    </DashboardLayout>
   );
 }

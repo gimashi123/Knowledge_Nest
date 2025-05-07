@@ -3,6 +3,7 @@ export interface SkillPost {
   title: string;
   description: string;
   content: string;
+  youtubeUrl?: string;
   userId: string;
   userName: string;
   tags: string[];
@@ -19,17 +20,22 @@ export interface Comment {
   userId: string;
   userName: string;
   createdAt: string;
+  updatedAt?: string;
+  parentCommentId?: string;
+  replies?: Comment[];
 }
 
 export interface SkillPostRequest {
   title: string;
   description: string;
   content: string;
+  youtubeUrl?: string;
   tags: string[];
 }
 
 export interface CommentRequest {
   content: string;
+  parentCommentId?: string;
 }
 
 export interface SkillPostResponse {

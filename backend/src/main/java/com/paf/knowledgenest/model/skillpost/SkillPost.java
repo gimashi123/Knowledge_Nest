@@ -19,6 +19,7 @@ public class SkillPost {
     private String title;
     private String description;
     private String content;
+    private String youtubeUrl;
     private String userId;
     private String userName;
     private List<String> tags = new ArrayList<>();
