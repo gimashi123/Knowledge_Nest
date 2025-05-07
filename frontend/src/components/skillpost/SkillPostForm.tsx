@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { SkillPost, SkillPostRequest } from "@/types/skillpost";
 import { X } from "lucide-react";
+import { extractYoutubeVideoId, getYoutubeThumbnailUrl, isYoutubeUrl } from "@/utils/youtubeUtils";
 
 interface SkillPostFormProps {
   post?: SkillPost;
@@ -18,17 +19,21 @@ interface SkillPostFormProps {
 export function SkillPostForm({ post, onSubmit, onCancel, isSubmitting }: SkillPostFormProps) {
   const [tags, setTags] = useState<string[]>(post?.tags || []);
   const [tagInput, setTagInput] = useState("");
+  const [youtubeUrl, setYoutubeUrl] = useState<string>(post?.youtubeUrl || "");
+  const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
   
   const { register, handleSubmit, reset, formState: { errors } } = useForm<SkillPostRequest>({
     defaultValues: post ? {
       title: post.title,
       description: post.description,
       content: post.content,
+      youtubeUrl: post.youtubeUrl,
       tags: post.tags,
     } : {
       title: "",
       description: "",
       content: "",
+      youtubeUrl: "",
       tags: [],
     },
   });
@@ -39,15 +44,34 @@ export function SkillPostForm({ post, onSubmit, onCancel, isSubmitting }: SkillP
         title: post.title,
         description: post.description,
         content: post.content,
+        youtubeUrl: post.youtubeUrl,
         tags: post.tags,
       });
       setTags(post.tags);
+      setYoutubeUrl(post.youtubeUrl || "");
+      updateThumbnail(post.youtubeUrl || "");
     }
   }, [post, reset]);
+
+  const updateThumbnail = (url: string) => {
+    const videoId = extractYoutubeVideoId(url);
+    if (videoId) {
+      setThumbnailUrl(`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`);
+    } else {
+      setThumbnailUrl(null);
+    }
+  };
+
+  const handleYoutubeUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const url = e.target.value;
+    setYoutubeUrl(url);
+    updateThumbnail(url);
+  };
 
   const handleFormSubmit = (data: SkillPostRequest) => {
     const formData = {
       ...data,
+      youtubeUrl: youtubeUrl,
       tags,
     };
     onSubmit(formData);
@@ -110,6 +134,55 @@ export function SkillPostForm({ post, onSubmit, onCancel, isSubmitting }: SkillP
             />
             {errors.description && (
               <p className="text-sm text-destructive">{errors.description.message}</p>
+            )}
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="youtubeUrl">YouTube Video URL (optional)</Label>
+            <Input
+              id="youtubeUrl"
+              placeholder="Paste YouTube video URL here"
+              value={youtubeUrl}
+              onChange={handleYoutubeUrlChange}
+            />
+            {youtubeUrl && !isYoutubeUrl(youtubeUrl) && (
+              <p className="text-sm text-destructive">Please enter a valid YouTube URL</p>
+            )}
+            {thumbnailUrl && (
+              <div className="mt-3 relative">
+                <img 
+                  src={thumbnailUrl} 
+                  alt="YouTube Thumbnail" 
+                  className="w-full h-auto rounded-md"
+                  onError={(e) => {
+                    console.error('Thumbnail failed to load:', thumbnailUrl);
+                    e.currentTarget.onerror = null;
+                    const videoId = extractYoutubeVideoId(youtubeUrl);
+                    if (videoId) {
+                      e.currentTarget.src = `https://img.youtube.com/vi/${videoId}/default.jpg`;
+                    }
+                  }}
+                />
+                <div className="absolute inset-0 bg-black/10 flex items-center justify-center">
+                  <div className="w-12 h-12 flex items-center justify-center bg-red-600/90 rounded-full">
+                    <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="icon"
+                  className="absolute top-2 right-2 bg-black/50 hover:bg-black/70"
+                  onClick={() => {
+                    setYoutubeUrl("");
+                    setThumbnailUrl(null);
+                  }}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
             )}
           </div>
           

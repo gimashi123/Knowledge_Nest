@@ -194,6 +194,24 @@ public class SkillPostController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    // Reply to a comment
+    @PostMapping("/{postId}/comments/{commentId}/replies")
+    public ResponseEntity<SkillPostDto.Response> replyToComment(
+            @PathVariable String postId,
+            @PathVariable String commentId,
+            @Valid @RequestBody SkillPostDto.CommentRequest request,
+            Authentication authentication) {
+        String userId = getUserIdFromAuth(authentication);
+        String userName = authentication.getName();
+        
+        // Set the parent comment ID in the request
+        request.setParentCommentId(commentId);
+        
+        SkillPostDto.Response response = skillPostService.replyToComment(
+            postId, commentId, request, userId, userName);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
     // Update comment
     @PutMapping("/{postId}/comments/{commentId}")
     public ResponseEntity<SkillPostDto.Response> updateComment(

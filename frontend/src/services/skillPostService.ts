@@ -249,6 +249,34 @@ const MockSkillPostService = {
     return post;
   },
   
+  replyToComment: async (postId: string, commentId: string, reply: CommentRequest): Promise<SkillPost> => {
+    const post = MOCK_DATA.find(p => p.id === postId);
+    if (!post) throw new Error(`Post with ID ${postId} not found`);
+    
+    // Find the parent comment
+    const parentComment = post.comments.find(c => c.id === commentId);
+    if (!parentComment) throw new Error(`Comment with ID ${commentId} not found`);
+    
+    // Initialize replies array if it doesn't exist
+    if (!parentComment.replies) {
+      parentComment.replies = [];
+    }
+    
+    // Create new reply
+    const newReply = {
+      id: `reply-${Date.now()}`,
+      ...reply,
+      parentCommentId: commentId,
+      userId: 'current-user',
+      userName: 'currentuser',
+      createdAt: new Date().toISOString()
+    };
+    
+    // Add to replies array
+    parentComment.replies.push(newReply);
+    return post;
+  },
+  
   updateComment: async (postId: string, commentId: string, comment: CommentRequest): Promise<SkillPost> => {
     const post = MOCK_DATA.find(p => p.id === postId);
     if (!post) throw new Error(`Post with ID ${postId} not found`);
@@ -614,6 +642,18 @@ export const SkillPostService = USE_MOCK ? MockSkillPostService : {
       console.error(`Error adding comment to skill post with ID ${postId}:`, error);
       // Fallback to mock if real API fails
       return MockSkillPostService.addComment(postId, comment);
+    }
+  },
+
+  // Reply to a comment
+  replyToComment: async (postId: string, commentId: string, reply: CommentRequest): Promise<SkillPost> => {
+    try {
+      const response = await axios.post(`${API_URL}/${postId}/comments/${commentId}/replies`, reply);
+      return response.data;
+    } catch (error) {
+      console.error(`Error replying to comment ${commentId} on post ${postId}:`, error);
+      // Fallback to mock implementation
+      return MockSkillPostService.replyToComment(postId, commentId, reply);
     }
   },
 
