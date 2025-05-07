@@ -1,15 +1,39 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Code2, ChefHat, Hammer, PlusCircle } from 'lucide-react';
+import { Code2, ChefHat, Hammer, PlusCircle, Trash2, Pencil } from 'lucide-react';
 import { Challenge } from '@/types/challenge';
 import { api } from '@/lib/api';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+    DialogDescription,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+
+type SkillCategory = 'coding' | 'cooking' | 'diy';
+type DifficultyLevel = 'beginner' | 'intermediate' | 'pro';
 
 export default function ChallengeListPage() {
     const [challenges, setChallenges] = useState<Challenge[]>([]);
     const [loading, setLoading] = useState(true);
-    const [filter, setFilter] = useState<'all' | 'coding' | 'cooking' | 'diy'>('all');
+    const [filter, setFilter] = useState<'all' | SkillCategory>('all');
+    const [editingChallenge, setEditingChallenge] = useState<Challenge | null>(null);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [challengeToDelete, setChallengeToDelete] = useState<Challenge | null>(null);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -45,8 +69,77 @@ export default function ChallengeListPage() {
         }
     };
 
+    const handleDeleteClick = (challenge: Challenge) => {
+        setChallengeToDelete(challenge);
+        setIsDeleteDialogOpen(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!challengeToDelete) return;
+
+        try {
+            await api.delete(`/api/challenges/${challengeToDelete.id}`);
+            setChallenges(challenges.filter(challenge => challenge.id !== challengeToDelete.id));
+            setIsDeleteDialogOpen(false);
+        } catch (error) {
+            console.error('Error deleting challenge:', error);
+        }
+    };
+
+    const handleUpdateClick = (challenge: Challenge) => {
+        setEditingChallenge({ ...challenge }); // Create a copy to avoid direct state mutation
+        setIsDialogOpen(true);
+    };
+
+    const handleUpdateSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!editingChallenge) return;
+
+        try {
+            const response = await api.put(`/api/challenges/${editingChallenge.id}`, {
+                title: editingChallenge.title,
+                skillCategory: editingChallenge.skillCategory,
+                difficultyLevel: editingChallenge.difficultyLevel,
+                timeLimit: editingChallenge.timeLimit,
+                // Include any other necessary fields
+            });
+
+            setChallenges(challenges.map(challenge =>
+                challenge.id === editingChallenge.id ? response.data : challenge
+            ));
+            setIsDialogOpen(false);
+        } catch (error) {
+            console.error('Error updating challenge:', error);
+        }
+    };
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!editingChallenge) return;
+        const { name, value } = e.target;
+        setEditingChallenge({
+            ...editingChallenge,
+            [name]: name === 'timeLimit' ? parseInt(value) : value
+        });
+    };
+
+    const handleCategoryChange = (value: SkillCategory) => {
+        if (!editingChallenge) return;
+        setEditingChallenge({
+            ...editingChallenge,
+            skillCategory: value
+        });
+    };
+
+    const handleDifficultyChange = (value: DifficultyLevel) => {
+        if (!editingChallenge) return;
+        setEditingChallenge({
+            ...editingChallenge,
+            difficultyLevel: value
+        });
+    };
+
     if (loading) {
-        return <div>Loading challenges...</div>;
+        return <div className="flex justify-center items-center h-screen">Loading challenges...</div>;
     }
 
     return (
@@ -96,32 +189,154 @@ export default function ChallengeListPage() {
                             <div className="flex justify-between items-start">
                                 <CardTitle>{challenge.title}</CardTitle>
                                 <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
-                  {getCategoryIcon(challenge.skillCategory)}
+                                    {getCategoryIcon(challenge.skillCategory)}
                                     {challenge.skillCategory}
-                </span>
-                            </div>
-                            <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">
-                  Difficulty: {challenge.difficultyLevel}
-                </span>
-                                <span className="text-sm text-muted-foreground">
-                  {challenge.timeLimit} min
-                </span>
+                                </span>
                             </div>
                         </CardHeader>
-                        <CardContent>
-                            <div className="flex justify-between items-center">
-                                <Button asChild variant="outline">
-                                    <Link to={`/challenges/${challenge.id}/attempt`}>Attempt</Link>
-                                </Button>
-                                <Button asChild variant="ghost">
-                                    <Link to={`/challenges/${challenge.id}`}>Details</Link>
+                        <CardContent className="space-y-4">
+                            <div className="space-y-2">
+                                <div className="flex justify-between">
+                                    <span className="text-sm font-medium">Difficulty:</span>
+                                    <span className="text-sm capitalize">{challenge.difficultyLevel}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-sm font-medium">Time Limit:</span>
+                                    <span className="text-sm">{challenge.timeLimit} minutes</span>
+                                </div>
+                            </div>
+                            <div className="flex justify-between items-center pt-2">
+                                <div className="flex gap-2">
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        onClick={() => handleUpdateClick(challenge)}
+                                    >
+                                        <Pencil className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        onClick={() => handleDeleteClick(challenge)}
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                                <Button asChild variant="default">
+                                    <Link to={`/user-dashboard/challenge-attempt/${challenge.id}/attempt`}>Attempt Challenge</Link>
                                 </Button>
                             </div>
                         </CardContent>
                     </Card>
                 ))}
             </div>
+
+            {/* Update Challenge Dialog */}
+            {editingChallenge && (
+                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    <DialogContent className="sm:max-w-[600px]">
+                        <DialogHeader>
+                            <DialogTitle>Update Challenge</DialogTitle>
+                        </DialogHeader>
+                        <form onSubmit={handleUpdateSubmit} className="space-y-6 py-2">
+                            <div className="space-y-3">
+                                <Label htmlFor="title">Title</Label>
+                                <Input
+                                    id="title"
+                                    name="title"
+                                    value={editingChallenge.title}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </div>
+
+                            <div className="space-y-3">
+                                <Label>Category</Label>
+                                <Select
+                                    value={editingChallenge.skillCategory}
+                                    onValueChange={handleCategoryChange}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select category" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="coding">Coding</SelectItem>
+                                        <SelectItem value="cooking">Cooking</SelectItem>
+                                        <SelectItem value="diy">DIY</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="space-y-3">
+                                <Label>Difficulty Level</Label>
+                                <Select
+                                    value={editingChallenge.difficultyLevel}
+                                    onValueChange={handleDifficultyChange}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select difficulty" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="beginner">Beginner</SelectItem>
+                                        <SelectItem value="intermediate">Intermediate</SelectItem>
+                                        <SelectItem value="pro">Pro</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="space-y-3">
+                                <Label htmlFor="timeLimit">Time Limit (minutes)</Label>
+                                <Input
+                                    id="timeLimit"
+                                    name="timeLimit"
+                                    type="number"
+                                    min="1"
+                                    value={editingChallenge.timeLimit}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </div>
+
+                            <div className="flex justify-end gap-2 pt-4">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => setIsDialogOpen(false)}
+                                >
+                                    Cancel
+                                </Button>
+                                <Button type="submit">Save Changes</Button>
+                            </div>
+                        </form>
+                    </DialogContent>
+                </Dialog>
+            )}
+
+            {/* Delete Confirmation Dialog */}
+            <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle>Delete Challenge</DialogTitle>
+                        <DialogDescription>
+                            Are you sure you want to delete "{challengeToDelete?.title}"? This action cannot be undone.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            onClick={() => setIsDeleteDialogOpen(false)}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            onClick={confirmDelete}
+                        >
+                            Delete Challenge
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
