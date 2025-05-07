@@ -25,7 +25,7 @@ export default function ProfilePage() {
   const [isFollowingOpen, setIsFollowingOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { currentUser, logoutUser } = useAuth();
+  const { currentUser, setCurrentUser, logoutUser } = useAuth();
 
   const fetchFollowData = async () => {
     setIsLoading(true);
@@ -84,17 +84,37 @@ export default function ProfilePage() {
     const formData = new FormData();
     formData.append("file", image);
     try {
+      setIsLoading(true);
       await api.post("/api/user/upload-photo", formData);
+
+      // Fetch updated user data
+      const response = await api.get("/api/user/me");
+      const updatedUser = response.data;
+
+      // Update auth context
+      setCurrentUser(updatedUser);
+
       toast.success("Profile picture updated");
       setImage(null);
-    } catch {
+    } catch (error) {
+      console.error("Upload error:", error);
       toast.error("Upload failed. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleDeletePhoto = async () => {
     try {
       await api.delete("/api/user/delete-photo");
+
+      // Fetch updated user data
+      const response = await api.get("/api/user/me");
+      const updatedUser = response.data;
+
+      // Update auth context
+      setCurrentUser(updatedUser);
+
       toast.success("Profile picture removed");
     } catch {
       toast.error("Failed to remove picture");
@@ -119,7 +139,12 @@ export default function ProfilePage() {
                   <div className="relative">
                     <div className="w-32 h-32 mx-auto rounded-full border-4 border-white shadow-md overflow-hidden">
                       {currentUser.profilePic ? (
-                          <img src={currentUser.profilePic} alt="Profile" className="w-full h-full object-cover" />
+                          <img
+                              src={`${currentUser.profilePic}?${Date.now()}`}
+                              alt="Profile"
+                              className="w-full h-full object-cover"
+                              key={Date.now()}
+                          />
                       ) : (
                           <div className="flex items-center justify-center h-full bg-gray-100">
                             <User className="w-16 h-16 text-gray-400" />
@@ -129,7 +154,12 @@ export default function ProfilePage() {
                     <div className="flex justify-center gap-2 mt-4">
                       <label className="cursor-pointer flex items-center gap-1 text-sm text-gray-600 hover:text-gray-800">
                         <Camera className="w-4 h-4" /> Upload
-                        <input type="file" accept="image/*" className="hidden" onChange={(e) => setImage(e.target.files?.[0] || null)} />
+                        <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => setImage(e.target.files?.[0] || null)}
+                        />
                       </label>
                       {currentUser.profilePic && (
                           <button onClick={handleDeletePhoto} className="flex items-center gap-1 text-sm text-red-600 hover:text-red-800">
@@ -138,8 +168,16 @@ export default function ProfilePage() {
                       )}
                     </div>
                     {image && (
-                        <Button onClick={handleImageUpload} className="w-full mt-4 bg-blue-600 hover:bg-blue-700">
-                          Confirm Upload
+                        <Button
+                            onClick={handleImageUpload}
+                            className="w-full mt-4 bg-blue-600 hover:bg-blue-700"
+                            disabled={isLoading}
+                        >
+                          {isLoading ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                              'Confirm Upload'
+                          )}
                         </Button>
                     )}
                   </div>
@@ -236,16 +274,13 @@ export default function ProfilePage() {
                           </div>
                         </div>
                         <div>
-                        <Button variant="outline" size="sm" onClick={() => handleFollowAction(follower.userId, false)}>
-                          Follow
-                        </Button>
-                          <Button className={'m-1 bg-white text-red-500 font-semibold border-black hover:bg-blue-200'}>Remove</Button>
+                          <Button variant="outline" className={'cursor-pointer'} size="sm" onClick={() => handleFollowAction(follower.userId, false)}>
+                            Follow
+                          </Button>
+                          <Button className={'m-1 bg-white text-red-500 font-semibold cursor-pointer border-black hover:bg-blue-200'}>Remove</Button>
                         </div>
-
                       </div>
-
                   ))}
-
                 </div>
             )}
           </DialogContent>
@@ -280,7 +315,7 @@ export default function ProfilePage() {
                             <p className="text-sm text-gray-500">{followed.email}</p>
                           </div>
                         </div>
-                        <Button variant="outline" size="sm" onClick={() => handleFollowAction(followed.userId, true)}>
+                        <Button variant="outline" className={'cursor-pointer'} size="sm" onClick={() => handleFollowAction(followed.userId, true)}>
                           Unfollow
                         </Button>
                       </div>
