@@ -10,6 +10,8 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
+    DialogFooter,
+    DialogDescription,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,7 +23,6 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 
-// Define type aliases for better type safety
 type SkillCategory = 'coding' | 'cooking' | 'diy';
 type DifficultyLevel = 'beginner' | 'intermediate' | 'pro';
 
@@ -31,6 +32,8 @@ export default function ChallengeListPage() {
     const [filter, setFilter] = useState<'all' | SkillCategory>('all');
     const [editingChallenge, setEditingChallenge] = useState<Challenge | null>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [challengeToDelete, setChallengeToDelete] = useState<Challenge | null>(null);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -66,17 +69,25 @@ export default function ChallengeListPage() {
         }
     };
 
-    const handleDelete = async (id: string) => {
+    const handleDeleteClick = (challenge: Challenge) => {
+        setChallengeToDelete(challenge);
+        setIsDeleteDialogOpen(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!challengeToDelete) return;
+
         try {
-            await api.delete(`/api/challenges/${id}`);
-            setChallenges(challenges.filter(challenge => challenge.id !== id));
+            await api.delete(`/api/challenges/${challengeToDelete.id}`);
+            setChallenges(challenges.filter(challenge => challenge.id !== challengeToDelete.id));
+            setIsDeleteDialogOpen(false);
         } catch (error) {
             console.error('Error deleting challenge:', error);
         }
     };
 
     const handleUpdateClick = (challenge: Challenge) => {
-        setEditingChallenge(challenge);
+        setEditingChallenge({ ...challenge }); // Create a copy to avoid direct state mutation
         setIsDialogOpen(true);
     };
 
@@ -85,9 +96,16 @@ export default function ChallengeListPage() {
         if (!editingChallenge) return;
 
         try {
-            const response = await api.put(`/api/challenges/${editingChallenge.id}`, editingChallenge);
+            const response = await api.put(`/api/challenges/${editingChallenge.id}`, {
+                title: editingChallenge.title,
+                skillCategory: editingChallenge.skillCategory,
+                difficultyLevel: editingChallenge.difficultyLevel,
+                timeLimit: editingChallenge.timeLimit,
+                // Include any other necessary fields
+            });
+
             setChallenges(challenges.map(challenge =>
-                challenge.id === editingChallenge.id ? response.data.data : challenge
+                challenge.id === editingChallenge.id ? response.data : challenge
             ));
             setIsDialogOpen(false);
         } catch (error) {
@@ -95,11 +113,12 @@ export default function ChallengeListPage() {
         }
     };
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!editingChallenge) return;
+        const { name, value } = e.target;
         setEditingChallenge({
             ...editingChallenge,
-            [e.target.name]: e.target.value
+            [name]: name === 'timeLimit' ? parseInt(value) : value
         });
     };
 
@@ -120,7 +139,7 @@ export default function ChallengeListPage() {
     };
 
     if (loading) {
-        return <div>Loading challenges...</div>;
+        return <div className="flex justify-center items-center h-screen">Loading challenges...</div>;
     }
 
     return (
@@ -198,7 +217,7 @@ export default function ChallengeListPage() {
                                     <Button
                                         variant="outline"
                                         size="icon"
-                                        onClick={() => handleDelete(challenge.id)}
+                                        onClick={() => handleDeleteClick(challenge)}
                                     >
                                         <Trash2 className="h-4 w-4" />
                                     </Button>
@@ -228,7 +247,6 @@ export default function ChallengeListPage() {
                                     value={editingChallenge.title}
                                     onChange={handleInputChange}
                                     required
-                                    className="mt-1"
                                 />
                             </div>
 
@@ -238,7 +256,7 @@ export default function ChallengeListPage() {
                                     value={editingChallenge.skillCategory}
                                     onValueChange={handleCategoryChange}
                                 >
-                                    <SelectTrigger className="mt-1">
+                                    <SelectTrigger>
                                         <SelectValue placeholder="Select category" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -255,13 +273,13 @@ export default function ChallengeListPage() {
                                     value={editingChallenge.difficultyLevel}
                                     onValueChange={handleDifficultyChange}
                                 >
-                                    <SelectTrigger className="mt-1">
+                                    <SelectTrigger>
                                         <SelectValue placeholder="Select difficulty" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="beginner">Beginner</SelectItem>
                                         <SelectItem value="intermediate">Intermediate</SelectItem>
-                                        <SelectItem value="advanced">Pro</SelectItem>
+                                        <SelectItem value="pro">Pro</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
@@ -272,10 +290,10 @@ export default function ChallengeListPage() {
                                     id="timeLimit"
                                     name="timeLimit"
                                     type="number"
+                                    min="1"
                                     value={editingChallenge.timeLimit}
                                     onChange={handleInputChange}
                                     required
-                                    className="mt-1"
                                 />
                             </div>
 
@@ -293,6 +311,32 @@ export default function ChallengeListPage() {
                     </DialogContent>
                 </Dialog>
             )}
+
+            {/* Delete Confirmation Dialog */}
+            <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle>Delete Challenge</DialogTitle>
+                        <DialogDescription>
+                            Are you sure you want to delete "{challengeToDelete?.title}"? This action cannot be undone.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            onClick={() => setIsDeleteDialogOpen(false)}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            onClick={confirmDelete}
+                        >
+                            Delete Challenge
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

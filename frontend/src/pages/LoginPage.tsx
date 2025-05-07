@@ -89,12 +89,12 @@ export default function LoginPage() {
               <div className="flex justify-center">
                 <a
                     href="http://localhost:8081/oauth2/authorization/google"
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[#b4c3ed] bg-white hover:bg-[#f1f5fc] text-gray-700 text-sm font-medium transition"
+                    className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-[#b4c3ed] bg-white hover:bg-[#f1f5fc] text-gray-700 text-sm font-medium transition w-full"
                 >
                   <img
                       src="https://www.svgrepo.com/show/475656/google-color.svg"
                       alt="Google"
-                      className="w-5 h-5"
+                      className="w-5 h-5 justify-center"
                   />
                   Continue with Google
                 </a>
