@@ -1,187 +1,213 @@
-import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
-import {Progress} from "../../types/progress.ts";
+import {useState, useEffect} from 'react';
+import {useForm} from 'react-hook-form';
+import {z} from 'zod';
+import {zodResolver} from '@hookform/resolvers/zod';
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from '@/components/ui/form';
+import {Input} from '@/components/ui/input';
+import {Button} from '@/components/ui/button';
+import {Badge} from '@/components/ui/badge';
+import {Slider} from '@/components/ui/slider';
+import {Card, CardHeader, CardTitle, CardContent} from '@/components/ui/card';
+import {Progress} from '@/types/progress';
+
+const formSchema = z.object({
+    title: z.string().min(1, 'Title is required'),
+    topics: z.array(z.string()).min(1, 'At least one topic is required'),
+    progress: z.number().min(0).max(100),
+    lastUpdate: z.string().optional(),
+});
 
 interface ProgressFormProps {
-  onSubmit: (progress: Progress) => void;
-  initialData?: Progress | null;
-  onCancel?: () => void;
+    onSubmit: (progress: Progress) => void,
+    initialData?: Progress | null,
+    onCancel?: () => void,
+    defaultValues?: Partial<Progress>
 }
 
-const ProgressForm = ({ onSubmit, initialData, onCancel }: ProgressFormProps) => {
-  const [title, setTitle] = useState('');
-  const [topics, setTopics] = useState<string[]>([]);
-  const [topicInput, setTopicInput] = useState('');
-  const [progressValue, setProgressValue] = useState(0);
-  const [timeValue, setTimeValue] = useState('');
-  const [completedTopics, setCompletedTopics] = useState<string[]>([]);
-  const [isEditing, setIsEditing] = useState(false);
+export const ProgressForm = ({onSubmit, initialData, onCancel, defaultValues}: ProgressFormProps) => {
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            title: '',
+            topics: [],
+            progress: 0,
+            lastUpdate: '',
+        },
+    });
 
-  useEffect(() => {
-    if (initialData) {
-      setTitle(initialData.title);
-      setTopics(initialData.topics);
-      setProgressValue(initialData.progress);
-      setCompletedTopics(initialData.completedTopics || []);
-      if (initialData.lastUpdate) {
-        setTimeValue(initialData.lastUpdate.substring(0, 5)); // Format HH:MM
-      }
-      setIsEditing(true);
-    } else {
-      resetForm();
-      setIsEditing(false);
-    }
-  }, [initialData]);
+    const [topics, setTopics] = useState<string[]>([]);
+    const [topicInput, setTopicInput] = useState('');
+    const [isEditing, setIsEditing] = useState(false);
 
-  const resetForm = () => {
-    setTitle('');
-    setTopics([]);
-    setTopicInput('');
-    setProgressValue(0);
-    setTimeValue('');
-    setCompletedTopics([]);
-  };
+    useEffect(() => {
+        if (initialData) {
+            form.reset({
+                title: initialData.title,
+                topics: initialData.topics,
+                progress: initialData.progress,
+                lastUpdate: initialData.lastUpdate?.substring(0, 5) || '',
+            });
+            setTopics(initialData.topics);
+            setIsEditing(true);
+        }
+    }, [initialData, form]);
 
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    
-    if (!title.trim()) {
-      alert('Please enter a title');
-      return;
-    }
-    
-    if (topics.length === 0) {
-      alert('Please add at least one topic');
-      return;
-    }
-    
-    const progressData: Progress = {
-      title,
-      topics,
-      completedTopics: isEditing ? completedTopics : [],
-      progress: isEditing ? progressValue : 0,
-      lastUpdate: timeValue || undefined,
+    const handleAddTopic = () => {
+        if (topicInput.trim() && !topics.includes(topicInput.trim())) {
+            const newTopics = [...topics, topicInput.trim()];
+            setTopics(newTopics);
+            form.setValue('topics', newTopics);
+            setTopicInput('');
+        }
     };
-    
-    onSubmit(progressData);
-    
-    if (!isEditing) {
-      resetForm();
-    }
-  };
 
-  const handleAddTopic = () => {
-    if (topicInput.trim() && !topics.includes(topicInput.trim())) {
-      setTopics([...topics, topicInput.trim()]);
-      setTopicInput('');
-    }
-  };
+    const handleRemoveTopic = (index: number) => {
+        const newTopics = topics.filter((_, i) => i !== index);
+        setTopics(newTopics);
+        form.setValue('topics', newTopics);
+    };
 
-  const handleRemoveTopic = (index: number) => {
-    const topicToRemove = topics[index];
-    
-    if (completedTopics.includes(topicToRemove)) {
-      setCompletedTopics(completedTopics.filter(t => t !== topicToRemove));
-    }
-    
-    setTopics(topics.filter((_, i) => i !== index));
-  };
+    const handleSubmit = (values: z.infer<typeof formSchema>) => {
+        const progressData: Progress = {
+            ...values,
+            completedTopics: initialData?.completedTopics || [],
+            lastUpdate: values.lastUpdate ? `${values.lastUpdate}:00` : undefined,
+        };
+        onSubmit(progressData);
+        if (!isEditing) {
+            form.reset();
+            setTopics([]);
+        }
+    };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleAddTopic();
-    }
-  };
+    return (
+        <Card className="w-full max-w-md">
+            <CardHeader>
+                <CardTitle>{isEditing ? 'Update Progress' : 'Add New Progress'}</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+                        <FormField
+                            control={form.control}
+                            name="title"
+                            render={({field}) => (
+                                <FormItem>
+                                    <FormLabel>Title</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="Enter title" {...field} />
+                                    </FormControl>
+                                    <FormMessage/>
+                                </FormItem>
+                            )}
+                        />
 
-  return (
-    <div className="progress-form-container">
-      <h3>{isEditing ? 'Update Progress' : 'Add New Progress'}</h3>
-      <form onSubmit={handleSubmit} className="progress-form">
-        <div className="form-group">
-          <label htmlFor="title">Title</label>
-          <input
-            type="text"
-            id="title"
-            value={title}
-            onChange={(e: ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
-            placeholder="Enter title"
-            required
-          />
-        </div>
-        
-        <div className="form-group">
-          <label htmlFor="topics">Topics</label>
-          <div className="topic-input-group">
-            <input
-              type="text"
-              id="topics"
-              value={topicInput}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setTopicInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Add topic"
-            />
-            <button type="button" onClick={handleAddTopic} className="add-topic-btn">Add</button>
-          </div>
-          
-          {topics.length > 0 && (
-            <div className="topics-list">
-              {topics.map((topic, index) => (
-                <div key={index} className="topic-item">
-                  <span>{topic}</span>
-                  <button 
-                    type="button" 
-                    onClick={() => handleRemoveTopic(index)}
-                    className="remove-topic-btn"
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-        
-        <div className="form-group">
-          <label htmlFor="time">Time</label>
-          <input
-            type="time"
-            id="time"
-            value={timeValue}
-            onChange={(e: ChangeEvent<HTMLInputElement>) => setTimeValue(e.target.value)}
-          />
-        </div>
-        
-        {isEditing && (
-          <div className="form-group">
-            <label htmlFor="progress">Progress (%): {progressValue}%</label>
-            <input
-              type="range"
-              id="progress"
-              min="0"
-              max="100"
-              value={progressValue}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setProgressValue(parseInt(e.target.value))}
-            />
-            <p className="progress-help-text">
-              Note: Progress is automatically calculated based on completed topics.
-              You can still manually adjust it if needed.
-            </p>
-          </div>
-        )}
-        
-        <div className="form-actions">
-          <button type="submit" className="submit-btn">
-            {isEditing ? 'Update' : 'Add'}
-          </button>
-          {isEditing && onCancel && (
-            <button type="button" onClick={onCancel} className="cancel-btn">
-              Cancel
-            </button>
-          )}
-        </div>
-      </form>
-    </div>
-  );
+                        <FormField
+                            control={form.control}
+                            name="topics"
+                            render={() => (
+                                <FormItem>
+                                    <FormLabel>Topics</FormLabel>
+                                    <div className="flex flex-col gap-2">
+                                        <div className="flex gap-2">
+                                            <Input
+                                                value={topicInput}
+                                                onChange={(e) => setTopicInput(e.target.value)}
+                                                placeholder="Add topic"
+                                                onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
+                                            />
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                onClick={handleAddTopic}
+                                            >
+                                                Add
+                                            </Button>
+                                        </div>
+                                        <div className="flex flex-wrap gap-2">
+                                            {topics.map((topic, index) => (
+                                                <Badge
+                                                    key={index}
+                                                    variant="secondary"
+                                                    className="flex items-center gap-1"
+                                                >
+                                                    {topic}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleRemoveTopic(index)}
+                                                        className="ml-1 rounded-full hover:bg-accent"
+                                                    >
+                                                        ×
+                                                    </button>
+                                                </Badge>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <FormMessage/>
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="lastUpdate"
+                            render={({field}) => (
+                                <FormItem>
+                                    <FormLabel>Time</FormLabel>
+                                    <FormControl>
+                                        <Input type="time" {...field} />
+                                    </FormControl>
+                                    <FormMessage/>
+                                </FormItem>
+                            )}
+                        />
+
+                        {isEditing && (
+                            <FormField
+                                control={form.control}
+                                name="progress"
+                                render={({field}) => (
+                                    <FormItem>
+                                        <FormLabel>Progress ({field.value}%)</FormLabel>
+                                        <FormControl>
+                                            <Slider
+                                                min={0}
+                                                max={100}
+                                                step={1}
+                                                value={[field.value]}
+                                                onValueChange={(value) => field.onChange(value[0])}
+                                            />
+                                        </FormControl>
+                                        <FormMessage/>
+                                    </FormItem>
+                                )}
+                            />
+                        )}
+
+                        <div className="flex justify-end gap-2">
+                            {isEditing && onCancel && (
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={onCancel}
+                                >
+                                    Cancel
+                                </Button>
+                            )}
+                            <Button type="submit">
+                                {isEditing ? 'Update' : 'Add'}
+                            </Button>
+                        </div>
+                    </form>
+                </Form>
+            </CardContent>
+        </Card>
+    );
 };
-
-export default ProgressForm; 
