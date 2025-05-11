@@ -5,7 +5,26 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Timer } from '@/components/challenge/Timer';
 import { Challenge } from '@/types/challenge';
 import { api } from '@/lib/api';
-import { ChevronDown, ChevronUp, Clock, AlertCircle } from 'lucide-react';
+import { ChevronDown, ChevronUp, Clock, AlertCircle, CheckCircle2, XCircle, Trophy } from 'lucide-react';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter,
+} from '@/components/ui/dialog';
+import { Progress } from '@/components/ui/progress';
+
+interface ValidationResult {
+    score: number;
+    totalQuestions: number;
+    feedback: string;
+    answers: Array<{
+        correct: boolean;
+        feedback: string;
+    }>;
+}
 
 export default function ChallengeAttemptPage() {
     const { id } = useParams();
@@ -15,6 +34,9 @@ export default function ChallengeAttemptPage() {
     const [startTime, setStartTime] = useState<Date | null>(null);
     const [loading, setLoading] = useState(true);
     const [expandedTask, setExpandedTask] = useState<number | null>(null);
+    const [showResultsDialog, setShowResultsDialog] = useState(false);
+    const [validationResults, setValidationResults] = useState<ValidationResult | null>(null);
+    const [coinsEarned, setCoinsEarned] = useState(0);
 
     useEffect(() => {
         const fetchChallenge = async () => {
@@ -49,7 +71,56 @@ export default function ChallengeAttemptPage() {
         setExpandedTask(expandedTask === index ? null : index);
     };
 
-    const submitAttempt = async () => {
+    const validateAnswers = (): void => {
+        if (!challenge) return;
+
+        let score = 0;
+        const totalQuestions = challenge.tasks.length;
+        
+        // First, validate all answers and calculate score
+        const validatedAnswers = challenge.tasks.map((task: string, index: number) => {
+            const answer = answers[index].trim();
+            // This is a simple validation - you should replace this with your actual validation logic
+            const isCorrect: boolean = answer.length > 0;
+            const feedback = isCorrect 
+                ? "Good answer!" 
+                : "Please provide an answer for this question.";
+
+            if (isCorrect) score++;
+            return { correct: isCorrect, feedback };
+        });
+
+        // Calculate coins earned (10 coins per correct answer)
+        const earnedCoins = score * 10;
+        setCoinsEarned(earnedCoins);
+
+        // Generate overall feedback based on score
+        const percentage = (score / totalQuestions) * 100;
+        let feedback = '';
+        
+        if (percentage === 100) {
+            feedback = "Perfect! You've answered all questions correctly!";
+        } else if (percentage >= 80) {
+            feedback = "Great job! You've answered most questions correctly.";
+        } else if (percentage >= 60) {
+            feedback = "Good effort! You've answered more than half correctly.";
+        } else {
+            feedback = "Keep practicing! You can do better next time.";
+        }
+
+        // Create the final results object
+        const results: ValidationResult = {
+            score,
+            totalQuestions,
+            feedback,
+            answers: validatedAnswers
+        };
+
+        setValidationResults(results);
+        setShowResultsDialog(true);
+    };
+
+    const handleSubmit = async () => {
         if (!challenge || !startTime) return;
 
         try {
@@ -58,6 +129,8 @@ export default function ChallengeAttemptPage() {
                 userId: 'current-user-id',
                 answers,
                 startedAt: startTime.toISOString(),
+                score: validationResults?.score || 0,
+                coinsEarned: coinsEarned
             });
             navigate(`/challenges/${challenge.id}/results`);
         } catch (error) {
@@ -109,7 +182,7 @@ export default function ChallengeAttemptPage() {
                                 <Clock className="h-5 w-5 text-red-600" />
                                 <Timer
                                     initialMinutes={challenge.timeLimit}
-                                    onComplete={submitAttempt}
+                                    onComplete={validateAnswers}
                                 />
                             </div>
                         )}
@@ -176,7 +249,7 @@ export default function ChallengeAttemptPage() {
                         {/* Submit Button */}
                         <div className="mt-8 flex justify-end">
                             <Button
-                                onClick={submitAttempt}
+                                onClick={validateAnswers}
                                 className="px-8 py-4 text-lg bg-[#44468f] hover:bg-[#3a3d7a] text-white transition-colors shadow-md"
                             >
                                 Submit Challenge
@@ -221,6 +294,74 @@ export default function ChallengeAttemptPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Results Dialog */}
+            <Dialog open={showResultsDialog} onOpenChange={setShowResultsDialog}>
+                <DialogContent className="sm:max-w-[500px]">
+                    <DialogHeader className="pb-2">
+                        <DialogTitle className="text-xl font-bold text-center text-gray-900">
+                            Challenge Results
+                        </DialogTitle>
+                        <DialogDescription className="text-center text-gray-600 text-sm">
+                            Here's how you did on the challenge
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    {validationResults && (
+                        <div className="py-4">
+                            {/* Score Display */}
+                            <div className="text-center mb-4">
+                                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#44468f]/10 mb-3">
+                                    <Trophy className="w-8 h-8 text-[#44468f]" />
+                                </div>
+                                <h3 className="text-2xl font-bold text-gray-900 mb-1">
+                                    {validationResults.score}/{validationResults.totalQuestions}
+                                </h3>
+                                <p className="text-base text-gray-600">{validationResults.feedback}</p>
+                                {coinsEarned > 0 && (
+                                    <div className="mt-2 text-sm font-medium text-amber-600">
+                                        +{coinsEarned} coins earned!
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Progress Bar */}
+                            <div className="mb-4">
+                                <Progress 
+                                    value={(validationResults.score / validationResults.totalQuestions) * 100} 
+                                    className="h-1.5"
+                                />
+                            </div>
+
+                            {/* Detailed Results */}
+                            <div className="space-y-2 max-h-[200px] overflow-y-auto pr-2">
+                                {validationResults.answers.map((result, index) => (
+                                    <div key={index} className="flex items-start gap-2 p-2 rounded-lg bg-gray-50">
+                                        {result.correct ? (
+                                            <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                                        ) : (
+                                            <XCircle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
+                                        )}
+                                        <div>
+                                            <p className="font-medium text-gray-900 text-sm">Question {index + 1}</p>
+                                            <p className="text-xs text-gray-600">{result.feedback}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    <DialogFooter className="pt-2">
+                        <Button
+                            onClick={handleSubmit}
+                            className="w-full h-9 bg-[#44468f] hover:bg-[#3a3d7a] text-white"
+                        >
+                            {coinsEarned > 0 ? `Add ${coinsEarned} Coins` : 'Complete Challenge'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
