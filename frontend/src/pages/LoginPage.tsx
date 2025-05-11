@@ -86,6 +86,7 @@ export default function LoginPage() {
                 </div>
               </div>
 
+              {/*OAuth login button*/}
               <div className="flex justify-center">
                 <a
                     href="http://localhost:8081/oauth2/authorization/google"

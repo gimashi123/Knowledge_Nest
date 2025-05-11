@@ -1,7 +1,9 @@
 package com.paf.knowledgenest.config;
 
+import com.paf.knowledgenest.repository.user.UserRepository;
 import com.paf.knowledgenest.security.JwtAuthFilter;
 import com.paf.knowledgenest.security.JwtUtils;
+//import com.paf.knowledgenest.security.OAuth2LoginSuccessHandler;
 import com.paf.knowledgenest.service.user.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
@@ -26,6 +28,7 @@ public class SecurityConfig {
 
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
+    private UserRepository userRepository;
 
     @Bean
     public AuthenticationManager authManager(AuthenticationConfiguration config) throws Exception {
@@ -51,9 +54,10 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
 
-                /*   .oauth2Login(oauth2 -> oauth2
-                           .successHandler(new OAuth2LoginSuccessHandler(userRepository, jwtUtils))
-                   )*/
+//                oauth stuff here
+//                .oauth2Login(oauth2 -> oauth2
+//                        .successHandler(new OAuth2LoginSuccessHandler(userRepository, jwtUtils))
+//                   )
 
                 .build();
     }
