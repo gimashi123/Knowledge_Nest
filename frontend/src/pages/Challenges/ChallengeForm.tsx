@@ -9,7 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Challenge } from '@/types/challenge';
 import { api } from '@/lib/api';
 import { useNavigate } from 'react-router-dom';
-import { Plus, X } from 'lucide-react';
+import { Plus, X, CheckCircle, XCircle } from 'lucide-react';
+import toast, { Toaster } from 'react-hot-toast';
 
 const formSchema = z.object({
     title: z.string().min(3, 'Title must be at least 3 characters'),
@@ -47,13 +48,52 @@ export function ChallengeForm({ initialData }: ChallengeFormProps) {
 
             if (initialData) {
                 await api.put(`/api/challenges/${initialData.id}`, challengeData);
+                toast.success('Challenge updated successfully!', {
+                    duration: 3000,
+                    position: 'top-center',
+                    style: {
+                        background: '#fff',
+                        color: '#333',
+                        padding: '16px',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                        border: '1px solid #e2e8f0',
+                    },
+                    icon: <CheckCircle className="w-5 h-5 text-green-500" />,
+                });
             } else {
                 await api.post('/api/challenges', challengeData);
+                toast.success('Challenge created successfully!', {
+                    duration: 3000,
+                    position: 'top-center',
+                    style: {
+                        background: '#fff',
+                        color: '#333',
+                        padding: '16px',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                        border: '1px solid #e2e8f0',
+                    },
+                    icon: <CheckCircle className="w-5 h-5 text-green-500" />,
+                });
             }
-
-            navigate('/challenges');
+            // Reset form after successful submission
+            form.reset();
         } catch (error) {
             console.error('Error saving challenge:', error);
+            toast.error('Failed to save challenge. Please try again.', {
+                duration: 3000,
+                position: 'top-center',
+                style: {
+                    background: '#fff',
+                    color: '#333',
+                    padding: '16px',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                    border: '1px solid #e2e8f0',
+                },
+                icon: <XCircle className="w-5 h-5 text-red-500" />,
+            });
         }
     };
 
@@ -67,6 +107,7 @@ export function ChallengeForm({ initialData }: ChallengeFormProps) {
 
     return (
         <div className="container mx-auto py-8 max-w-6xl">
+            <Toaster />
             <div className="flex flex-col md:flex-row gap-6">
                 {/* Instructions Sidebar */}
                 <div className="md:w-1/3">
