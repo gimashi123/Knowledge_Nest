@@ -101,7 +101,7 @@ export default function ChallengeListPage() {
                 skillCategory: editingChallenge.skillCategory,
                 difficultyLevel: editingChallenge.difficultyLevel,
                 timeLimit: editingChallenge.timeLimit,
-                // Include any other necessary fields
+                tasks: editingChallenge.tasks,
             });
 
             setChallenges(challenges.map(challenge =>
@@ -119,6 +119,34 @@ export default function ChallengeListPage() {
         setEditingChallenge({
             ...editingChallenge,
             [name]: name === 'timeLimit' ? parseInt(value) : value
+        });
+    };
+
+    const handleTaskChange = (index: number, value: string) => {
+        if (!editingChallenge) return;
+        const newTasks = [...editingChallenge.tasks];
+        newTasks[index] = value;
+        setEditingChallenge({
+            ...editingChallenge,
+            tasks: newTasks
+        });
+    };
+
+    const addNewTask = () => {
+        if (!editingChallenge) return;
+        if (editingChallenge.tasks.length >= 5) return; // Prevent adding more than 5 tasks
+        setEditingChallenge({
+            ...editingChallenge,
+            tasks: [...editingChallenge.tasks, '']
+        });
+    };
+
+    const removeTask = (index: number) => {
+        if (!editingChallenge) return;
+        const newTasks = editingChallenge.tasks.filter((_, i) => i !== index);
+        setEditingChallenge({
+            ...editingChallenge,
+            tasks: newTasks
         });
     };
 
@@ -295,15 +323,15 @@ export default function ChallengeListPage() {
             {/* Update Challenge Dialog */}
             {editingChallenge && (
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                    <DialogContent className="sm:max-w-[800px] bg-white rounded-xl shadow-lg border border-gray-200">
-                        <DialogHeader className="space-y-3 pb-4 border-b border-gray-100">
-                            <DialogTitle className="text-2xl font-bold text-gray-900">Update Challenge</DialogTitle>
-                            <DialogDescription className="text-gray-600">
+                    <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto bg-white rounded-xl shadow-lg border border-gray-200">
+                        <DialogHeader className="space-y-2 pb-3 border-b border-gray-100">
+                            <DialogTitle className="text-xl font-bold text-gray-900">Update Challenge</DialogTitle>
+                            <DialogDescription className="text-sm text-gray-600">
                                 Modify the challenge details below. All fields are required.
                             </DialogDescription>
                         </DialogHeader>
-                        <form onSubmit={handleUpdateSubmit} className="space-y-6 py-4">
-                            <div className="space-y-3">
+                        <form onSubmit={handleUpdateSubmit} className="space-y-4 py-3">
+                            <div className="space-y-2">
                                 <Label htmlFor="title" className="text-sm font-medium text-gray-700">Title</Label>
                                 <Input
                                     id="title"
@@ -311,19 +339,19 @@ export default function ChallengeListPage() {
                                     value={editingChallenge.title}
                                     onChange={handleInputChange}
                                     required
-                                    className="h-11 bg-gray-50 border-gray-200 focus:border-[#44468f] focus:ring-[#44468f]"
+                                    className="h-10 bg-gray-50 border-gray-200 focus:border-[#44468f] focus:ring-[#44468f]"
                                     placeholder="Enter challenge title"
                                 />
                             </div>
 
-                            <div className="grid grid-cols-3 gap-4">
-                                <div className="space-y-3">
+                            <div className="grid grid-cols-3 gap-3">
+                                <div className="space-y-2">
                                     <Label className="text-sm font-medium text-gray-700">Category</Label>
                                     <Select
                                         value={editingChallenge.skillCategory}
                                         onValueChange={handleCategoryChange}
                                     >
-                                        <SelectTrigger className="h-11 bg-gray-50 border-gray-200 focus:border-[#44468f] focus:ring-[#44468f]">
+                                        <SelectTrigger className="h-10 bg-gray-50 border-gray-200 focus:border-[#44468f] focus:ring-[#44468f]">
                                             <SelectValue placeholder="Select category" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -343,13 +371,13 @@ export default function ChallengeListPage() {
                                     </Select>
                                 </div>
 
-                                <div className="space-y-3">
+                                <div className="space-y-2">
                                     <Label className="text-sm font-medium text-gray-700">Difficulty Level</Label>
                                     <Select
                                         value={editingChallenge.difficultyLevel}
                                         onValueChange={handleDifficultyChange}
                                     >
-                                        <SelectTrigger className="h-11 bg-gray-50 border-gray-200 focus:border-[#44468f] focus:ring-[#44468f]">
+                                        <SelectTrigger className="h-10 bg-gray-50 border-gray-200 focus:border-[#44468f] focus:ring-[#44468f]">
                                             <SelectValue placeholder="Select difficulty" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -360,7 +388,7 @@ export default function ChallengeListPage() {
                                     </Select>
                                 </div>
 
-                                <div className="space-y-3">
+                                <div className="space-y-2">
                                     <Label htmlFor="timeLimit" className="text-sm font-medium text-gray-700">Time Limit (minutes)</Label>
                                     <Input
                                         id="timeLimit"
@@ -370,24 +398,65 @@ export default function ChallengeListPage() {
                                         value={editingChallenge.timeLimit}
                                         onChange={handleInputChange}
                                         required
-                                        className="h-11 bg-gray-50 border-gray-200 focus:border-[#44468f] focus:ring-[#44468f]"
+                                        className="h-10 bg-gray-50 border-gray-200 focus:border-[#44468f] focus:ring-[#44468f]"
                                         placeholder="Enter time limit"
                                     />
                                 </div>
                             </div>
 
-                            <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                            {/* Tasks Section */}
+                            <div className="space-y-3">
+                                <div className="flex justify-between items-center">
+                                    <Label className="text-sm font-medium text-gray-700">
+                                        Challenge Tasks ({editingChallenge.tasks.length}/5)
+                                    </Label>
+                                    {editingChallenge.tasks.length < 5 && (
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={addNewTask}
+                                            className="h-8 px-3"
+                                        >
+                                            <PlusCircle className="mr-2 h-4 w-4" />
+                                            Add Task
+                                        </Button>
+                                    )}
+                                </div>
+                                <div className="space-y-2">
+                                    {editingChallenge.tasks.map((task, index) => (
+                                        <div key={index} className="flex gap-2">
+                                            <Input
+                                                value={task}
+                                                onChange={(e) => handleTaskChange(index, e.target.value)}
+                                                placeholder={`Task ${index + 1}`}
+                                                className="flex-1 h-10 bg-gray-50 border-gray-200 focus:border-[#44468f] focus:ring-[#44468f]"
+                                            />
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                size="icon"
+                                                onClick={() => removeTask(index)}
+                                                className="h-10 w-10 hover:bg-red-50 hover:text-red-600 hover:border-red-200"
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="flex justify-end gap-3 pt-3 border-t border-gray-100">
                                 <Button
                                     type="button"
                                     variant="outline"
                                     onClick={() => setIsDialogOpen(false)}
-                                    className="h-11 px-6 border-gray-200 hover:bg-gray-50"
+                                    className="h-9 px-4 border-gray-200 hover:bg-gray-50"
                                 >
                                     Cancel
                                 </Button>
                                 <Button 
                                     type="submit"
-                                    className="h-11 px-6 bg-[#44468f] hover:bg-[#3a3d7a] text-white"
+                                    className="h-9 px-4 bg-[#44468f] hover:bg-[#3a3d7a] text-white"
                                 >
                                     Save Changes
                                 </Button>
