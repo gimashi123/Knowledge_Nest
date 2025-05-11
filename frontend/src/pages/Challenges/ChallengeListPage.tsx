@@ -160,7 +160,7 @@ export default function ChallengeListPage() {
                             <p className="text-gray-600 mt-1">Create and manage your learning challenges</p>
                         </div>
                         <Button
-                            onClick={() => navigate('/user-dashboard/add-challenges')}
+                            onClick={() => navigate('/add-challenges')}
                             className="bg-green-600 hover:bg-green-700 text-white px-6 h-12"
                         >
                             <PlusCircle className="mr-2 h-5 w-5" />
@@ -263,7 +263,7 @@ export default function ChallengeListPage() {
                                         asChild
                                         className="bg-[#44468f] hover:bg-[#3a3d7a] text-white border border-gray-200"
                                     >
-                                        <Link to={`/user-dashboard/challenge-attempt/${challenge.id}/attempt`}>
+                                        <Link to={`/challenge-attempt/${challenge.id}/attempt`}>
                                             Attempt Challenge
                                         </Link>
                                     </Button>

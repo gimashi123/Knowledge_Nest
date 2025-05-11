@@ -78,7 +78,7 @@ export default function ChallengeAttemptPage() {
         const totalQuestions = challenge.tasks.length;
         
         // First, validate all answers and calculate score
-        const validatedAnswers = challenge.tasks.map((task: string, index: number) => {
+        const validatedAnswers = challenge.tasks.map((_task: string, index: number) => {
             const answer = answers[index].trim();
             // This is a simple validation - you should replace this with your actual validation logic
             const isCorrect: boolean = answer.length > 0;
