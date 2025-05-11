@@ -309,7 +309,7 @@ export default function ChallengeListPage() {
                             <h3 className="text-lg font-medium text-gray-900 mb-2">No challenges found</h3>
                             <p className="text-gray-600 mb-6">Create your first challenge to get started</p>
                             <Button
-                                onClick={() => navigate('/user-dashboard/add-challenges')}
+                                onClick={() => navigate('/add-challenges')}
                                 className="bg-green-600 hover:bg-green-700 text-white"
                             >
                                 <PlusCircle className="mr-2 h-5 w-5" />
