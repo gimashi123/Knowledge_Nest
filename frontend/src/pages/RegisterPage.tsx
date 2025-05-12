@@ -151,6 +151,29 @@ export default function RegisterPage() {
                 Create Account
               </Button>
 
+              <div className="relative my-4">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-200"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white text-gray-500">Or continue with</span>
+                </div>
+              </div>
+
+              <div className="flex justify-center">
+                <a
+                  href="http://localhost:8081/oauth2/authorization/google"
+                  className="inline-flex items-center justify-center gap-3 px-4 py-2.5 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 text-sm font-medium transition-all duration-200 w-full group"
+                >
+                  <img
+                    src="https://www.svgrepo.com/show/475656/google-color.svg"
+                    alt="Google"
+                    className="w-5 h-5"
+                  />
+                  <span>Continue with Google</span>
+                </a>
+              </div>
+
               <div className="text-center text-sm text-gray-600 pt-3">
                 Already have an account?{" "}
                 <Link 
