@@ -30,6 +30,8 @@ export default function ChallengeListPage() {
     const [challenges, setChallenges] = useState<Challenge[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<'all' | SkillCategory>('all');
+    const [difficultyFilter, setDifficultyFilter] = useState<DifficultyLevel | 'all'>('all');
+    const [searchQuery, setSearchQuery] = useState('');
     const [editingChallenge, setEditingChallenge] = useState<Challenge | null>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [challengeToDelete, setChallengeToDelete] = useState<Challenge | null>(null);
@@ -166,6 +168,13 @@ export default function ChallengeListPage() {
         });
     };
 
+    // Update filtered challenges computation
+    const filteredChallenges = challenges.filter(challenge => {
+        const matchesSearch = challenge.title.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesDifficulty = difficultyFilter === 'all' || challenge.difficultyLevel === difficultyFilter;
+        return matchesSearch && matchesDifficulty;
+    });
+
     if (loading) {
         return (
             <div className="min-h-screen flex justify-center items-center bg-gray-50">
@@ -197,46 +206,149 @@ export default function ChallengeListPage() {
                     </div>
                 </div>
 
-                {/* Filter Section */}
+                {/* Enhanced Filter Section */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-8">
-                    <div className="flex flex-wrap gap-3">
-                        <Button
-                            variant={filter === 'all' ? 'default' : 'outline'}
-                            onClick={() => setFilter('all')}
-                            className="h-10 px-4"
-                        >
-                            All Challenges
-                        </Button>
-                        <Button
-                            variant={filter === 'coding' ? 'default' : 'outline'}
-                            onClick={() => setFilter('coding')}
-                            className="h-10 px-4"
-                        >
-                            <Code2 className="mr-2 h-4 w-4" />
-                            Coding
-                        </Button>
-                        <Button
-                            variant={filter === 'cooking' ? 'default' : 'outline'}
-                            onClick={() => setFilter('cooking')}
-                            className="h-10 px-4"
-                        >
-                            <ChefHat className="mr-2 h-4 w-4" />
-                            Cooking
-                        </Button>
-                        <Button
-                            variant={filter === 'diy' ? 'default' : 'outline'}
-                            onClick={() => setFilter('diy')}
-                            className="h-10 px-4"
-                        >
-                            <Hammer className="mr-2 h-4 w-4" />
-                            DIY
-                        </Button>
+                    <div className="flex flex-wrap items-center gap-4">
+                        {/* Search Bar */}
+                        <div className="flex-1 min-w-[200px] max-w-[300px]">
+                            <div className="relative">
+                                <Input
+                                    type="text"
+                                    placeholder="Search challenges..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="h-9 pl-9 pr-4 rounded-lg bg-gray-50 border-gray-200 focus:border-[#44468f] focus:ring-[#44468f] transition-all duration-200"
+                                />
+                                <svg
+                                    className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                    />
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div className="h-6 w-px bg-gray-200"></div>
+
+                        {/* Category Filter */}
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-gray-700 whitespace-nowrap">Category:</span>
+                            <div className="flex gap-2">
+                                <Button
+                                    variant={filter === 'all' ? 'default' : 'outline'}
+                                    onClick={() => setFilter('all')}
+                                    className={`h-9 px-3 rounded-lg transition-all duration-200 ${
+                                        filter === 'all' 
+                                            ? 'bg-[#44468f] text-white hover:bg-[#44468f]/90' 
+                                            : 'hover:bg-gray-50 text-gray-700'
+                                    }`}
+                                >
+                                    All
+                                </Button>
+                                <Button
+                                    variant={filter === 'coding' ? 'default' : 'outline'}
+                                    onClick={() => setFilter('coding')}
+                                    className={`h-9 px-3 rounded-lg transition-all duration-200 flex items-center gap-1.5 ${
+                                        filter === 'coding' 
+                                            ? 'bg-[#44468f] text-white hover:bg-[#44468f]/90' 
+                                            : 'hover:bg-gray-50 text-gray-700'
+                                    }`}
+                                >
+                                    <Code2 className="h-4 w-4" />
+                                    Coding
+                                </Button>
+                                <Button
+                                    variant={filter === 'cooking' ? 'default' : 'outline'}
+                                    onClick={() => setFilter('cooking')}
+                                    className={`h-9 px-3 rounded-lg transition-all duration-200 flex items-center gap-1.5 ${
+                                        filter === 'cooking' 
+                                            ? 'bg-[#44468f] text-white hover:bg-[#44468f]/90' 
+                                            : 'hover:bg-gray-50 text-gray-700'
+                                    }`}
+                                >
+                                    <ChefHat className="h-4 w-4" />
+                                    Cooking
+                                </Button>
+                                <Button
+                                    variant={filter === 'diy' ? 'default' : 'outline'}
+                                    onClick={() => setFilter('diy')}
+                                    className={`h-9 px-3 rounded-lg transition-all duration-200 flex items-center gap-1.5 ${
+                                        filter === 'diy' 
+                                            ? 'bg-[#44468f] text-white hover:bg-[#44468f]/90' 
+                                            : 'hover:bg-gray-50 text-gray-700'
+                                    }`}
+                                >
+                                    <Hammer className="h-4 w-4" />
+                                    DIY
+                                </Button>
+                            </div>
+                        </div>
+
+                        <div className="h-6 w-px bg-gray-200"></div>
+
+                        {/* Difficulty Filter */}
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-gray-700 whitespace-nowrap">Difficulty:</span>
+                            <div className="flex gap-2">
+                                <Button
+                                    variant={difficultyFilter === 'all' ? 'default' : 'outline'}
+                                    onClick={() => setDifficultyFilter('all')}
+                                    className={`h-9 px-3 rounded-lg transition-all duration-200 ${
+                                        difficultyFilter === 'all' 
+                                            ? 'bg-[#44468f] text-white hover:bg-[#44468f]/90' 
+                                            : 'hover:bg-gray-50 text-gray-700'
+                                    }`}
+                                >
+                                    All
+                                </Button>
+                                <Button
+                                    variant={difficultyFilter === 'beginner' ? 'default' : 'outline'}
+                                    onClick={() => setDifficultyFilter('beginner')}
+                                    className={`h-9 px-3 rounded-lg transition-all duration-200 ${
+                                        difficultyFilter === 'beginner' 
+                                            ? 'bg-green-500 text-white hover:bg-green-500/90' 
+                                            : 'hover:bg-green-50 text-green-600 border-green-200'
+                                    }`}
+                                >
+                                    Beginner
+                                </Button>
+                                <Button
+                                    variant={difficultyFilter === 'intermediate' ? 'default' : 'outline'}
+                                    onClick={() => setDifficultyFilter('intermediate')}
+                                    className={`h-9 px-3 rounded-lg transition-all duration-200 ${
+                                        difficultyFilter === 'intermediate' 
+                                            ? 'bg-yellow-500 text-white hover:bg-yellow-500/90' 
+                                            : 'hover:bg-yellow-50 text-yellow-600 border-yellow-200'
+                                    }`}
+                                >
+                                    Intermediate
+                                </Button>
+                                <Button
+                                    variant={difficultyFilter === 'pro' ? 'default' : 'outline'}
+                                    onClick={() => setDifficultyFilter('pro')}
+                                    className={`h-9 px-3 rounded-lg transition-all duration-200 ${
+                                        difficultyFilter === 'pro' 
+                                            ? 'bg-red-500 text-white hover:bg-red-500/90' 
+                                            : 'hover:bg-red-50 text-red-600 border-red-200'
+                                    }`}
+                                >
+                                    Pro
+                                </Button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 {/* Challenges Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {challenges.map((challenge) => (
+                    {filteredChallenges.map((challenge) => (
                         <Card key={challenge.id} className="hover:shadow-lg transition-all duration-200 border border-gray-200">
                             <CardHeader className="pb-4">
                                 <div className="flex justify-between items-start gap-4">
@@ -302,12 +414,16 @@ export default function ChallengeListPage() {
                 </div>
 
                 {/* Empty State */}
-                {challenges.length === 0 && (
+                {filteredChallenges.length === 0 && (
                     <div className="text-center py-12">
                         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
                             <Code2 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                             <h3 className="text-lg font-medium text-gray-900 mb-2">No challenges found</h3>
-                            <p className="text-gray-600 mb-6">Create your first challenge to get started</p>
+                            <p className="text-gray-600 mb-6">
+                                {searchQuery || difficultyFilter !== 'all' 
+                                    ? "No challenges match your current filters"
+                                    : "Create your first challenge to get started"}
+                            </p>
                             <Button
                                 onClick={() => navigate('/add-challenges')}
                                 className="bg-green-600 hover:bg-green-700 text-white"
