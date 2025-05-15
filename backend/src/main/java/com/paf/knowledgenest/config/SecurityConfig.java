@@ -1,7 +1,9 @@
 package com.paf.knowledgenest.config;
 
+import com.paf.knowledgenest.repository.user.UserRepository;
 import com.paf.knowledgenest.security.JwtAuthFilter;
 import com.paf.knowledgenest.security.JwtUtils;
+import com.paf.knowledgenest.security.OAuth2LoginSuccessHandler;
 import com.paf.knowledgenest.service.user.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
@@ -26,6 +28,7 @@ public class SecurityConfig {
 
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
+    private UserRepository userRepository;
 
     @Bean
     public AuthenticationManager authManager(AuthenticationConfiguration config) throws Exception {
@@ -38,33 +41,35 @@ public class SecurityConfig {
 
         return http
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Enable CORS
-//                .securityMatcher("/**") removed this for a test
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/challenges/**").permitAll()
                         .requestMatchers("/api/skill-posts/**").authenticated()
+                        .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-
-                /*   .oauth2Login(oauth2 -> oauth2
-                           .successHandler(new OAuth2LoginSuccessHandler(userRepository, jwtUtils))
-                   )*/
-
+                .oauth2Login(oauth2 -> oauth2
+                        .successHandler(new OAuth2LoginSuccessHandler(userRepository, jwtUtils))
+                        .authorizationEndpoint(authorization -> authorization
+                                .baseUri("/oauth2/authorization")
+                        )
+                )
                 .build();
     }
 
-    // CORS config bean (for allowing frontend origins, etc.)
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("*")); // use specific origins in prod
+        config.setAllowedOrigins(List.of("http://localhost:5173")); // Frontend URL
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        config.setAllowedHeaders(List.of("*"));
-        config.setAllowCredentials(false); // true only if using cookies + specific origin
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
+        config.setAllowCredentials(true);
+        config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);

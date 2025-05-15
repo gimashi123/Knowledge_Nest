@@ -17,12 +17,18 @@ import AdminPostsPage from "@/pages/AdminPostsPage";
 import { AuthProvider, useAuth } from "@/contexts/auth-context";
 import { NotificationProvider } from "@/contexts/notification-context";
 
-import {ProgressPage} from "@/pages/authorized/admin/ProgressPage.tsx";
+
 import {UserDashboardPage} from "@/pages/UserDashboardPage.tsx";
 import LaunchPage from "@/pages/LaunchPage.tsx";
+import ChallengeListPage from "@/pages/Challenges/ChallengeListPage.tsx";
+import {ChallengeForm} from "@/pages/Challenges/ChallengeForm.tsx";
+import ChallengeAttemptPage from "@/pages/Challenges/ChallengeAttemptPage.tsx";
+import {ProgressPage} from "@/pages/authorized/user/ProgressTrack.tsx";
+
+
 import SkillPostsPage from "@/pages/skillpost/SkillPostsPage";
 import SkillPostDetailPage from "@/pages/skillpost/SkillPostDetailPage";
-import UserSkillPostsPage from "@/pages/UserSkillPostsPage.tsx";
+// import UserSkillPostsPage from "@/pages/UserSkillPostsPage.tsx";
 import UserSettingsPage from "@/pages/UserSettingsPage.tsx";
 
 function PrivateRoute() {
@@ -32,15 +38,15 @@ function PrivateRoute() {
 
 function AdminRoute() {
     const { currentUser } = useAuth();
-    return currentUser && currentUser.role === "ROLE_ADMIN" ? 
-        <Outlet /> : 
+    return currentUser && currentUser.role === "ROLE_ADMIN" ?
+        <Outlet /> :
         <Navigate to="/user-dashboard" replace />;
 }
 
 function UserRoute() {
     const { currentUser } = useAuth();
-    return currentUser && currentUser.role !== "ROLE_ADMIN" ? 
-        <Outlet /> : 
+    return currentUser && currentUser.role !== "ROLE_ADMIN" ?
+        <Outlet /> :
         <Navigate to="/admin-dashboard" replace />;
 }
 
@@ -56,12 +62,19 @@ export default function App() {
                         <Route path="/register" element={<RegisterPage />} />
                         <Route path="/oauth-success" element={<OAuthSuccessPage />} />
 
-                        {/* Private Routes for Everyone */}
+                    {/* Private Routes */}
+                    <Route element={<PrivateRoute />}>
+                        <Route path="/dashboard" element={<Dashboard />} />
+                        <Route path="/profile" element={<ProfilePage />} />
+                        <Route path="/admin-dashboard" element={<AdminDashboardPage />} />
+                        <Route path="/user-dashboard" element={<UserDashboardPage />} />
+                        <Route path="/admin-profile" element={<AdminProfilePage />} />
+                        <Route path={'/admin-progress'} element={<ProgressPage/>} />
+
                         <Route element={<PrivateRoute />}>
                             <Route path="/dashboard" element={<Dashboard />} />
                             <Route path="/profile" element={<ProfilePage />} />
-                            
-                            {/* Admin Only Routes */}
+
                             <Route element={<AdminRoute />}>
                                 <Route path="/admin-dashboard" element={<AdminDashboardPage />} />
                                 <Route path="/admin-profile" element={<AdminProfilePage />} />
@@ -69,14 +82,37 @@ export default function App() {
                                 <Route path="/admin/posts" element={<AdminPostsPage />} />
                                 <Route path="/admin/posts/:id" element={<AdminPostsPage />} />
                             </Route>
-                            
+
+                            {/* Admin Nested Routes */}
+                            <Route path="/admin-dashboard" element={<AdminDashboardPage />}>
+                                {/*<Route index element={<AdminHome />} /> /!* Create this component *!/*/}
+                                <Route path="progress" element={<ProgressPage />} />
+                                {/*<Route path="posts" element={<PostsPage />} />*/}
+                                {/*<Route path="users" element={<UsersPage />} />*/}
+                                {/*<Route path="settings" element={<SettingsPage />} />*/}
+                                <Route path="admin-profile" element={<AdminProfilePage />} />
+                            </Route>
+                            <Route path="/user-dashboard" element={<UserDashboardPage />}>
+                                {/*<Route index element={<AdminHome />} /> /!* Create this component *!/*/}
+                                <Route path="progress" element={<ProgressPage />} />
+                                {/*<Route path="posts" element={<PostsPage />} />*/}
+                                {/*<Route path="users" element={<UsersPage />} />*/}
+                                {/*<Route path="settings" element={<SettingsPage />} />*/}
+                                <Route path="admin-profile" element={<AdminProfilePage />} />
+                            </Route>
+
                             {/* Regular User Routes */}
                             <Route element={<UserRoute />}>
+                                <Route path="challenges" element={<ChallengeListPage />} />
+                                <Route path="add-challenges" element={<ChallengeForm />} />
+                                <Route path="challenge-attempt/:id/attempt" element={<ChallengeAttemptPage />} />
+
                                 <Route path="/user-dashboard" element={<UserDashboardPage />} />
                                 <Route path="/skill-posts" element={<SkillPostsPage />} />
                                 <Route path="/skill-posts/:id" element={<SkillPostDetailPage />} />
                                 <Route path="/user-settings" element={<UserSettingsPage />} />
                             </Route>
+                        </Route>
                         </Route>
                     </Routes>
                 </NotificationProvider>
@@ -84,3 +120,4 @@ export default function App() {
         </BrowserRouter>
     );
 }
+
