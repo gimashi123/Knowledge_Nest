@@ -5,6 +5,7 @@ import {useAuth} from "@/contexts/auth-context.tsx";
 import {Link} from "react-router-dom";
 
 
+
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -22,6 +23,8 @@ export default function LoginPage() {
       setError("Invalid credentials. Please try again.");
     }
   };
+
+
 
   return (
       <div className="max-w-md mx-auto p-6 shadow-md rounded-2xl bg-white mt-20">

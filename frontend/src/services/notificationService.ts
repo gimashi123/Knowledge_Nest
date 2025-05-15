@@ -1,5 +1,5 @@
 import { Notification, NotificationCount } from "@/types/notification";
-import axios from 'axios';
+import axiosInstance from "@/services/axios.ts";
 
 // Determine API URL based on environment
 const API_URL = 
@@ -17,7 +17,7 @@ export class NotificationService {
   }> {
     console.log(`Fetching notifications, page: ${page}, size: ${size}`);
     try {
-      const response = await axios.get(`${API_URL}/notifications?page=${page}&size=${size}`);
+      const response = await axiosInstance.get(`${API_URL}/notifications?page=${page}&size=${size}`);
       console.log('Notifications response:', response.data);
       
       // Validate response structure
@@ -50,7 +50,7 @@ export class NotificationService {
   static async getUnreadNotifications(): Promise<Notification[]> {
     console.log('Fetching unread notifications');
     try {
-      const response = await axios.get(`${API_URL}/notifications/unread`);
+      const response = await axiosInstance.get(`${API_URL}/notifications/unread`);
       console.log('Unread notifications response:', response.data);
       return response.data;
     } catch (error) {
@@ -62,7 +62,7 @@ export class NotificationService {
   static async getUnreadCount(): Promise<NotificationCount> {
     console.log('Fetching unread count');
     try {
-      const response = await axios.get(`${API_URL}/notifications/count`);
+      const response = await axiosInstance.get(`${API_URL}/notifications/count`);
       console.log('Unread count response:', response.data);
       
       // Validate response structure
@@ -83,7 +83,7 @@ export class NotificationService {
   static async markAsRead(id: string): Promise<Notification> {
     console.log(`Marking notification as read: ${id}`);
     try {
-      const response = await axios.patch(`${API_URL}/notifications/${id}/read`);
+      const response = await axiosInstance.patch(`${API_URL}/notifications/${id}/read`);
       console.log('Mark as read response:', response.data);
       return response.data;
     } catch (error) {
@@ -95,7 +95,7 @@ export class NotificationService {
   static async markAllAsRead(): Promise<void> {
     console.log('Marking all notifications as read');
     try {
-      await axios.patch(`${API_URL}/notifications/read-all`);
+      await axiosInstance.patch(`${API_URL}/notifications/read-all`);
       console.log('All notifications marked as read');
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
@@ -106,7 +106,7 @@ export class NotificationService {
   static async deleteNotification(id: string): Promise<void> {
     console.log(`Deleting notification: ${id}`);
     try {
-      await axios.delete(`${API_URL}/notifications/${id}`);
+      await axiosInstance.delete(`${API_URL}/notifications/${id}`);
       console.log('Notification deleted');
     } catch (error) {
       console.error('Error deleting notification:', error);

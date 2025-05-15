@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import { Notification, NotificationCount } from '@/types/notification';
+import { Notification } from '@/types/notification';
 import { NotificationService } from '@/services/notificationService';
 import { useAuth } from './auth-context';
 import { toast } from 'sonner';
@@ -153,13 +153,13 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
   // Fetch notifications on mount and when auth state changes
   useEffect(() => {
     if (currentUser) {
-      fetchNotifications();
+      fetchNotifications().then();
     } else {
       // Reset state when user logs out
       setNotifications([]);
       setUnreadCount(0);
     }
-  }, [currentUser, fetchNotifications]);
+  }, [currentUser]);
   
   // Set up polling for new notifications
   useEffect(() => {
@@ -167,13 +167,11 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
     
     const checkForNewNotifications = async () => {
       try {
-        console.log('Checking for new notifications');
         const countData = await NotificationService.getUnreadCount();
         
         if (countData.unreadCount > unreadCount) {
-          console.log(`Found ${countData.unreadCount - unreadCount} new notifications, refreshing...`);
           // Only fetch full notifications if there are new ones
-          fetchNotifications();
+          fetchNotifications().then();
         } else {
           console.log('No new notifications found');
         }
@@ -182,12 +180,12 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
       }
     };
     
-    // Check for new notifications immediately and then every 15 seconds
-    checkForNewNotifications();
-    const intervalId = setInterval(checkForNewNotifications, 15000);
+    // Check for new notifications immediately and then every 3 min
+    checkForNewNotifications().then();
+    const intervalId = setInterval(checkForNewNotifications, (60000 * 3));
     
     return () => clearInterval(intervalId);
-  }, [currentUser, unreadCount, fetchNotifications]);
+  }, [currentUser]);
   
   const value = {
     notifications,

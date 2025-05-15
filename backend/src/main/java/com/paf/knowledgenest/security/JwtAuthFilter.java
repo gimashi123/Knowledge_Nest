@@ -27,6 +27,10 @@ public class JwtAuthFilter extends GenericFilter {
         HttpServletRequest httpReq = (HttpServletRequest) request;
         String path = httpReq.getRequestURI();
 
+        if (httpReq.getMethod().equals("OPTIONS")) {
+            chain.doFilter(request, response);
+            return;
+        }
 
         // Skip filtering for login and register
         if (path.startsWith("/api/auth/login") || path.startsWith("/api/auth/register")) {

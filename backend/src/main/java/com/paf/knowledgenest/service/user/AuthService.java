@@ -98,9 +98,11 @@ public class AuthService {
                     .accessToken(token)
                     .user(UserResponse.builder()
                           .id(user.getId())
-                          .role("ROLE_" + user.getRole())  // Ensure ROLE_ prefix is added
+                          .role("ROLE_" + user.getRole())
                           .email(user.getEmail())
                           .name(user.getName())
+                          .followers(user.getFollowers())
+                          .following(user.getFollowing())
                           .build())
                     .build();
             return ApiResponse.successResponse("User Login Successfully", loginResponse);
