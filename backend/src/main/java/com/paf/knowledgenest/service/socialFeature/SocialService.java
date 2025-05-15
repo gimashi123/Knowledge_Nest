@@ -1,12 +1,13 @@
 package com.paf.knowledgenest.service.socialFeature;
 
 
-import com.paf.knowledgenest.dto.requests.ProgressRequestDTO;
-import com.paf.knowledgenest.dto.responses.UserResponse;
+import com.paf.knowledgenest.dto.requests.FollowerRequestDTO;
 import com.paf.knowledgenest.dto.responses.skillPost.FollowerFollowingDTO;
 import com.paf.knowledgenest.dto.responses.skillPost.UserFollowResponse;
+import com.paf.knowledgenest.model.notification.Notification;
 import com.paf.knowledgenest.model.user.User;
 import com.paf.knowledgenest.repository.user.UserRepository;
+import com.paf.knowledgenest.service.notification.NotificationService;
 import com.paf.knowledgenest.utils.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,37 +20,54 @@ import java.util.List;
 @Service
 public class SocialService {
 
-    @Autowired
-    private UserRepository userRepository;
 
-    public ApiResponse<Boolean> followUser(ProgressRequestDTO.FollowerRequestDTO followerRequestDTO) {
+    private final UserRepository userRepository;
+    private final NotificationService notificationService;
+
+    @Autowired
+    public SocialService(UserRepository userRepository, NotificationService notificationService) {
+        this.userRepository = userRepository;
+        this.notificationService = notificationService;
+    }
+
+    public ApiResponse<Boolean> followUser(FollowerRequestDTO followerRequestDTO) {
         try {
-            if (followerRequestDTO.getFollowerId().equals(followerRequestDTO.getUserId())) {
+            if (followerRequestDTO.getTargetUserId().equals(followerRequestDTO.getUserId())) {
                 throw new RuntimeException("You can't follow yourself");
             }
 
-            User user = userRepository.findById(followerRequestDTO.getUserId())
-                    .orElseThrow(() -> new RuntimeException("Following User Not Found"));
+            User currentUser = userRepository.findById(followerRequestDTO.getUserId()).orElseThrow(() -> new RuntimeException("User Not Found"));
 
-            User followedUser = userRepository.findById(followerRequestDTO.getFollowerId())
+            User targetUser = userRepository.findById(followerRequestDTO.getTargetUserId())
                     .orElseThrow(() -> new RuntimeException("Followed User Not Found"));
 
             // Initialize lists if null
-            if (user.getFollowing() == null) user.setFollowing(new java.util.ArrayList<>());
-            if (followedUser.getFollowers() == null) followedUser.setFollowers(new java.util.ArrayList<>());
+            if (currentUser.getFollowing() == null) currentUser.setFollowing(new ArrayList<>());
+            if (targetUser.getFollowers() == null) targetUser.setFollowers(new ArrayList<>());
 
             // Prevent duplicate follows
-            if (user.getFollowing().contains(followedUser.getId())) {
-                return ApiResponse.errorResponse("Already following " + followedUser.getName());
+            if (currentUser.getFollowing().contains(targetUser.getId())) {
+                return ApiResponse.errorResponse("Already following " + targetUser.getName());
             }
 
-            user.getFollowing().add(followedUser.getId());
-            followedUser.getFollowers().add(user.getId());
+            currentUser.getFollowing().add(targetUser.getId());
+            targetUser.getFollowers().add(currentUser.getId());
 
-            userRepository.save(user);
-            userRepository.save(followedUser);
+            userRepository.save(currentUser);
+            userRepository.save(targetUser);
 
-            return ApiResponse.successResponse(("Followed " + followedUser.getName() + " Successfully"), true);
+            notificationService.createNotification(
+                    followerRequestDTO.getUserId(),
+                    followerRequestDTO.getUserId(),
+                    currentUser.getName(),
+                    Notification.NotificationType.FOLLOW,
+                    currentUser.getName() + " followed " + targetUser.getName(),
+                    "",
+                    "",
+                    ""
+            );
+
+            return ApiResponse.successResponse(("Followed " + targetUser.getName() + " Successfully"), true);
         } catch (RuntimeException e) {
             return ApiResponse.errorResponse(e.getMessage());
         } catch (Exception e) {
@@ -57,16 +75,16 @@ public class SocialService {
         }
     }
 
-    public ApiResponse<Boolean> unfollowUser(ProgressRequestDTO.FollowerRequestDTO followerRequestDTO) {
+    public ApiResponse<Boolean> unfollowUser(FollowerRequestDTO followerRequestDTO) {
         try {
-            if (followerRequestDTO.getFollowerId().equals(followerRequestDTO.getUserId())) {
+            if (followerRequestDTO.getTargetUserId().equals(followerRequestDTO.getUserId())) {
                 throw new RuntimeException("You can't unfollow yourself");
             }
 
             User user = userRepository.findById(followerRequestDTO.getUserId())
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
-            User followedUser = userRepository.findById(followerRequestDTO.getFollowerId())
+            User followedUser = userRepository.findById(followerRequestDTO.getTargetUserId())
                     .orElseThrow(() -> new RuntimeException("User to unfollow not found"));
 
             if (user.getFollowing() == null || !user.getFollowing().contains(followedUser.getId())) {
@@ -108,24 +126,6 @@ public class SocialService {
             return ApiResponse.errorResponse(e.getMessage());
         } catch (Exception e) {
             return ApiResponse.errorResponse("Unexpected error occurred while fetching following users");
-        }
-    }
-    public ApiResponse<List<User>> getFollowersUsers(String userId) {
-        try {
-            User user = userRepository.findById(userId)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
-
-            List<String> followerIds = user.getFollowers();
-            if (followerIds == null || followerIds.isEmpty()) {
-                return ApiResponse.successResponse("User has no followers", new ArrayList<>());
-            }
-
-            List<User> followerUsers = userRepository.findAllById(followerIds);
-            return ApiResponse.successResponse("Followers fetched", followerUsers);
-        } catch (RuntimeException e) {
-            return ApiResponse.errorResponse(e.getMessage());
-        } catch (Exception e) {
-            return ApiResponse.errorResponse("Unexpected error occurred while fetching followers");
         }
     }
 
@@ -194,6 +194,13 @@ public class SocialService {
         }
     }
 
+    public boolean isUserFollowing(String followerId, String followeeId) {
+        User follower = userRepository.findById(followerId)
+                .orElseThrow(() -> new RuntimeException("Follower not found"));
+
+        List<String> followingList = follower.getFollowing();
+        return followingList != null && followingList.contains(followeeId);
+    }
 
 
 }

@@ -1,4 +1,4 @@
-import  { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import {  login, getCurrentUser } from "../services/authService";
 import {useNavigate} from "react-router-dom";
 
@@ -9,14 +9,18 @@ export interface User {
     name: string;
     role: string;
     profilePic?: string;
+    followers?: string[];
+    following?: string[]
 }
 
 interface AuthContextType {
     currentUser: User | null;
+    setCurrentUser: React.Dispatch<React.SetStateAction<User | null>>;
     loading : boolean
     accessToken: string | null;
     loginUser: (email: string, password: string) => Promise<void>;
     logoutUser: () => void;
+    saveUserAfterUpdate: (updatedUser: User) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -105,8 +109,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         navigate("/");
     };
 
+    const saveUserAfterUpdate = (updatedUser : User) => {
+        setCurrentUser(updatedUser)
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+    }
+
     return (
-        <AuthContext.Provider value={{ loading, currentUser, accessToken, loginUser, logoutUser }}>
+        <AuthContext.Provider value={{ loading, currentUser, accessToken, loginUser, logoutUser , setCurrentUser, saveUserAfterUpdate}}>
             {children}
         </AuthContext.Provider>
     );

@@ -1,8 +1,8 @@
-import api from "@/utils/axiosInstance.ts";
+import axiosInstance from "@/services/axios.ts";
 
 export const getFollowersAndFollowingsForUser = async (userId: string) => {
     try {
-        const response = await api.get(`/api/social/user/followers/${userId}`);
+        const response = await axiosInstance.get(`/social/user/followers/${userId}`);
 
         return response.data.result as FollowerFollowing || null;
     } catch (error) {

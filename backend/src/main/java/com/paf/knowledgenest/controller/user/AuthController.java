@@ -75,6 +75,8 @@ public class AuthController {
                 .name(user.getName())
                 .email(user.getEmail())
                 .role("ROLE_" + user.getRole())
+                    .followers(user.getFollowers())
+                    .following(user.getFollowing())
                 .build();
                 
         return ResponseEntity.ok(userResponse);

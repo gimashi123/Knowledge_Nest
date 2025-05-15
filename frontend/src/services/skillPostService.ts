@@ -692,4 +692,5 @@ export const SkillPostService = USE_MOCK ? MockSkillPostService : {
       return MockSkillPostService.getAllTags();
     }
   }
+
 };

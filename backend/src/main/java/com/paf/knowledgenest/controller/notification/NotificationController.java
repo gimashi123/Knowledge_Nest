@@ -1,7 +1,9 @@
 package com.paf.knowledgenest.controller.notification;
 
 import com.paf.knowledgenest.dto.notification.NotificationDto;
+import com.paf.knowledgenest.model.user.User;
 import com.paf.knowledgenest.service.notification.NotificationService;
+import com.paf.knowledgenest.service.user.AuthService;
 import com.paf.knowledgenest.utils.ApiResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -16,16 +18,19 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/notifications")
 public class NotificationController {
 
     private final NotificationService notificationService;
+    private final AuthService authService;
     
     // Explicit constructor injection instead of using Lombok
-    public NotificationController(NotificationService notificationService) {
+    public NotificationController(NotificationService notificationService, AuthService authService) {
         this.notificationService = notificationService;
+        this.authService = authService;
     }
 
     @GetMapping
@@ -37,13 +42,18 @@ public class NotificationController {
             @RequestParam(defaultValue = "desc") String direction) {
         
         try {
-            String userId = authentication.getName();
-            System.out.println("Fetching notifications for user: " + userId + ", page: " + page + ", size: " + size);
-            
+            String userEmail = authentication.getName();
+            System.out.println("Fetching notifications for user: " + userEmail + ", page: " + page + ", size: " + size);
+
+            Optional<User> user = authService.getUserByEmail(userEmail);
+            if (user.isEmpty()) {
+                return ResponseEntity.badRequest().body(ApiResponse.errorResponse("User not found"));
+            }
+
             Sort.Direction sortDirection = direction.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
             Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortBy));
             
-            Page<NotificationDto.Response> notifications = notificationService.getNotificationsForUser(userId, pageable);
+            Page<NotificationDto.Response> notifications = notificationService.getNotificationsForUser(user.get().getId(), pageable);
             System.out.println("Found " + notifications.getTotalElements() + " notifications total, " + notifications.getNumberOfElements() + " on this page");
             
             return ResponseEntity.ok(notifications);

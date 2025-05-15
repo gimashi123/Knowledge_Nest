@@ -15,24 +15,30 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {FollowerFollowing, getFollowersAndFollowingsForUser, UserResponse} from "@/services/social-features.ts";
+import { FollowerFollowing, getFollowersAndFollowingsForUser, UserResponse } from "@/services/social-features.ts";
+import {UserService} from "@/services/UserService.ts";
 
 export default function ProfilePage() {
   const [name, setName] = useState("");
   const [image, setImage] = useState<File | null>(null);
-  const [followData, setFollowData] = useState<FollowerFollowing>({followers: [], followings: []});
+  const [followData, setFollowData] = useState<FollowerFollowing>({ followers: [], followings: [] });
   const [isFollowersOpen, setIsFollowersOpen] = useState(false);
   const [isFollowingOpen, setIsFollowingOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { currentUser, logoutUser } = useAuth();
+  const { currentUser, setCurrentUser, logoutUser, saveUserAfterUpdate } = useAuth();
 
   const fetchFollowData = async () => {
     setIsLoading(true);
     try {
       if (!currentUser?.id) return;
       const data = await getFollowersAndFollowingsForUser(currentUser.id);
-      setFollowData(data);
+
+      setFollowData({
+        followers: data.followers,   // ✅ flipping here
+        followings: data.followings     // ✅ flipping here
+      });
+
     } catch (error) {
       console.error("Failed to fetch follow data:", error);
       toast.error("Failed to load follow data");
@@ -43,30 +49,42 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (currentUser?.id) {
-      fetchFollowData();
+      fetchFollowData().then();
       setName(currentUser.name || "");
     }
   }, [currentUser]);
 
-  const handleFollowAction = async (userId: string, isCurrentlyFollowing: boolean) => {
+
+
+  const handleFollowClick = async (targetUserId: string) => {
+
     try {
-      const endpoint = isCurrentlyFollowing ? "/api/social/unfollow" : "/api/social/follow";
-      await api.post(endpoint, {
-        followerId: currentUser?.id,
-        followingId: userId
-      });
 
-      setFollowData(prev => ({
-        followers: isCurrentlyFollowing ? prev.followers : [...prev.followers, currentUser],
-        followings: isCurrentlyFollowing
-            ? prev.followings.filter(user => user.userId !== userId)
-            : [...prev.followings, { userId, name: '', email: '', profilePic: '' }]
-      }));
+      if(!currentUser) return
+      await UserService.followUser(currentUser?.id as string, targetUserId);
 
-      toast.success(`Successfully ${isCurrentlyFollowing ? 'unfollowed' : 'followed'}`);
+      saveUserAfterUpdate({
+        ...currentUser,
+        following: [...currentUser.following as any, targetUserId]
+      })
     } catch (error) {
-      console.error(`Action failed:`, error);
-      toast.error(`Failed to ${isCurrentlyFollowing ? 'unfollow' : 'follow'}`);
+      console.error("Failed to toggle follow:", error);
+    }
+  };
+
+  const handleUnfollowClick = async (targetUserId: string) => {
+
+    try {
+      await UserService.unfollowUser(currentUser?.id as string, targetUserId);
+
+
+      //@ts-ignore
+      saveUserAfterUpdate({
+        ...currentUser,
+        following: currentUser?.following?.filter(id => id !== targetUserId) || []
+      });
+    } catch (error) {
+      console.error("Failed to toggle unfollow:", error);
     }
   };
 
@@ -84,17 +102,29 @@ export default function ProfilePage() {
     const formData = new FormData();
     formData.append("file", image);
     try {
+      setIsLoading(true);
       await api.post("/api/user/upload-photo", formData);
+
+      const response = await api.get("/api/user/me");
+      setCurrentUser(response.data);
+
       toast.success("Profile picture updated");
       setImage(null);
-    } catch {
+    } catch (error) {
+      console.error("Upload error:", error);
       toast.error("Upload failed. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleDeletePhoto = async () => {
     try {
       await api.delete("/api/user/delete-photo");
+
+      const response = await api.get("/api/user/me");
+      setCurrentUser(response.data);
+
       toast.success("Profile picture removed");
     } catch {
       toast.error("Failed to remove picture");
@@ -119,7 +149,11 @@ export default function ProfilePage() {
                   <div className="relative">
                     <div className="w-32 h-32 mx-auto rounded-full border-4 border-white shadow-md overflow-hidden">
                       {currentUser.profilePic ? (
-                          <img src={currentUser.profilePic} alt="Profile" className="w-full h-full object-cover" />
+                          <img
+                              src={`${currentUser.profilePic}?${Date.now()}`}
+                              alt="Profile"
+                              className="w-full h-full object-cover"
+                          />
                       ) : (
                           <div className="flex items-center justify-center h-full bg-gray-100">
                             <User className="w-16 h-16 text-gray-400" />
@@ -129,7 +163,12 @@ export default function ProfilePage() {
                     <div className="flex justify-center gap-2 mt-4">
                       <label className="cursor-pointer flex items-center gap-1 text-sm text-gray-600 hover:text-gray-800">
                         <Camera className="w-4 h-4" /> Upload
-                        <input type="file" accept="image/*" className="hidden" onChange={(e) => setImage(e.target.files?.[0] || null)} />
+                        <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => setImage(e.target.files?.[0] || null)}
+                        />
                       </label>
                       {currentUser.profilePic && (
                           <button onClick={handleDeletePhoto} className="flex items-center gap-1 text-sm text-red-600 hover:text-red-800">
@@ -138,18 +177,26 @@ export default function ProfilePage() {
                       )}
                     </div>
                     {image && (
-                        <Button onClick={handleImageUpload} className="w-full mt-4 bg-blue-600 hover:bg-blue-700">
-                          Confirm Upload
+                        <Button
+                            onClick={handleImageUpload}
+                            className="w-full mt-4 bg-blue-600 hover:bg-blue-700"
+                            disabled={isLoading}
+                        >
+                          {isLoading ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                              'Confirm Upload'
+                          )}
                         </Button>
                     )}
                   </div>
 
                   <div className="mt-6 space-y-4">
-                    <Button onClick={() => setIsFollowersOpen(true)} className="w-full cursor-pointer flex justify-between items-center" variant="outline">
+                    <Button onClick={() => setIsFollowersOpen(true)} className="w-full flex justify-between items-center" variant="outline">
                       <span>Followers</span>
                       <span className="bg-gray-200 px-2 rounded-full text-sm">{followData.followers.length}</span>
                     </Button>
-                    <Button onClick={() => setIsFollowingOpen(true)} className="w-full cursor-pointer flex justify-between items-center" variant="outline">
+                    <Button onClick={() => setIsFollowingOpen(true)} className="w-full flex justify-between items-center" variant="outline">
                       <span>Following</span>
                       <span className="bg-gray-200 px-2 rounded-full text-sm">{followData.followings.length}</span>
                     </Button>
@@ -174,7 +221,7 @@ export default function ProfilePage() {
                         {currentUser.email}
                       </div>
                     </div>
-                    <Button onClick={handleNameUpdate} className="w-50 bg-blue-400 cursor-pointer hover:bg-blue-700">
+                    <Button onClick={handleNameUpdate} className="bg-blue-500 hover:bg-blue-700">
                       Save Changes
                     </Button>
                   </div>
@@ -197,7 +244,7 @@ export default function ProfilePage() {
                     </div>
                   </div>
                   <div className="mt-6 pt-4 border-t">
-                    <Button onClick={logoutUser} className="w-50 ml-50 bg-red-100 cursor-pointer hover:bg-red-200 text-red-600">
+                    <Button onClick={logoutUser} className="bg-red-100 hover:bg-red-200 text-red-600">
                       Logout
                     </Button>
                   </div>
@@ -216,13 +263,13 @@ export default function ProfilePage() {
                 <div className="flex justify-center py-4">
                   <Loader2 className="w-6 h-6 animate-spin" />
                 </div>
-            ) : followData.followers.length === 0 ? (
+            ) : followData?.followers.length === 0 ? (
                 <div className="text-center py-4 text-gray-500">No followers yet</div>
             ) : (
                 <div className="space-y-2">
-                  {followData.followers.map((follower: UserResponse) => (
+                  {followData?.followers?.map((follower: UserResponse) => (
                       <div key={follower.userId} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg">
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 w-full ">
                           <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
                             {follower.profilePic ? (
                                 <img alt="profile-pic" src={follower.profilePic} className="w-full h-full object-cover rounded-full" />
@@ -230,22 +277,23 @@ export default function ProfilePage() {
                                 <User className="w-5 h-5 text-gray-400" />
                             )}
                           </div>
-                          <div>
-                            <p className="font-medium">{follower.name}</p>
-                            <p className="text-sm text-gray-500">{follower.email}</p>
+                          <div className={'flex justify-between w-full'}>
+                            <div>
+                              <p className="font-medium">{follower.name}</p>
+                              <p className="text-sm text-gray-500">{follower.email}</p>
+                            </div>
+
+                            {
+                              currentUser?.followers?.includes(follower.userId) ? ( <Button disabled variant="outline" className="cursor-pointer" size="sm">
+                                  Following
+                                </Button>):( <Button variant="outline" className="cursor-pointer" size="sm" onClick={() => handleFollowClick(follower.userId)}>
+                                Follow
+                              </Button>)
+                            }
                           </div>
                         </div>
-                        <div>
-                        <Button variant="outline" size="sm" onClick={() => handleFollowAction(follower.userId, false)}>
-                          Follow
-                        </Button>
-                          <Button className={'m-1 bg-white text-red-500 font-semibold border-black hover:bg-blue-200'}>Remove</Button>
-                        </div>
-
                       </div>
-
                   ))}
-
                 </div>
             )}
           </DialogContent>
@@ -280,7 +328,7 @@ export default function ProfilePage() {
                             <p className="text-sm text-gray-500">{followed.email}</p>
                           </div>
                         </div>
-                        <Button variant="outline" size="sm" onClick={() => handleFollowAction(followed.userId, true)}>
+                        <Button variant="outline" className="cursor-pointer" size="sm" onClick={() => handleUnfollowClick(followed.userId)}>
                           Unfollow
                         </Button>
                       </div>

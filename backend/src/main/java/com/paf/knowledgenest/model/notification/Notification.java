@@ -41,7 +41,9 @@ public class Notification {
         LIKE,
         COMMENT,
         COMMENT_REPLY,
-        SYSTEM_NOTIFICATION
+        SYSTEM_NOTIFICATION,
+        FOLLOW,
+        UNFOLLOW,
     }
     
     public enum ResourceType {
