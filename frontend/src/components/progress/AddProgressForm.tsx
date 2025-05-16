@@ -1,6 +1,8 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { ProgressForm } from './ProgressForm'
 import { Progress } from '@/types/progress'
+import {useEffect} from "react";
+import {useAuth} from "@/contexts/auth-context.tsx";
 
 interface AddProgressFormProps {
     open: boolean
@@ -14,8 +16,17 @@ export function AddProgressForm({ open, onOpenChange, onSubmit, imageUrl = 'http
         title: '',
         topics: [],
         progress: 0,
-        lastUpdate: ''
+        lastUpdate: '',
+        userId: ''
     }
+
+    const {currentUser} = useAuth();
+
+    useEffect(() => {
+        if(currentUser){
+            defaultValues.userId = currentUser.id;
+        }
+    }, [currentUser?.id]);
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>

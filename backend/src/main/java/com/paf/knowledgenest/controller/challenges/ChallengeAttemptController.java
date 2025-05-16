@@ -1,7 +1,9 @@
 package com.paf.knowledgenest.controller.challenges;
 
+import com.paf.knowledgenest.enums.CoinType;
 import com.paf.knowledgenest.model.challenges.ChallengeAttempt;
 import com.paf.knowledgenest.service.challenges.ChallengeAttemptService;
+import com.paf.knowledgenest.service.socialFeature.SocialService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,9 +19,12 @@ import java.util.List;
 public class ChallengeAttemptController {
 
     private final ChallengeAttemptService attemptService;
+    private final SocialService socialService;
 
     @PostMapping("/submit")
     public ChallengeAttempt submitChallenge(@RequestBody ChallengeSubmitRequest request) {
+        socialService.addUserCoins(request.userId, CoinType.CHALLENGE_ATTEMPT);
+
         return attemptService.submitChallenge(
                 request.getChallengeId(),
                 request.getUserId(),

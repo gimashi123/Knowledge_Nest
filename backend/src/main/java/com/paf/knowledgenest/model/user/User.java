@@ -31,6 +31,8 @@ public class User {
 
     private List<String> following;
 
+    private Integer userCoins = 0;
+
 
     // Constructors
     public User() {}

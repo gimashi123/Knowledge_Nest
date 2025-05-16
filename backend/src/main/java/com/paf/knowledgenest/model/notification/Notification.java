@@ -15,25 +15,28 @@ public class Notification {
     
     // User who will receive this notification
     private String userId;
+
+    // Content of the notification
+    private String message;
+
+    // Type of notification: LIKE, COMMENT, REPLY, etc.
+    private NotificationType type;
     
     // User who triggered the action
     private String actorId;
     private String actorName;
+
+    // Status
+    private boolean read = false;
+    private LocalDateTime createdAt;
     
-    // Type of notification: LIKE, COMMENT, REPLY, etc.
-    private NotificationType type;
-    
-    // Content of the notification
-    private String message;
+
+    //-----------------------------------------------
     
     // Link to the relevant resource
     private String resourceId; // Usually a skill post id
     private String resourceType; // Type of resource (SKILL_POST)
-    
-    // Status
-    private boolean read;
-    private LocalDateTime createdAt;
-    
+
     // Optional specific data
     private String commentId;
     
@@ -44,9 +47,5 @@ public class Notification {
         SYSTEM_NOTIFICATION,
         FOLLOW,
         UNFOLLOW,
-    }
-    
-    public enum ResourceType {
-        SKILL_POST
     }
 } 

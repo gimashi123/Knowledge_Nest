@@ -10,7 +10,8 @@ export interface User {
     role: string;
     profilePic?: string;
     followers?: string[];
-    following?: string[]
+    following?: string[];
+    userCoins?:number;
 }
 
 interface AuthContextType {

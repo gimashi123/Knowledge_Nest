@@ -22,18 +22,12 @@ package com.paf.knowledgenest.controller.progress;
         }
 
         @PostMapping("/add") // 1. req is getting as a post method
-        public ResponseEntity<ProgressResponseDTO> addProgress(@RequestBody ProgressRequestDTO progressRequestDTO) { //2. body will get the data
-            ProgressResponseDTO addedProgress = progressService.addNewProgress(progressRequestDTO); // 3. that should be passed to the service layer
-
-            //The addedProgress variable will be null if the progress is not added successfully
-
-            //We need to check if the addedProgress variable is null or not
+        public ResponseEntity<ProgressResponseDTO> addProgress(@RequestBody ProgressRequestDTO progressRequestDTO) {
+            ProgressResponseDTO addedProgress = progressService.addNewProgress(progressRequestDTO);
             if (addedProgress != null) {
-                //If it is not null, we need to return the addedProgress variable as a created status and body will be the response body
                 return ResponseEntity.status(HttpStatus.CREATED).body(addedProgress);
             }
 
-            //If it is null, we need to return a bad request status and body will be null since there was an error
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
 

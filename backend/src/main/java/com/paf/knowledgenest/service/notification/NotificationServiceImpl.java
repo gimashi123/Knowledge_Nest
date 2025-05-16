@@ -4,6 +4,9 @@ import com.paf.knowledgenest.dto.notification.NotificationDto;
 import com.paf.knowledgenest.exception.ResourceNotFoundException;
 import com.paf.knowledgenest.model.notification.Notification;
 import com.paf.knowledgenest.repository.notification.NotificationRepository;
+import com.paf.knowledgenest.utils.ApiResponse;
+import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -16,18 +19,30 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationRepository notificationRepository;
-    
-    // Explicit constructor injection instead of using Lombok
+
     public NotificationServiceImpl(NotificationRepository notificationRepository) {
         this.notificationRepository = notificationRepository;
     }
 
     @Override
-    public NotificationDto.Response createNotification(
+    public void createNotificationBySystem(String targetUserId, String message, Notification.NotificationType type) {
+        Notification notification = new Notification();
+        notification.setUserId(targetUserId);
+        notification.setMessage(message);
+        notification.setType(type);
+        notification.setCreatedAt(LocalDateTime.now());
+        notificationRepository.save(notification);
+    }
+
+    //-------------------------------
+
+    @Override
+    public void createNotification(
             String userId, 
             String actorId, 
             String actorName, 
@@ -39,7 +54,7 @@ public class NotificationServiceImpl implements NotificationService {
         
         // Don't create self-notifications
         if (userId.equals(actorId)) {
-            return null;
+            return;
         }
         
         Notification notification = new Notification();
@@ -56,7 +71,7 @@ public class NotificationServiceImpl implements NotificationService {
         notification.setCreatedAt(LocalDateTime.now());
         
         Notification savedNotification = notificationRepository.save(notification);
-        return NotificationDto.Response.fromNotification(savedNotification);
+        NotificationDto.Response.fromNotification(savedNotification);
     }
 
     @Override
@@ -68,23 +83,21 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public Page<NotificationDto.Response> getNotificationsForUser(String userId, Pageable pageable) {
         try {
-            System.out.println("NotificationService: Getting notifications for user: " + userId);
-            
+
+            log.info("Attempting to get notifications for user {}", userId);
             if (userId == null || userId.isEmpty()) {
-                System.err.println("NotificationService: User ID is null or empty");
                 return new PageImpl<>(Collections.emptyList(), pageable, 0);
             }
             
             Page<Notification> notificationsPage = notificationRepository.findByUserId(userId, pageable);
-            System.out.println("NotificationService: Found " + notificationsPage.getTotalElements() + " notifications");
-            
+
+
             List<NotificationDto.Response> notificationResponses = notificationsPage.getContent().stream()
                     .map(notification -> {
                         try {
                             return NotificationDto.Response.fromNotification(notification);
                         } catch (Exception e) {
-                            System.err.println("NotificationService: Error mapping notification: " + e.getMessage());
-                            e.printStackTrace();
+                           log.error("NotificationService: Error mapping notification: " + e.getMessage());
                             return null;
                         }
                     })
@@ -93,8 +106,7 @@ public class NotificationServiceImpl implements NotificationService {
             
             return new PageImpl<>(notificationResponses, pageable, notificationsPage.getTotalElements());
         } catch (Exception e) {
-            System.err.println("NotificationService: Error getting notifications for user: " + userId + ", error: " + e.getMessage());
-            e.printStackTrace();
+          log.error("Error getting notifications for user: " + userId, e.getMessage());
             return new PageImpl<>(Collections.emptyList(), pageable, 0);
         }
     }
@@ -102,31 +114,29 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public List<NotificationDto.Response> getUnreadNotificationsForUser(String userId) {
         try {
-            System.out.println("NotificationService: Getting unread notifications for user: " + userId);
-            
+
+            log.info("NotificationService: Getting unread notifications for user: " + userId);
             if (userId == null || userId.isEmpty()) {
-                System.err.println("NotificationService: User ID is null or empty");
+                log.warn("NotificationService: User ID is null or empty");
                 return Collections.emptyList();
             }
             
             List<Notification> notifications = notificationRepository.findByUserIdAndReadFalse(userId);
-            System.out.println("NotificationService: Found " + notifications.size() + " unread notifications");
-            
+
+            log.info("NotificationService: Getting unread notifications for user: {}", userId);
             return notifications.stream()
                     .map(notification -> {
                         try {
                             return NotificationDto.Response.fromNotification(notification);
                         } catch (Exception e) {
-                            System.err.println("NotificationService: Error mapping notification: " + e.getMessage());
-                            e.printStackTrace();
+                            log.error("Error mapping notification: " + notification.getId(), e.getMessage());
                             return null;
                         }
                     })
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
         } catch (Exception e) {
-            System.err.println("NotificationService: Error getting unread notifications for user: " + userId + ", error: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Error getting unread notifications for user: " + userId, e.getMessage());
             return Collections.emptyList();
         }
     }
@@ -151,34 +161,43 @@ public class NotificationServiceImpl implements NotificationService {
         notificationRepository.saveAll(unreadNotifications);
     }
 
+    @Transactional
     @Override
-    public void deleteNotification(String notificationId) {
-        notificationRepository.deleteById(notificationId);
+    public ApiResponse<Boolean> deleteNotification(String notificationId) {
+        try{
+            notificationRepository.deleteById(notificationId);
+
+            return ApiResponse.successResponse("Notification Removed Successfully", true);
+        } catch (Exception e) {
+            log.error("Error removing notification: {}",  e.getMessage());
+            return ApiResponse.errorResponse("Notification Deletion Failed", false);
+        }
     }
 
     @Override
     public NotificationDto.CountResponse getUnreadNotificationCount(String userId) {
         try {
-            System.out.println("NotificationService: Getting unread count for user: " + userId);
-            
+
+            log.info("NotificationService: Getting unread notification count for user: {}", userId);
             if (userId == null || userId.isEmpty()) {
-                System.err.println("NotificationService: User ID is null or empty");
+
+                log.warn("NotificationService: User ID is null or empty");
                 return new NotificationDto.CountResponse(0);
             }
             
             long count = notificationRepository.countByUserIdAndReadFalse(userId);
-            System.out.println("NotificationService: Found " + count + " unread notifications");
-            
+
+            log.info("NotificationService: Getting unread count for user: " + userId);
             return new NotificationDto.CountResponse(count);
         } catch (Exception e) {
-            System.err.println("NotificationService: Error getting unread count for user: " + userId + ", error: " + e.getMessage());
-            e.printStackTrace();
+
+            log.error("Error getting unread count for user: " + userId, e.getMessage());
             return new NotificationDto.CountResponse(0);
         }
     }
 
     @Override
-    public NotificationDto.Response createLikeNotification(
+    public void createLikeNotification(
             String postOwnerId, 
             String likerId, 
             String likerName, 
@@ -186,8 +205,8 @@ public class NotificationServiceImpl implements NotificationService {
             String postTitle) {
         
         String message = likerName + " liked your post: " + postTitle;
-        
-        return createNotification(
+
+        createNotification(
                 postOwnerId,
                 likerId,
                 likerName,
@@ -200,7 +219,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public NotificationDto.Response createCommentNotification(
+    public void createCommentNotification(
             String postOwnerId, 
             String commenterId, 
             String commenterName, 
@@ -215,8 +234,8 @@ public class NotificationServiceImpl implements NotificationService {
                 : commentContent;
         
         String message = commenterName + " commented on your post: \"" + truncatedComment + "\"";
-        
-        return createNotification(
+
+        createNotification(
                 postOwnerId,
                 commenterId,
                 commenterName,
@@ -229,7 +248,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public NotificationDto.Response createCommentReplyNotification(
+    public void createCommentReplyNotification(
             String commentOwnerId,
             String replierId,
             String replierName,
@@ -245,8 +264,8 @@ public class NotificationServiceImpl implements NotificationService {
                 : replyContent;
         
         String message = replierName + " replied to your comment on \"" + postTitle + "\": \"" + truncatedReply + "\"";
-        
-        return createNotification(
+
+        createNotification(
                 commentOwnerId,
                 replierId,
                 replierName,

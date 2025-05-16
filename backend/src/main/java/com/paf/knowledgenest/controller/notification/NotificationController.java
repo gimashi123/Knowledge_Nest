@@ -115,7 +115,6 @@ public class NotificationController {
             return ResponseEntity.ok(notification);
         } catch (Exception e) {
             System.err.println("Error marking notification as read: " + e.getMessage());
-            e.printStackTrace();
             
             ApiResponse response = new ApiResponse();
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -132,26 +131,20 @@ public class NotificationController {
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             System.err.println("Error marking all notifications as read: " + e.getMessage());
-            e.printStackTrace();
-            
+
             ApiResponse response = new ApiResponse();
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse> deleteNotification(@PathVariable String id) {
-        try {
-            notificationService.deleteNotification(id);
-            
-            ApiResponse response = new ApiResponse();
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        } catch (Exception e) {
-            System.err.println("Error deleting notification: " + e.getMessage());
-            e.printStackTrace();
-            
-            ApiResponse response = new ApiResponse();
-            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    public ResponseEntity<ApiResponse<Boolean>> deleteNotification(@PathVariable String id) {
+
+        ApiResponse<Boolean> response = notificationService.deleteNotification(id);
+
+        return response.isSuccess()
+                ? ResponseEntity.ok(response)
+                : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+
     }
 } 

@@ -103,6 +103,7 @@ public class AuthService {
                           .name(user.getName())
                           .followers(user.getFollowers())
                           .following(user.getFollowing())
+                            .userCoins(user.getUserCoins())
                           .build())
                     .build();
             return ApiResponse.successResponse("User Login Successfully", loginResponse);

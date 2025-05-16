@@ -4,6 +4,7 @@ package com.paf.knowledgenest.service.socialFeature;
 import com.paf.knowledgenest.dto.requests.FollowerRequestDTO;
 import com.paf.knowledgenest.dto.responses.skillPost.FollowerFollowingDTO;
 import com.paf.knowledgenest.dto.responses.skillPost.UserFollowResponse;
+import com.paf.knowledgenest.enums.CoinType;
 import com.paf.knowledgenest.model.notification.Notification;
 import com.paf.knowledgenest.model.user.User;
 import com.paf.knowledgenest.repository.user.UserRepository;
@@ -56,15 +57,10 @@ public class SocialService {
             userRepository.save(currentUser);
             userRepository.save(targetUser);
 
-            notificationService.createNotification(
-                    followerRequestDTO.getUserId(),
-                    followerRequestDTO.getUserId(),
-                    currentUser.getName(),
-                    Notification.NotificationType.FOLLOW,
-                    currentUser.getName() + " followed " + targetUser.getName(),
-                    "",
-                    "",
-                    ""
+            this.addUserCoins(targetUser.getId(), CoinType.FOLLOW);
+
+            notificationService.createNotificationBySystem(
+                    targetUser.getId(), "You are followed by " + currentUser.getName(), Notification.NotificationType.FOLLOW
             );
 
             return ApiResponse.successResponse(("Followed " + targetUser.getName() + " Successfully"), true);
@@ -200,6 +196,19 @@ public class SocialService {
 
         List<String> followingList = follower.getFollowing();
         return followingList != null && followingList.contains(followeeId);
+    }
+
+    public void addUserCoins(String userId, CoinType coinType) {
+        try {
+            User user = userRepository.findById(userId).orElseThrow(
+                    () -> new RuntimeException("User not found")
+            );
+
+            user.setUserCoins(user.getUserCoins() + coinType.getPoints());
+            userRepository.save(user);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
 

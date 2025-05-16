@@ -18,4 +18,5 @@ public class UserResponse {
     private String role;
     private List<String> followers;
     private List<String> following;
+    private Integer userCoins;
 }

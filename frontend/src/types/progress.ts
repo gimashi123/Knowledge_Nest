@@ -5,6 +5,7 @@ export interface Progress {
   completedTopics?: string[];
   progress: number;
   lastUpdate?: string;
+  userId? : string;
 }
 
 export interface ProgressRequest {

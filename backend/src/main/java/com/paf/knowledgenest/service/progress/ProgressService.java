@@ -2,8 +2,11 @@ package com.paf.knowledgenest.service.progress;
 
 import com.paf.knowledgenest.dto.requests.ProgressRequestDTO;
 import com.paf.knowledgenest.dto.responses.ProgressResponseDTO;
+import com.paf.knowledgenest.enums.CoinType;
 import com.paf.knowledgenest.model.Progress;
 import com.paf.knowledgenest.repository.ProgressRepository;
+import com.paf.knowledgenest.repository.challenges.ChallengeRepository;
+import com.paf.knowledgenest.service.socialFeature.SocialService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,19 +22,19 @@ public class ProgressService {
 
 
     private final ProgressRepository progressRepository;
+    private final SocialService socialService;
 
     @Autowired
-    public ProgressService(ProgressRepository progressRepository) {
+    public ProgressService(ProgressRepository progressRepository, SocialService socialService) {
         this.progressRepository = progressRepository;
+        this.socialService = socialService;
     }
 
-
-    // Method should be getting ProgressRequestDTO as parameter since its passing through controller
-    // Response should be ProgressResponseDTO
     public ProgressResponseDTO addNewProgress(ProgressRequestDTO progressRequestDTO) {
 
             try {
                 ProgressResponseDTO progressResponseDTO = new ProgressResponseDTO(); // this will be the response object (if any error it should return null)
+
 
                 if (progressRequestDTO.getTitle() == null || progressRequestDTO.getTopics() == null ) {
                     log.error("addNewProgress: title and topics and progress are null");
@@ -54,6 +57,11 @@ public class ProgressService {
                 progress.setLastUpdate( LocalTime.now());
 
 
+                if(progressRequestDTO.getUserId() != null) {
+                    socialService.addUserCoins(progressRequestDTO.getUserId(), CoinType.CHALLENGE_CREATION);
+                }
+
+
                 // Save the progress object to the database
                 Progress addedProgress = progressRepository.save(progress); // the added progress object will be returned and saved in addedProgress variable
 
@@ -63,6 +71,9 @@ public class ProgressService {
                 progressResponseDTO.setProgress(addedProgress.getProgress());
                 progressResponseDTO.setLastUpdate(addedProgress.getLastUpdate());
                 log.info("addNewProgress: progress added");
+
+
+
 
                 //After that we need to return the progressResponseDTO object
                 return progressResponseDTO;
@@ -133,6 +144,12 @@ public class ProgressService {
 
                 if (progressRequest.getProgress() != null) {
                     progress.setProgress(progressRequest.getProgress());
+                }
+
+                if(progressRequest.getUserId() != null) {
+                   if( progress.getProgress() >= 100){
+                       socialService.addUserCoins(progressRequest.getUserId(), CoinType.PROGRESS_COMPLETION);
+                   }
                 }
 
                 // Always update the last update time
