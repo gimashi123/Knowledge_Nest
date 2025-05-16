@@ -168,6 +168,7 @@ export default function ChallengeAttemptPage() {
     }
 
     return (
+
         <div className="min-h-screen bg-gray-50">
             <div className="container mx-auto px-4 py-8 max-w-7xl">
                 {/* Header Section */}
@@ -327,8 +328,8 @@ export default function ChallengeAttemptPage() {
 
                             {/* Progress Bar */}
                             <div className="mb-4">
-                                <Progress 
-                                    value={(validationResults.score / validationResults.totalQuestions) * 100} 
+                                <Progress
+                                    value={(validationResults.score / validationResults.totalQuestions) * 100}
                                     className="h-1.5"
                                 />
                             </div>

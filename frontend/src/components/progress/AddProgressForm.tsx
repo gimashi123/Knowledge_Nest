@@ -5,7 +5,7 @@ import { Progress } from '@/types/progress'
 interface AddProgressFormProps {
     open: boolean
     onOpenChange: (open: boolean) => void
-    onSubmit: (data: Progress) => void
+    onSubmit: (data: Progress | undefined ) => Promise<void>
     imageUrl?: string
 }
 
