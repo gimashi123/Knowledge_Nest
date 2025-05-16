@@ -8,6 +8,7 @@ import {
     User,
     // FileText,
     Settings,
+    LoaderPinwheel,
     LogOut,
     // Package2,
     Trophy, // Added Trophy icon for challenges
@@ -39,7 +40,7 @@ export function UserSidebar() {
                             //onClick={() => navigate("/user-dashboard/progress")}
                         >
                             <LayoutDashboard className="h-4 w-4" />
-                            Progress
+                            Dashboard
                         </Button>
                         <Button
                             variant={isActive("/skill-posts") ? "default" : "ghost"}
@@ -75,6 +76,14 @@ export function UserSidebar() {
                             Create Challenge
                         </Button>
                         <Button
+                            variant={isActive("/progress") ? "default" : "ghost"}
+                            className="justify-start gap-2"
+                            onClick={() => navigate("/progress")}
+                        >
+                            <LoaderPinwheel className="h-4 w-4" />
+                            Progress
+                        </Button>
+                        <Button
                             variant={isActive("/user-settings") ? "default" : "ghost"}
                             className="justify-start gap-2"
                             onClick={() => navigate("/user-settings")}
@@ -82,6 +91,7 @@ export function UserSidebar() {
                             <Settings className="h-4 w-4" />
                             Settings
                         </Button>
+
                     </nav>
                 </div>
                 <div className="mt-auto p-4 border-t">

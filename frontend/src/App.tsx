@@ -24,7 +24,7 @@ import LaunchPage from "@/pages/LaunchPage.tsx";
 import ChallengeListPage from "@/pages/Challenges/ChallengeListPage.tsx";
 import {ChallengeForm} from "@/pages/Challenges/ChallengeForm.tsx";
 import ChallengeAttemptPage from "@/pages/Challenges/ChallengeAttemptPage.tsx";
-import {ProgressPage} from "@/pages/authorized/user/ProgressTrack.tsx";
+import {ProgressPage} from "@/pages/progressTrack/ProgressTrack.tsx";
 
 
 import SkillPostsPage from "@/pages/skillpost/SkillPostsPage";
@@ -87,7 +87,7 @@ export default function App() {
                             {/* Admin Nested Routes */}
                             <Route path="/admin-dashboard" element={<AdminDashboardPage />}>
                                 {/*<Route index element={<AdminHome />} /> /!* Create this component *!/*/}
-                                <Route path="progress" element={<ProgressPage />} />
+
                                 {/*<Route path="posts" element={<PostsPage />} />*/}
                                 {/*<Route path="users" element={<UsersPage />} />*/}
                                 {/*<Route path="settings" element={<SettingsPage />} />*/}
@@ -112,6 +112,7 @@ export default function App() {
                                 <Route path="/skill-posts" element={<SkillPostsPage />} />
                                 <Route path="/skill-posts/:id" element={<SkillPostDetailPage />} />
                                 <Route path="/user-settings" element={<UserSettingsPage />} />
+                                <Route path="/progress" element={<ProgressPage />} />
                             </Route>
                         </Route>
                         </Route>
