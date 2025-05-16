@@ -120,4 +120,31 @@ public class AuthService {
     public Optional<User> getUserByEmail(String email) {
         return userRepository.findByEmail(email);
     }
+
+    public ApiResponse<LoginResponse> googleLogin(String email) {
+        Optional<User> userOpt = userRepository.findByEmail(email);
+
+        if (userOpt.isEmpty()) {
+            return ApiResponse.errorResponse("Google account not registered");
+        }
+
+        User user = userOpt.get();
+        String token = jwtUtils.generateToken(user.getEmail());
+
+        LoginResponse loginResponse = LoginResponse.builder()
+                .accessToken(token)
+                .user(UserResponse.builder()
+                        .id(user.getId())
+                        .name(user.getName())
+                        .email(user.getEmail())
+                        .role("ROLE_" + user.getRole())
+                        .followers(user.getFollowers())
+                        .following(user.getFollowing())
+                        .build())
+                .build();
+
+        return ApiResponse.successResponse("Google Login Successful", loginResponse);
+    }
+
+
 }

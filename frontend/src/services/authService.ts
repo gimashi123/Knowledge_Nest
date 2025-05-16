@@ -42,3 +42,13 @@ export const getCurrentUser = async () => {
   });
   return response.data;
 };*/
+
+export const loginWithGoogle = async (email: string): Promise<LoginResponse> => {
+  const response = await api.post("/api/auth/google-login", { email }, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  return response.data.result;
+};
+

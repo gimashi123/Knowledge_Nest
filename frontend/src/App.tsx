@@ -10,12 +10,13 @@ import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
 import Dashboard from "@/pages/DashboardPage";
 import ProfilePage from "@/pages/ProfilePage";
-import OAuthSuccessPage from "@/pages/OAuthSuccessPage";
+import OAuthSuccess from "@/pages/OAuthSuccess";
 import AdminDashboardPage from "@/pages/AdminDashboardPage";
 import AdminProfilePage from "@/pages/AdminProfilePage";
 import AdminPostsPage from "@/pages/AdminPostsPage";
 import { AuthProvider, useAuth } from "@/contexts/auth-context";
 import { NotificationProvider } from "@/contexts/notification-context";
+
 
 
 import {UserDashboardPage} from "@/pages/UserDashboardPage.tsx";
@@ -60,7 +61,7 @@ export default function App() {
                         <Route path={'/'} element={<LaunchPage/>} />
                         <Route path="/login" element={<LoginPage />} />
                         <Route path="/register" element={<RegisterPage />} />
-                        <Route path="/oauth-success" element={<OAuthSuccessPage />} />
+                        <Route path="/oauth-success" element={<OAuthSuccess/>} />
 
                     {/* Private Routes */}
                     <Route element={<PrivateRoute />}>

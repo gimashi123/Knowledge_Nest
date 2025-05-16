@@ -1,5 +1,6 @@
 package com.paf.knowledgenest.controller.user;
 
+import com.paf.knowledgenest.dto.GoogleLoginRequest;
 import com.paf.knowledgenest.dto.RegisterRequest;
 import com.paf.knowledgenest.dto.LoginRequest;
 import com.paf.knowledgenest.dto.responses.LoginResponse;
@@ -82,5 +83,15 @@ public class AuthController {
         return ResponseEntity.ok(userResponse);
     }
 
+    @PostMapping("/google-login")
+    public ResponseEntity<ApiResponse<LoginResponse>> googleLogin(@RequestBody GoogleLoginRequest request) {
+        String email = request.getEmail();
+        ApiResponse<LoginResponse> response = authService.googleLogin(email);
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
+    }
 
 }
