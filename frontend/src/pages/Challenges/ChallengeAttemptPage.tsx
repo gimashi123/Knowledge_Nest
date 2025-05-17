@@ -120,22 +120,9 @@ export default function ChallengeAttemptPage() {
         setShowResultsDialog(true);
     };
 
-    const handleSubmit = async () => {
-        if (!challenge || !startTime) return;
-
-        try {
-            await api.post('/api/challenge-attempts/submit', {
-                challengeId: challenge.id,
-                userId: 'current-user-id',
-                answers,
-                startedAt: startTime.toISOString(),
-                score: validationResults?.score || 0,
-                coinsEarned: coinsEarned
-            });
-            navigate(`/challenges/${challenge.id}/results`);
-        } catch (error) {
-            console.error('Error submitting attempt:', error);
-        }
+    const handleSubmit = () => {
+        setShowResultsDialog(false);
+        navigate('/challenges');
     };
 
     if (loading) {
