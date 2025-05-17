@@ -99,7 +99,7 @@ export function UserSidebar() {
                         {currentUser && (
                             <div className="text-sm font-medium">
                                 <p>{currentUser.name}</p>
-                                <p className="text-muted-foreground">{currentUser.role}</p>
+
                             </div>
                         )}
                     </div>
