@@ -57,4 +57,10 @@ public class UserController {
         userRepository.save(user);
         return ResponseEntity.ok("Profile picture removed");
     }
+
+    @GetMapping("/get-coins/{userId}")
+    public ResponseEntity<?> getCoins(@PathVariable String userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        return ResponseEntity.ok(user.getUserCoins());
+    }
 }

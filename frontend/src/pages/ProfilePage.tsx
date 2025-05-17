@@ -16,7 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { FollowerFollowing, getFollowersAndFollowingsForUser } from "@/services/social-features.ts";
+import {FollowerFollowing, getFollowersAndFollowingsForUser, getUserCoinsByUser} from "@/services/social-features.ts";
 import { UserService } from "@/services/UserService.ts";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,6 +35,7 @@ export default function ProfilePage() {
   const [isSaving, setIsSaving] = useState(false);
   const navigate = useNavigate();
   const { currentUser, setCurrentUser, logoutUser, saveUserAfterUpdate } = useAuth();
+  const [userCoins, setUserCoins] = useState(0);
 
   const fetchFollowData = async () => {
     setIsLoading(true);
@@ -66,7 +67,7 @@ export default function ProfilePage() {
         ...currentUser,
         following: [...(currentUser.following as any), targetUserId]
       });
-      fetchFollowData();
+      fetchFollowData().then();
       toast.success("Followed successfully");
     } catch (error) {
       console.error("Failed to toggle follow:", error);
@@ -81,7 +82,7 @@ export default function ProfilePage() {
         ...currentUser as any,
         following: currentUser?.following?.filter(id => id !== targetUserId) || []
       });
-      fetchFollowData();
+      fetchFollowData().then();
       toast.success("Unfollowed successfully");
     } catch (error) {
       console.error("Failed to toggle unfollow:", error);
@@ -143,6 +144,16 @@ export default function ProfilePage() {
       setIsLoading(false);
     }
   };
+
+  const fetchCoins = async () => {
+    if(!currentUser)return;
+    const coins = await getUserCoinsByUser(currentUser?.id as string) || 0
+    setUserCoins(coins);
+  }
+
+  useEffect(() => {
+    fetchCoins().then()
+  }, []);
 
   const handleDeletePhoto = async () => {
     try {
@@ -352,8 +363,12 @@ export default function ProfilePage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-6">
-                    <div className="text-center text-neutral-500 py-8">
-                      <p>No achievements yet</p>
+                    <div className="flex justify-between items-center mb-4">
+                      <span className="text-sm font-medium text-neutral-600">Your Coins:</span>
+                      <span className="font-bold text-neutral-800">{userCoins || 0}</span>
+                    </div>
+                    <div className="text-center text-neutral-500 py-4">
+
                     </div>
                   </CardContent>
                 </Card>

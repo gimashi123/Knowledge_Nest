@@ -136,7 +136,7 @@ public class NotificationController {
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
+//delete follow notification-----
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Boolean>> deleteNotification(@PathVariable String id) {
 

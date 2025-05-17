@@ -126,7 +126,7 @@
             className="w-full hover:shadow-md transition-shadow cursor-pointer"
             onClick={handleCardClick}
         >
-          {/* Follow Button */}
+          {/* Follow Button - Gimashi*/}
           {post.userId !== currentUser?.id && (
             <>
               <Button

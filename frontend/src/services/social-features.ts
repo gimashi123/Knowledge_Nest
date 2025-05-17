@@ -11,6 +11,16 @@ export const getFollowersAndFollowingsForUser = async (userId: string) => {
     }
 }
 
+export const getUserCoinsByUser= async  (userId: string) => {
+    try{
+        const response = await axiosInstance.get(`/user/get-coins/${userId}`);
+
+        return response.data as number || null;
+    }catch (e) {
+
+    }
+}
+
 
 export interface FollowerFollowing {
     followers: UserResponse[],

@@ -11,7 +11,7 @@ export default function LaunchPage() {
             <nav className="bg-white/80 backdrop-blur-sm shadow-sm py-4 px-6 flex justify-between items-center sticky top-0 z-50">
                 <div className="flex items-center gap-2 hover:opacity-80 transition-opacity">
                     <BookOpen className="text-[#44468f] w-7 h-7" />
-                    <span className="font-bold text-xl text-[#44468f]">Kowlage Nest</span>
+                    <span className="font-bold text-xl text-[#44468f]">Knowledge Nest</span>
                 </div>
                 <div className="flex gap-4">
                     <Button variant="ghost" asChild className="hover:bg-[#e0e6fa] transition-colors">
@@ -47,7 +47,7 @@ export default function LaunchPage() {
 
                     <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-8 leading-tight">
                         Master Skills in <span className="text-[#44468f] relative">
-                            Kowlage Nest
+                            Knowledge Nest
                             <span className="absolute -bottom-2 left-0 w-full h-1 bg-[#44468f] transform scale-x-0 group-hover:scale-x-100 transition-transform"></span>
                         </span>
                     </h1>
@@ -223,7 +223,7 @@ export default function LaunchPage() {
             <footer className="py-12 bg-[#44468f] text-[#f1f5fc]">
                 <div className="max-w-6xl mx-auto px-8 grid grid-cols-1 md:grid-cols-4 gap-12">
                     <div>
-                        <h3 className="font-bold text-xl mb-6">Kowlage Nest</h3>
+                        <h3 className="font-bold text-xl mb-6">Knowledge Nest</h3>
                         <p className="text-sm leading-relaxed">Where skills take flight and knowledge finds its home</p>
                     </div>
                     <div>
