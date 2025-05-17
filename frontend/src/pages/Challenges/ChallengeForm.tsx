@@ -11,6 +11,7 @@ import { api } from '@/lib/api';
 import { useNavigate } from 'react-router-dom';
 import { Plus, X, CheckCircle, XCircle } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
+import {UserSidebar} from "@/components/sidebar/UserSidebar.tsx";
 
 const formSchema = z.object({
     title: z.string()
@@ -136,6 +137,10 @@ export function ChallengeForm({ initialData }: ChallengeFormProps) {
     };
 
     return (
+        <div className="flex min-h-screen ">
+            <UserSidebar />
+
+            <main className="flex-1 ml-0 lg:ml-[220px] p-4 lg:p-8">
         <div className="min-h-screen bg-gray-50 py-12">
             <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="flex flex-col lg:flex-row gap-8">
@@ -368,6 +373,8 @@ export function ChallengeForm({ initialData }: ChallengeFormProps) {
                 </div>
             </div>
             <Toaster />
+        </div>
+            </main>
         </div>
     );
 }
