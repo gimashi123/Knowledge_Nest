@@ -120,10 +120,4 @@ The Skill Sharing Platform allows users to:
 -   Password encryption
 -   Role-based access control
 
-------------------------------------------------------------------------
 
-## 📌 Academic Purpose
-
-This project was developed as part of a university coursework assignment
-to demonstrate full-stack development, secure authentication
-implementation, and modern UI design practices.
