@@ -1,4 +1,4 @@
-# 🎓 Skill Sharing Platform
+# 🎓 Knowledge Nest
 
 A full-stack web application that enables users to **share, learn, and
 practice skills** through articles, videos, quizzes, and interactive
